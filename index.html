@@ -206,9 +206,86 @@
     <!-- TODO: Добавить подключение стилей через модульную систему -->
 
 </head>
-<body class="min-vh-100">
+<body class="min-vh-100 pt-5 pb-5">
     <div id="app">
-        <!-- Контент приложения загружается через Vue компоненты -->
+        <!-- Header приложения (фиксирован к верху) -->
+        <header class="fixed-top bg-primary bg-opacity-75 text-white py-3">
+            <div class="container-fluid">
+                <h1 class="h5 mb-0">Header</h1>
+            </div>
+        </header>
+
+        <!-- Основной контент с отступами для header и footer (Bootstrap spacing utilities) -->
+        <div class="container-fluid pt-5 pb-5 bg-info bg-opacity-50">
+            <main>
+                <!-- Контент приложения загружается через Vue компоненты -->
+                <div class="container">
+                    <div class="d-inline-block d-flex align-items-center justify-content-center bg-primary m-2 text-white" style="width: 100px; height: 100px;">1</div>
+                    <div class="d-inline-block d-flex align-items-center justify-content-center bg-secondary m-2 text-white" style="width: 100px; height: 100px;">2</div>
+                    <div class="d-inline-block d-flex align-items-center justify-content-center bg-success m-2 text-white" style="width: 100px; height: 100px;">3</div>
+                    <div class="d-inline-block d-flex align-items-center justify-content-center bg-danger m-2 text-white" style="width: 100px; height: 100px;">4</div>
+                    <div class="d-inline-block d-flex align-items-center justify-content-center bg-warning m-2 text-dark" style="width: 100px; height: 100px;">5</div>
+                    <div class="d-inline-block d-flex align-items-center justify-content-center bg-info m-2 text-white" style="width: 100px; height: 100px;">6</div>
+                    <div class="d-inline-block d-flex align-items-center justify-content-center bg-light m-2 text-dark" style="width: 100px; height: 100px;">7</div>
+                    <div class="d-inline-block d-flex align-items-center justify-content-center bg-dark m-2 text-white" style="width: 100px; height: 100px;">8</div>
+                    <div class="d-inline-block d-flex align-items-center justify-content-center bg-primary m-2 text-white" style="width: 100px; height: 100px;">9</div>
+                    <div class="d-inline-block d-flex align-items-center justify-content-center bg-secondary m-2 text-white" style="width: 100px; height: 100px;">10</div>
+                    <div class="d-inline-block d-flex align-items-center justify-content-center bg-success m-2 text-white" style="width: 100px; height: 100px;">11</div>
+                    <div class="d-inline-block d-flex align-items-center justify-content-center bg-danger m-2 text-white" style="width: 100px; height: 100px;">12</div>
+                    <div class="d-inline-block d-flex align-items-center justify-content-center bg-warning m-2 text-dark" style="width: 100px; height: 100px;">13</div>
+                    <div class="d-inline-block d-flex align-items-center justify-content-center bg-info m-2 text-white" style="width: 100px; height: 100px;">14</div>
+                    <div class="d-inline-block d-flex align-items-center justify-content-center bg-light m-2 text-dark" style="width: 100px; height: 100px;">15</div>
+                    <div class="d-inline-block d-flex align-items-center justify-content-center bg-dark m-2 text-white" style="width: 100px; height: 100px;">16</div>
+                    <div class="d-inline-block d-flex align-items-center justify-content-center bg-primary m-2 text-white" style="width: 100px; height: 100px;">17</div>
+                    <div class="d-inline-block d-flex align-items-center justify-content-center bg-secondary m-2 text-white" style="width: 100px; height: 100px;">18</div>
+                    <div class="d-inline-block d-flex align-items-center justify-content-center bg-success m-2 text-white" style="width: 100px; height: 100px;">19</div>
+                    <div class="d-inline-block d-flex align-items-center justify-content-center bg-danger m-2 text-white" style="width: 100px; height: 100px;">20</div>
+                    <div class="d-inline-block d-flex align-items-center justify-content-center bg-warning m-2 text-dark" style="width: 100px; height: 100px;">21</div>
+                    <div class="d-inline-block d-flex align-items-center justify-content-center bg-info m-2 text-white" style="width: 100px; height: 100px;">22</div>
+                    <div class="d-inline-block d-flex align-items-center justify-content-center bg-light m-2 text-dark" style="width: 100px; height: 100px;">23</div>
+                    <div class="d-inline-block d-flex align-items-center justify-content-center bg-dark m-2 text-white" style="width: 100px; height: 100px;">24</div>
+                    <div class="d-inline-block d-flex align-items-center justify-content-center bg-primary m-2 text-white" style="width: 100px; height: 100px;">25</div>
+                    <div class="d-inline-block d-flex align-items-center justify-content-center bg-secondary m-2 text-white" style="width: 100px; height: 100px;">26</div>
+                    <div class="d-inline-block d-flex align-items-center justify-content-center bg-success m-2 text-white" style="width: 100px; height: 100px;">27</div>
+                    <div class="d-inline-block d-flex align-items-center justify-content-center bg-danger m-2 text-white" style="width: 100px; height: 100px;">28</div>
+                    <div class="d-inline-block d-flex align-items-center justify-content-center bg-warning m-2 text-dark" style="width: 100px; height: 100px;">29</div>
+                    <div class="d-inline-block d-flex align-items-center justify-content-center bg-info m-2 text-white" style="width: 100px; height: 100px;">30</div>
+                    <div class="d-inline-block d-flex align-items-center justify-content-center bg-light m-2 text-dark" style="width: 100px; height: 100px;">31</div>
+                    <div class="d-inline-block d-flex align-items-center justify-content-center bg-dark m-2 text-white" style="width: 100px; height: 100px;">32</div>
+                    <div class="d-inline-block d-flex align-items-center justify-content-center bg-primary m-2 text-white" style="width: 100px; height: 100px;">33</div>
+                    <div class="d-inline-block d-flex align-items-center justify-content-center bg-secondary m-2 text-white" style="width: 100px; height: 100px;">34</div>
+                    <div class="d-inline-block d-flex align-items-center justify-content-center bg-success m-2 text-white" style="width: 100px; height: 100px;">35</div>
+                    <div class="d-inline-block d-flex align-items-center justify-content-center bg-danger m-2 text-white" style="width: 100px; height: 100px;">36</div>
+                    <div class="d-inline-block d-flex align-items-center justify-content-center bg-warning m-2 text-dark" style="width: 100px; height: 100px;">37</div>
+                    <div class="d-inline-block d-flex align-items-center justify-content-center bg-info m-2 text-white" style="width: 100px; height: 100px;">38</div>
+                    <div class="d-inline-block d-flex align-items-center justify-content-center bg-light m-2 text-dark" style="width: 100px; height: 100px;">39</div>
+                    <div class="d-inline-block d-flex align-items-center justify-content-center bg-dark m-2 text-white" style="width: 100px; height: 100px;">40</div>
+                    <div class="d-inline-block d-flex align-items-center justify-content-center bg-primary m-2 text-white" style="width: 100px; height: 100px;">41</div>
+                    <div class="d-inline-block d-flex align-items-center justify-content-center bg-secondary m-2 text-white" style="width: 100px; height: 100px;">42</div>
+                    <div class="d-inline-block d-flex align-items-center justify-content-center bg-success m-2 text-white" style="width: 100px; height: 100px;">43</div>
+                    <div class="d-inline-block d-flex align-items-center justify-content-center bg-danger m-2 text-white" style="width: 100px; height: 100px;">44</div>
+                    <div class="d-inline-block d-flex align-items-center justify-content-center bg-warning m-2 text-dark" style="width: 100px; height: 100px;">45</div>
+                    <div class="d-inline-block d-flex align-items-center justify-content-center bg-info m-2 text-white" style="width: 100px; height: 100px;">46</div>
+                    <div class="d-inline-block d-flex align-items-center justify-content-center bg-light m-2 text-dark" style="width: 100px; height: 100px;">47</div>
+                    <div class="d-inline-block d-flex align-items-center justify-content-center bg-dark m-2 text-white" style="width: 100px; height: 100px;">48</div>
+                    <div class="d-inline-block bg-primary m-2 w-25 h-25"></div>
+                    <div class="d-inline-block bg-secondary m-2 w-25 h-25"></div>
+                    <div class="d-inline-block bg-success m-2 w-25 h-25"></div>
+                    <div class="d-inline-block bg-danger m-2 w-25 h-25"></div>
+                    <div class="d-inline-block bg-warning m-2 w-25 h-25"></div>
+                    <div class="d-inline-block bg-info m-2 w-25 h-25"></div>
+                    <div class="d-inline-block bg-light m-2 w-25 h-25"></div>
+                    <div class="d-inline-block bg-dark m-2 w-25 h-25"></div>
+                </div>
+            </main>
+        </div>
+
+        <!-- Footer приложения (фиксирован к низу) -->
+        <footer class="fixed-bottom bg-success bg-opacity-75 text-white py-3">
+            <div class="container-fluid">
+                <p class="mb-0">Footer</p>
+            </div>
+        </footer>
     </div>
 
     <!-- Bootstrap 5 JS Bundle -->
