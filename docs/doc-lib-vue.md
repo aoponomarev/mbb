@@ -132,6 +132,3 @@ await window.libLoader.load('vue', '3.4.0');
 await window.libLoader.load('chartjs', '4.4.0');
 ```
 
-## Манифест библиотек
-Файл `manifest.json` в libs-репозитории содержит информацию о всех доступных библиотеках и их версиях для автоматической загрузки.
-
