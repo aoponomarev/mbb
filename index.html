@@ -1,0 +1,227 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MBB - Statistics</title>
+
+    <!--
+    ================================================================================================
+    ПРИНЦИПЫ МОДУЛЬНОСТИ И ОРГАНИЗАЦИИ ПРОЕКТА
+    ================================================================================================
+
+    ЦЕЛЬ: index.html служит только точкой подключения всех скриптов и стилей.
+    Вся разметка компонентов, шаблоны и логика вынесены в отдельные модули.
+
+    ------------------------------------------------------------------------------------------------
+    1. ВЫНОС X-TEMPLATE ШАБЛОНОВ В ОТДЕЛЬНЫЕ ФАЙЛЫ
+    ------------------------------------------------------------------------------------------------
+
+    Проблема: В старом проекте все x-template шаблоны (17+ штук) находились внутри index.html,
+    что раздувало файл до 1300+ строк.
+
+    Решение:
+    - Каждый x-template шаблон выносится в отдельный файл в папке ui/templates/
+    - Формат имени: <component-name>-template.html
+    - Пример: ui/templates/splash-template.html, ui/templates/header-template.html
+
+    Загрузка шаблонов:
+    - Шаблоны загружаются динамически через fetch() ДО инициализации Vue.js
+    - Загрузчик шаблонов находится в core/template-loader.js
+    - Шаблоны вставляются в DOM как <script type="text/x-template"> элементы
+    - Порядок загрузки критичен: шаблоны → Vue.js → компоненты → app
+
+    Преимущества:
+    - index.html остаётся компактным (только подключения)
+    - Шаблоны легко находить и редактировать
+    - Возможность переиспользования шаблонов
+    - Улучшенная читаемость и поддержка
+
+    ------------------------------------------------------------------------------------------------
+    2. МОДУЛЬНАЯ СИСТЕМА ЗАГРУЗКИ СКРИПТОВ
+    ------------------------------------------------------------------------------------------------
+
+    Проблема: В старом проекте 30+ <script> тегов в index.html, сложно управлять порядком загрузки.
+
+    Решение:
+    - Создать конфигурационный файл core/modules-config.js с описанием всех модулей
+    - Модули группируются по категориям: библиотеки, утилиты, core, domain, features, ui, app
+    - Загрузчик модулей core/module-loader.js читает конфигурацию и загружает модули в правильном порядке
+    - В index.html остаётся только подключение загрузчика модулей
+
+    Структура modules-config.js:
+    {
+        libraries: [
+            { src: 'https://cdn.../bootstrap.js', type: 'external' },
+            { src: 'https://unpkg.com/vue@3...', type: 'external' }
+        ],
+        core: [
+            { src: 'core/cfg-app.js', type: 'local', deps: [] },
+            { src: 'core/api/coingecko.js', type: 'local', deps: ['core/cfg-app.js'] }
+        ],
+        ui: [
+            { src: 'ui/components/button.js', type: 'local', deps: ['core/cfg-app.js'] }
+        ],
+        app: [
+            { src: 'app/app-ui-root.js', type: 'local', deps: ['ui/**'] }
+        ]
+    }
+
+    Преимущества:
+    - Централизованное управление зависимостями
+    - Автоматическая проверка порядка загрузки
+    - Легко добавлять/удалять модули
+    - Возможность условной загрузки модулей
+
+    ------------------------------------------------------------------------------------------------
+    3. ГРУППИРОВКА КОМПОНЕНТОВ И МОДУЛЕЙ
+    ------------------------------------------------------------------------------------------------
+
+    Принципы организации:
+
+    a) По функциональности (features/):
+       - features/markets/ - все компоненты и логика работы с рынками
+       - features/portfolios/ - конструктор портфелей
+       - features/metrics/ - расчёт и отображение метрик
+       Каждая feature содержит: компоненты, утилиты, шаблоны, стили
+
+    b) По слоям архитектуры:
+       - core/ - базовые утилиты, конфигурация, API-обёртки
+       - domain/ - бизнес-логика, сущности, сервисы
+       - ui/ - переиспользуемые UI-компоненты
+       - app/ - корневой компонент приложения
+
+    c) По типу файлов:
+       - ui/templates/ - x-template шаблоны
+       - ui/components/ - Vue компоненты
+       - ui/styles/ - CSS файлы (группируются по компонентам)
+       - core/api/ - утилиты для работы с внешними API
+       - ui/api/ - Vue компоненты для работы с API
+
+    ------------------------------------------------------------------------------------------------
+    4. ПРАВИЛА РАЗМЕЩЕНИЯ ФАЙЛОВ
+    ------------------------------------------------------------------------------------------------
+
+    Шаблоны (x-template):
+    - ui/templates/<component-name>-template.html
+    - Загружаются через core/template-loader.js
+
+    Компоненты Vue:
+    - ui/components/<component-name>.js
+    - ui/features/<feature-name>/<component-name>.js (для feature-специфичных)
+    - Экспортируют Vue компонент через window или Vue.component()
+
+    Стили:
+    - ui/styles/<component-name>.css
+    - ui/styles/theme-colors.css (глобальные темы)
+    - ui/styles/layout.css (общие стили layout)
+
+    Утилиты:
+    - core/api/<api-name>.js - чистые функции для API (не Vue)
+    - ui/api/<component-name>.js - Vue компоненты для API
+    - ui/utils/<utility-name>.js - вспомогательные функции UI
+
+    Математические модели:
+    - mm/<model-name>/utils/ - утилиты модели
+    - mm/<model-name>/core/ - ядро модели
+    - mm/<model-name>/metrics/ - метрики модели
+
+    ------------------------------------------------------------------------------------------------
+    5. ПОРЯДОК ЗАГРУЗКИ (КРИТИЧЕСКИ ВАЖНО)
+    ------------------------------------------------------------------------------------------------
+
+    1. Bootstrap CSS и внешние стили
+    2. Локальные стили (theme, layout, components)
+    3. Bootstrap JS
+    4. Загрузчик шаблонов (core/template-loader.js) - загружает все x-template
+    5. Конфигурация модулей (core/modules-config.js)
+    6. Загрузчик модулей (core/module-loader.js) - загружает все скрипты по конфигурации
+    7. Инициализация приложения (app/app-ui-root.js)
+
+    Нарушение порядка приводит к ошибкам:
+    - Vue не найдёт шаблоны, если они не загружены до Vue.js
+    - Компоненты не загрузятся, если их зависимости не загружены
+    - Стили не применятся, если загружены после разметки
+
+    ------------------------------------------------------------------------------------------------
+    6. ПРИНЦИПЫ ИМЕНОВАНИЯ
+    ------------------------------------------------------------------------------------------------
+
+    Файлы компонентов: kebab-case
+    - ui/components/button.js
+    - ui/components/system-messages.js
+
+    Файлы шаблонов: kebab-case с суффиксом -template
+    - ui/templates/button-template.html
+    - ui/templates/splash-template.html
+
+    Файлы утилит: kebab-case
+    - core/api/coingecko.js
+    - ui/utils/table-sort-mixin.js
+
+    ID шаблонов в DOM: kebab-case (соответствует имени файла без расширения)
+    - <script type="text/x-template" id="splash-template">
+    - <script type="text/x-template" id="header-template">
+
+    ------------------------------------------------------------------------------------------------
+    7. РАБОТА БЕЗ СБОРКИ
+    ------------------------------------------------------------------------------------------------
+
+    Проект должен работать:
+    - На GitHub Pages (HTTPS)
+    - Локально через file:// протокол
+    - Без использования bundler'ов (webpack, vite и т.п.)
+
+    Ограничения:
+    - Нет ES6 модулей (import/export)
+    - Использование глобальных переменных через window.*
+    - Динамическая загрузка через fetch() и eval() или создание <script> тегов
+    - Относительные пути к файлам
+
+    Преимущества:
+    - Простота развёртывания
+    - Нет необходимости в сборке
+    - Быстрая разработка без компиляции
+
+    ================================================================================================
+    -->
+
+    <!-- Bootstrap 5 CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-sRIl4kxILFvY47J16cr9ZwB07vP4J8+LH7qKQnuqkuIAvNWLzeN8tE5YBujZqJLB" crossorigin="anonymous">
+
+    <!-- Font Awesome 6 -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" integrity="sha512-DTOQO9RWCH3ppGqcWaEA1BIZOC6xxalwEsw9c2QQeAIftl+Vegovlnee1c9QX4TctnWMn13TZye+giMm8e2LwA==" crossorigin="anonymous" referrerpolicy="no-referrer" />
+
+    <!-- Material Symbols (Sharp) -->
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Sharp:opsz,wght,FILL,GRAD@20..48,400,0,0" />
+
+    <!-- Локальные стили -->
+    <!-- TODO: Добавить подключение стилей через модульную систему -->
+
+</head>
+<body class="min-vh-100">
+    <div id="app">
+        <!-- Контент приложения загружается через Vue компоненты -->
+    </div>
+
+    <!-- Bootstrap 5 JS Bundle -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/js/bootstrap.bundle.min.js" integrity="sha384-FKyoEForCGlyvwx9Hj09JcYn3nv7wiPVlz7YYwJrWVcXK/BmnVDxM+D2scQbITxI" crossorigin="anonymous"></script>
+
+    <!-- Загрузчик шаблонов (загружает все x-template из ui/templates/) -->
+    <!-- TODO: Создать core/template-loader.js -->
+    <!-- <script src="core/template-loader.js"></script> -->
+
+    <!-- Конфигурация модулей -->
+    <!-- TODO: Создать core/modules-config.js -->
+    <!-- <script src="core/modules-config.js"></script> -->
+
+    <!-- Загрузчик модулей (загружает все скрипты по конфигурации) -->
+    <!-- TODO: Создать core/module-loader.js -->
+    <!-- <script src="core/module-loader.js"></script> -->
+
+    <!-- Инициализация приложения -->
+    <!-- TODO: Создать app/app-ui-root.js -->
+    <!-- <script src="app/app-ui-root.js"></script> -->
+</body>
+</html>
+
