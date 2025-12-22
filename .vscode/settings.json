@@ -1,0 +1,197 @@
+{
+  // Настройки проекта для совместимости с Cursor
+  // Синхронизировано согласно протоколу синхронизации настроек Cursor → VS Code
+
+  // ============================================
+  // Настройки работы с файлами
+  // ============================================
+  "files.encoding": "utf8",
+  "files.eol": "\r\n",
+  "files.trimTrailingWhitespace": true,
+  "files.insertFinalNewline": true,
+  "files.autoSave": "afterDelay",
+  "files.autoSaveDelay": 1000,
+  "files.hotExit": "onExitAndWindowClose",
+  "files.exclude": {
+    "**/.git": true,
+    "**/.DS_Store": true,
+    "**/Thumbs.db": true
+  },
+  // ============================================
+  // Защита папки do-overs от записи
+  // ============================================
+  // Отключаем отслеживание изменений (снижает нагрузку, но НЕ блокирует запись)
+  "files.watcherExclude": {
+    "**/do-overs/**": true
+  },
+  // ВАЖНО: VS Code/Cursor НЕ имеет системных настроек для полной блокировки записи
+  // Защита обеспечивается через:
+  // 1. Правила в .cursorrules (запрет записи для ИИ-агента)
+  // 2. .gitignore (защита от случайных коммитов)
+  // 3. Права доступа к файлам на уровне ОС Windows (рекомендуется)
+  //
+  // Для полной системной защиты на Windows:
+  // 1. Откройте свойства папки do-overs
+  // 2. Вкладка "Безопасность" → "Изменить"
+  // 3. Уберите права на запись для текущего пользователя
+  // 4. Оставьте только права на чтение
+  "files.associations": {
+    "*.cursorrules": "markdown"
+  },
+
+  // ============================================
+  // Настройки редактора
+  // ============================================
+  "editor.fontFamily": "'JetBrains Mono', 'Source Code Pro', Consolas, 'Courier New', monospace",
+  "editor.fontLigatures": true,
+  "editor.fontSize": 14,
+  "editor.tabSize": 2,
+  "editor.insertSpaces": true,
+  "editor.detectIndentation": false,
+  "editor.renderWhitespace": "boundary",
+  "editor.renderControlCharacters": false,
+  "editor.wordWrap": "on",
+  "editor.minimap.enabled": false,
+  "editor.lineNumbers": "on",
+  "editor.rulers": [],
+  "editor.matchBrackets": "always",
+  "editor.bracketPairColorization.enabled": true,
+  "editor.guides.bracketPairs": true,
+  "editor.formatOnSave": false,
+  "editor.formatOnPaste": false,
+  "editor.suggestSelection": "first",
+  "editor.acceptSuggestionOnCommitCharacter": true,
+  "editor.acceptSuggestionOnEnter": "on",
+  "editor.snippetSuggestions": "top",
+  "editor.wordBasedSuggestions": "allDocuments",
+  "editor.quickSuggestions": {
+    "other": true,
+    "comments": false,
+    "strings": true
+  },
+  "editor.occurrencesHighlight": "singleFile",
+
+  // ============================================
+  // Настройки терминала
+  // ============================================
+  "terminal.integrated.defaultProfile.windows": "Git Bash",
+  "terminal.integrated.profiles.windows": {
+    "Git Bash": {
+      "path": "C:\\Program Files\\Git\\bin\\bash.exe",
+      "args": []
+    }
+  },
+  "terminal.integrated.cursorBlinking": true,
+  "terminal.integrated.cursorStyle": "line",
+  "terminal.integrated.fontSize": 14,
+
+  // ============================================
+  // Настройки Git
+  // ============================================
+  "git.enabled": true,
+  "git.autofetch": true,
+  "git.confirmSync": false,
+  "git.path": "C:\\Program Files\\Git\\bin\\git.exe",
+  "git.ignoreLimitWarning": true,
+
+  // ============================================
+  // Настройки поиска
+  // ============================================
+  "search.exclude": {
+    "**/node_modules": true,
+    "**/bower_components": true,
+    "**/.git": true,
+    "**/dist": true,
+    "**/build": true
+    // Примечание: do-overs/ НЕ исключена из поиска, так как должна быть доступна для чтения
+  },
+  "search.useIgnoreFiles": true,
+  "search.smartCase": true,
+
+  // ============================================
+  // Настройки интерфейса
+  // ============================================
+  "workbench.colorTheme": "Prism (No Bold)",
+  "workbench.iconTheme": "vs-seti",
+  "workbench.editor.enablePreview": false,
+  "workbench.editor.enablePreviewFromQuickOpen": false,
+  "workbench.editor.closeOnFileDelete": false,
+  "workbench.editor.restoreViewState": true,
+  "workbench.startupEditor": "welcomePage",
+  "workbench.sideBar.location": "left",
+  "workbench.statusBar.visible": true,
+  "workbench.panel.defaultLocation": "bottom",
+  "workbench.panel.opensMaximized": "never",
+  "workbench.editor.showTabs": "multiple",
+  "workbench.editor.tabActionLocation": "right",
+  "workbench.editor.tabSizing": "shrink",
+  "workbench.editor.tabSizingFixedMinWidth": 38,
+  "workbench.editor.tabSizingFixedMaxWidth": 120,
+  "workbench.localHistory.enabled": true,
+  "workbench.localHistory.maxFileSize": 256,
+
+  // ============================================
+  // Настройки чата Cursor (вкладки Агента)
+  // ============================================
+  // Отключение лимита на количество вкладок
+  "workbench.editor.limit.enabled": false,
+  "workbench.editor.limit.perEditorGroup": false,
+  // Прокрутка вкладок для отображения большего количества
+  "workbench.editor.scrollToSwitchTabs": true,
+  // Автоматическое открытие 3 вкладок чата агента при старте
+  // Примечание: Вкладки нужно открыть вручную один раз, после этого Cursor запомнит их состояние
+  // благодаря настройке workbench.editor.restoreViewState: true (уже установлена выше)
+
+  // ============================================
+  // Настройки ассоциаций редакторов
+  // ============================================
+  "workbench.editorAssociations": {
+    "*.md": "vscode.markdown.preview.editor"
+  },
+
+  // ============================================
+  // Настройки Markdown
+  // ============================================
+  "markdown.preview.fontFamily": "'JetBrains Mono', 'Source Code Pro', Consolas, 'Courier New', monospace",
+  "markdown.preview.codeFontFamily": "'JetBrains Mono', 'Source Code Pro', Consolas, 'Courier New', monospace",
+  // Настройки Markdown All in One для улучшенной подсветки синтаксиса
+  "markdown.extension.syntax.plainTheme": false,
+  "markdown.extension.syntax.decorationFileSizeLimit": 1048576,
+  "markdown.extension.toc.updateOnSave": true,
+  "markdown.extension.preview.autoShowPreviewToSide": false,
+
+  // ============================================
+  // Настройки языков
+  // ============================================
+  "[javascript]": {
+    "editor.tabSize": 2,
+    "editor.defaultFormatter": null
+  },
+  "[json]": {
+    "editor.tabSize": 2
+  },
+  "[html]": {
+    "editor.tabSize": 2
+  },
+  "[css]": {
+    "editor.tabSize": 2
+  },
+  "[markdown]": {
+    "editor.tabSize": 2,
+    "editor.wordWrap": "on"
+  },
+
+  // ============================================
+  // Настройки проверки орфографии
+  // ============================================
+  "cSpell.enabled": true,
+  "cSpell.language": "en,ru",
+  "cSpell.customDictionaries": {
+    "project-dict": {
+      "name": "project-dict",
+      "path": "${workspaceFolder}/.vscode/cspell-dict.txt",
+      "addWords": true
+    }
+  },
+
+}
