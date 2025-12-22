@@ -1,0 +1,18 @@
+{
+  "folders": [
+    {
+      "name": "MBB (основной проект)",
+      "path": "."
+    },
+    {
+      "name": "libs (библиотеки)",
+      "path": "../libs"
+    }
+  ],
+  "settings": {
+    "files.exclude": {
+      "**/.git": true
+    }
+  }
+}
+
