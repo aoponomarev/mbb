@@ -206,8 +206,8 @@
     <!-- TODO: Добавить подключение стилей через модульную систему -->
 
 </head>
-<body class="min-vh-100 pt-5 pb-5">
-    <div id="app">
+<body class="min-vh-100 pt-5 pb-5 d-flex flex-column">
+    <div id="app" class="flex-grow-1 d-flex flex-column">
         <!-- Header приложения (фиксирован к верху) -->
         <header class="fixed-top bg-primary bg-opacity-75 text-white py-3">
             <div class="container-fluid">
@@ -216,10 +216,10 @@
         </header>
 
         <!-- Основной контент с отступами для header и footer (Bootstrap spacing utilities) -->
-        <div class="container-fluid pt-5 pb-5 bg-info bg-opacity-50">
-            <main>
+        <div class="container-fluid pt-5 pb-5 bg-info bg-opacity-50 d-flex flex-column flex-grow-1">
+            <main class="flex-grow-1 d-flex flex-column">
                 <!-- Контент приложения загружается через Vue компоненты -->
-                <div class="container">
+                <div class="container flex-grow-1">
                     <div class="d-inline-flex align-items-center justify-content-center bg-primary m-2 text-white" style="width: 100px; height: 100px;">1</div>
                     <div class="d-inline-flex align-items-center justify-content-center bg-secondary m-2 text-white" style="width: 100px; height: 100px;">2</div>
                     <div class="d-inline-flex align-items-center justify-content-center bg-success m-2 text-white" style="width: 100px; height: 100px;">3</div>
