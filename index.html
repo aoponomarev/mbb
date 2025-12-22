@@ -21,9 +21,9 @@
     что раздувало файл до 1300+ строк.
 
     Решение:
-    - Каждый x-template шаблон выносится в отдельный файл в папке ui/templates/
+    - Каждый x-template шаблон выносится в отдельный файл в папке shared/templates/ (переиспользуемые) или features/<feature-name>/templates/ (feature-specific)
     - Формат имени: <component-name>-template.html
-    - Пример: ui/templates/splash-template.html, ui/templates/header-template.html
+    - Пример: shared/templates/button-template.html, features/layout/templates/splash-template.html
 
     Загрузка шаблонов:
     - Шаблоны загружаются динамически через fetch() ДО инициализации Vue.js
@@ -45,7 +45,7 @@
 
     Решение:
     - Создать конфигурационный файл core/modules-config.js с описанием всех модулей
-    - Модули группируются по категориям: библиотеки, утилиты, core, domain, features, ui, app
+    - Модули группируются по категориям: библиотеки, утилиты, core, domain, features, shared, app
     - Загрузчик модулей core/module-loader.js читает конфигурацию и загружает модули в правильном порядке
     - В index.html остаётся только подключение загрузчика модулей
 
@@ -59,11 +59,11 @@
             { src: 'core/cfg-app.js', type: 'local', deps: [] },
             { src: 'core/api/coingecko.js', type: 'local', deps: ['core/cfg-app.js'] }
         ],
-        ui: [
-            { src: 'ui/components/button.js', type: 'local', deps: ['core/cfg-app.js'] }
+        shared: [
+            { src: 'shared/components/button.js', type: 'local', deps: ['core/cfg-app.js'] }
         ],
         app: [
-            { src: 'app/app-ui-root.js', type: 'local', deps: ['ui/**'] }
+            { src: 'app/app-ui-root.js', type: 'local', deps: ['shared/**', 'features/**'] }
         ]
     }
 
@@ -88,38 +88,45 @@
     b) По слоям архитектуры:
        - core/ - базовые утилиты, конфигурация, API-обёртки
        - domain/ - бизнес-логика, сущности, сервисы
-       - ui/ - переиспользуемые UI-компоненты
+       - shared/ - переиспользуемые компоненты, стили, утилиты
        - app/ - корневой компонент приложения
 
     c) По типу файлов:
-       - ui/templates/ - x-template шаблоны
-       - ui/components/ - Vue компоненты
-       - ui/styles/ - CSS файлы (группируются по компонентам)
-       - core/api/ - утилиты для работы с внешними API
-       - ui/api/ - Vue компоненты для работы с API
+       - shared/templates/ - переиспользуемые x-template шаблоны
+       - shared/components/ - переиспользуемые Vue компоненты
+       - shared/styles/ - общие CSS файлы
+       - shared/utils/ - общие утилиты
+       - shared/config/ - общая конфигурация
+       - core/api/ - утилиты для работы с внешними API (чистые функции)
+       - features/<feature-name>/components/ - feature-specific компоненты
+       - features/<feature-name>/styles/ - feature-specific стили
 
     ------------------------------------------------------------------------------------------------
     4. ПРАВИЛА РАЗМЕЩЕНИЯ ФАЙЛОВ
     ------------------------------------------------------------------------------------------------
 
     Шаблоны (x-template):
-    - ui/templates/<component-name>-template.html
+    - shared/templates/<component-name>-template.html (переиспользуемые)
+    - features/<feature-name>/templates/<component-name>-template.html (feature-specific)
     - Загружаются через core/template-loader.js
 
     Компоненты Vue:
-    - ui/components/<component-name>.js
-    - ui/features/<feature-name>/<component-name>.js (для feature-специфичных)
+    - shared/components/<component-name>.js (переиспользуемые)
+    - features/<feature-name>/components/<component-name>.js (feature-specific)
     - Экспортируют Vue компонент через window или Vue.component()
 
     Стили:
-    - ui/styles/<component-name>.css
-    - ui/styles/theme-colors.css (глобальные темы)
-    - ui/styles/layout.css (общие стили layout)
+    - shared/styles/<component-name>.css (общие)
+    - features/<feature-name>/styles/<component-name>.css (feature-specific)
 
     Утилиты:
     - core/api/<api-name>.js - чистые функции для API (не Vue)
-    - ui/api/<component-name>.js - Vue компоненты для API
-    - ui/utils/<utility-name>.js - вспомогательные функции UI
+    - shared/utils/<utility-name>.js - общие утилиты
+    - features/<feature-name>/utils/<utility-name>.js - feature-specific утилиты
+
+    Конфигурация:
+    - shared/config/<config-name>.js - общая конфигурация
+    - features/<feature-name>/config/<config-name>.js - feature-specific конфигурация
 
     Математические модели:
     - mm/<model-name>/utils/ - утилиты модели
@@ -148,16 +155,16 @@
     ------------------------------------------------------------------------------------------------
 
     Файлы компонентов: kebab-case
-    - ui/components/button.js
-    - ui/components/system-messages.js
+    - shared/components/button.js
+    - shared/components/system-messages.js
 
     Файлы шаблонов: kebab-case с суффиксом -template
-    - ui/templates/button-template.html
-    - ui/templates/splash-template.html
+    - shared/templates/button-template.html
+    - features/layout/templates/splash-template.html
 
     Файлы утилит: kebab-case
     - core/api/coingecko.js
-    - ui/utils/table-sort-mixin.js
+    - shared/utils/table-sort-mixin.js
 
     ID шаблонов в DOM: kebab-case (соответствует имени файла без расширения)
     - <script type="text/x-template" id="splash-template">
@@ -207,7 +214,7 @@
     <!-- Bootstrap 5 JS Bundle -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/js/bootstrap.bundle.min.js" integrity="sha384-FKyoEForCGlyvwx9Hj09JcYn3nv7wiPVlz7YYwJrWVcXK/BmnVDxM+D2scQbITxI" crossorigin="anonymous"></script>
 
-    <!-- Загрузчик шаблонов (загружает все x-template из ui/templates/) -->
+    <!-- Загрузчик шаблонов (загружает все x-template из shared/templates/ и features/*/templates/) -->
     <!-- TODO: Создать core/template-loader.js -->
     <!-- <script src="core/template-loader.js"></script> -->
 
