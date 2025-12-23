@@ -1,0 +1,61 @@
+<script type="text/x-template" id="dropdown-template">
+<div class="dropdown" ref="dropdownContainer">
+    <!-- Кнопка триггера -->
+    <button
+        v-if="!$slots.button"
+        :class="buttonClasses"
+        type="button"
+        :id="dropdownId"
+        data-bs-toggle="dropdown"
+        :aria-expanded="isOpen"
+        @click="handleToggle">
+        <slot name="button-content">
+            {{ buttonText }}
+        </slot>
+    </button>
+
+    <!-- Кастомная кнопка через слот -->
+    <slot name="button" :isOpen="isOpen" :toggle="handleToggle"></slot>
+
+    <!-- Выпадающее меню -->
+    <ul
+        class="dropdown-menu"
+        :class="[
+            { 'show': isOpen },
+            menuClasses
+        ]"
+        :style="menuStyle">
+        <!-- Поисковое поле -->
+        <li v-if="searchable" class="px-3 py-2 border-bottom">
+            <input
+                type="text"
+                class="form-control form-control-sm"
+                v-model="searchQuery"
+                :placeholder="searchPlaceholder"
+                @input="handleSearch"
+                @keydown.esc="handleEscape"
+                ref="searchInput">
+        </li>
+
+        <!-- Прокручиваемая область для длинных списков -->
+        <template v-if="scrollable">
+            <div
+                class="dropdown-menu-scrollable"
+                :style="{ maxHeight: maxHeight, overflowY: 'auto' }">
+                <slot name="items" :filteredItems="filteredItems" :searchQuery="searchQuery"></slot>
+            </div>
+        </template>
+
+        <!-- Обычный список (если не прокручиваемый) -->
+        <template v-else>
+            <slot name="items" :filteredItems="filteredItems" :searchQuery="searchQuery"></slot>
+        </template>
+
+        <!-- Пустое состояние при поиске -->
+        <li v-if="searchable && filteredItems.length === 0 && searchQuery" class="px-3 py-2 text-muted text-center">
+            {{ emptySearchText }}
+        </li>
+    </ul>
+</div>
+</script>
+

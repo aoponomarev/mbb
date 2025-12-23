@@ -5,6 +5,11 @@
   - *Приоритет библиотек* — использование готовых библиотек перед кастомными компонентами.
   - *Использование Bootstrap* — нативные компоненты Bootstrap вместо кастомных обёрток.
   - *Запрет кастомных стилей* — использование только Bootstrap классов и утилит.
+- § Компонент dropdown
+  - *Назначение* — Vue-обёртка над Bootstrap dropdown с поддержкой поиска и прокрутки.
+  - *API компонента* — входные параметры (props) и выходные события (emits).
+  - *Особенности реализации* — максимальная совместимость с Bootstrap JS API, поиск, прокрутка.
+  - *Размещение* — структура файлов компонента.
 - § Компонент dropdown-menu-item
   - *Назначение* — универсальный компонент пункта выпадающего меню.
   - *API компонента* — входные параметры (props) и выходные события (emits).
@@ -22,10 +27,280 @@
 Перед созданием кастомного компонента **обязательно** проверь наличие подходящих Vue-библиотек с расширяемым API. Приоритет библиотекам, которые имеют плагины, composables, возможность кастомизации. Кастомные компоненты создаются только если библиотека не существует, слишком тяжёлая или требуется специфичная бизнес-логика. Подробности в `docs/doc-lib-vue.md`.
 
 ## Использование Bootstrap
-Нативные компоненты Bootstrap 5 (dropdown, modal, tooltip, popover и т.п.) используются напрямую через классы и JavaScript API без создания кастомных Vue-обёрток. Bootstrap предоставляет полный функционал: клавиатурную навигацию, позиционирование через Popper.js, управление через JavaScript API, поддержку тем. Кастомные компоненты создаются только для элементов внутри нативных Bootstrap-компонентов (например, пункты меню внутри `dropdown-menu`). Контейнеры Bootstrap (`<div class="dropdown">`, `<div class="modal">` и т.п.) остаются под управлением Bootstrap без Vue-обёрток.
+
+### Базовый принцип
+Нативные компоненты Bootstrap 5 (dropdown, modal, tooltip, popover и т.п.) используются напрямую через классы и JavaScript API без создания кастомных Vue-обёрток. Bootstrap предоставляет полный функционал: клавиатурную навигацию, позиционирование через Popper.js, управление через JavaScript API, поддержку тем.
+
+### Когда создавать Vue-обёртки
+Кастомные Vue-компоненты-обёртки над Bootstrap создаются **только** если требуется дополнительная функциональность, которой нет в нативном Bootstrap:
+- Поиск по элементам (например, в dropdown)
+- Прокрутка для длинных списков
+- Кастомная логика фильтрации/сортировки
+- Динамическая загрузка элементов
+
+**Важно:** Кастомные компоненты создаются только для элементов внутри нативных Bootstrap-компонентов (например, пункты меню внутри `dropdown-menu`). Контейнеры Bootstrap (`<div class="dropdown">`, `<div class="modal">` и т.п.) остаются под управлением Bootstrap без Vue-обёрток, **кроме случаев**, когда требуется расширенная функциональность.
+
+### Стратегия максимальной совместимости с Bootstrap (обязательное требование)
+При создании Vue-обёрток над Bootstrap-компонентами **обязательно** соблюдать следующие принципы:
+
+1. **Инициализация через Bootstrap JavaScript API:**
+   - Использовать `new bootstrap.Dropdown()`, `new bootstrap.Modal()` и т.п.
+   - Сохранять ссылку на экземпляр Bootstrap в `data()` или `ref`
+   - Инициализировать в `mounted()` через `$nextTick()`
+
+2. **Подписка на события Bootstrap:**
+   - Подписываться на события Bootstrap (`show.bs.dropdown`, `hide.bs.dropdown`, `shown.bs.modal` и т.п.)
+   - Синхронизировать состояние Vue с состоянием Bootstrap
+   - Эмитить события Vue на основе событий Bootstrap
+
+3. **Программный доступ к Bootstrap API:**
+   - Предоставлять методы для программного управления (`show()`, `hide()`, `toggle()`)
+   - Предоставлять метод `getBootstrapInstance()` для прямого доступа к экземпляру Bootstrap
+   - Не блокировать стандартные способы управления Bootstrap
+
+4. **Уничтожение экземпляров:**
+   - Вызывать `instance.dispose()` в `beforeUnmount()` для предотвращения утечек памяти
+   - Очищать подписки на события
+
+5. **Использование нативных атрибутов Bootstrap:**
+   - Сохранять `data-bs-toggle`, `data-bs-target` и другие data-атрибуты
+   - Не переопределять стандартное поведение Bootstrap без необходимости
+
+6. **Совместимость с темами:**
+   - Использовать только Bootstrap классы и CSS-переменные
+   - Не добавлять кастомные стили, которые могут конфликтовать с темами
+
+**Пример правильной реализации:**
+```javascript
+mounted() {
+    this.$nextTick(() => {
+        if (window.bootstrap && window.bootstrap.Dropdown) {
+            this.dropdownInstance = new window.bootstrap.Dropdown(toggleElement);
+
+            // Подписка на события Bootstrap
+            container.addEventListener('show.bs.dropdown', () => {
+                this.isOpen = true;
+                this.$emit('show');
+            });
+        }
+    });
+},
+
+beforeUnmount() {
+    if (this.dropdownInstance) {
+        this.dropdownInstance.dispose();
+    }
+},
+
+methods: {
+    show() {
+        if (this.dropdownInstance) {
+            this.dropdownInstance.show();
+        }
+    },
+
+    getBootstrapInstance() {
+        return this.dropdownInstance;
+    }
+}
+```
 
 ## Запрет кастомных стилей
 Все компоненты используют только Bootstrap классы и утилиты. Кастомный CSS, inline-стили и `<style>`-блоки запрещены, кроме минимальных исключений (например, inline `transition` для анимации chevron в `dropdown-menu-item`). Подробности в `docs/doc-architect.md` (раздел "Фреймворки и UI").
+
+> § <br> КОМПОНЕНТ DROPDOWN
+
+## Назначение
+Vue-обёртка над Bootstrap dropdown с поддержкой поиска по элементам и прокрутки для длинных списков. Компонент обеспечивает **максимальную совместимость с Bootstrap JavaScript API**, позволяя использовать все стандартные возможности Bootstrap (позиционирование через Popper.js, клавиатурная навигация, программное управление) с дополнительной функциональностью.
+
+## API компонента
+
+### Входные параметры (props)
+
+**Кнопка триггера:**
+- `buttonText` (String, default: 'Dropdown') — текст кнопки.
+- `buttonVariant` (String, default: 'primary') — вариант кнопки Bootstrap (`primary`, `secondary`, `success`, `danger`, `warning`, `info`, `light`, `dark`, `outline-*`, `link`).
+- `buttonSize` (String) — размер кнопки (`sm`, `lg`).
+
+**Поиск:**
+- `searchable` (Boolean, default: false) — включить поиск по элементам.
+- `searchPlaceholder` (String, default: 'Поиск...') — placeholder для поля поиска.
+- `emptySearchText` (String, default: 'Ничего не найдено') — текст при отсутствии результатов.
+- `searchFunction` (Function) — кастомная функция поиска. Если не указана, используется встроенная фильтрация по строке.
+
+**Прокрутка:**
+- `scrollable` (Boolean, default: false) — включить прокрутку для длинных списков.
+- `maxHeight` (String, default: '300px') — максимальная высота прокручиваемой области.
+
+**Элементы списка:**
+- `items` (Array, default: []) — массив элементов для встроенной фильтрации (опционально, если используется слот).
+
+**Дополнительные:**
+- `menuClasses` (String) — дополнительные CSS классы для `dropdown-menu`.
+- `menuStyle` (Object) — дополнительные inline стили для `dropdown-menu`.
+- `dropdownId` (String) — ID для кнопки триггера (для Bootstrap).
+
+### Выходные события (emits)
+
+- `show` — событие открытия dropdown (синхронизировано с `show.bs.dropdown`).
+- `hide` — событие закрытия dropdown (синхронизировано с `hide.bs.dropdown`).
+- `search` — событие поиска (эмитится при изменении `searchQuery`).
+- `item-select` — событие выбора элемента (эмитится из слота `items`).
+
+### Слоты
+
+- `button` — кастомная кнопка триггера (с ограниченной областью видимости: `isOpen`, `toggle`).
+- `button-content` — содержимое стандартной кнопки (если не используется слот `button`).
+- `items` — элементы списка (с ограниченной областью видимости: `filteredItems`, `searchQuery`).
+
+### Методы (ref API)
+
+- `show()` — программное открытие dropdown через Bootstrap API.
+- `hide()` — программное закрытие dropdown через Bootstrap API.
+- `toggle()` — программное переключение dropdown через Bootstrap API.
+- `getBootstrapInstance()` — получение экземпляра Bootstrap Dropdown для прямого доступа к API.
+
+## Особенности реализации
+
+### Максимальная совместимость с Bootstrap JS API (обязательное требование)
+
+Компонент реализует стратегию максимальной совместимости с Bootstrap:
+
+1. **Инициализация через Bootstrap JavaScript API:**
+   ```javascript
+   this.dropdownInstance = new window.bootstrap.Dropdown(toggleElement);
+   ```
+
+2. **Подписка на события Bootstrap:**
+   - `show.bs.dropdown` → синхронизация `isOpen = true`, эмит `show`
+   - `hide.bs.dropdown` → синхронизация `isOpen = false`, эмит `hide`
+   - `shown.bs.dropdown`, `hidden.bs.dropdown` — для дополнительной логики
+
+3. **Программный доступ:**
+   - Методы `show()`, `hide()`, `toggle()` используют Bootstrap API
+   - Метод `getBootstrapInstance()` предоставляет прямой доступ к экземпляру Bootstrap
+
+4. **Уничтожение экземпляров:**
+   - `dropdownInstance.dispose()` в `beforeUnmount()` для предотвращения утечек памяти
+
+5. **Использование нативных атрибутов:**
+   - Сохранение `data-bs-toggle="dropdown"` для стандартного поведения Bootstrap
+   - Сохранение `aria-expanded` для доступности
+
+### Поиск
+
+- Встроенная фильтрация по строке (ищет в значениях объектов или строках).
+- Поддержка кастомной функции поиска через prop `searchFunction`.
+- Автофокус на поле поиска при открытии dropdown (если `searchable === true`).
+- Очистка поиска при закрытии dropdown.
+
+### Прокрутка
+
+- Прокручиваемая область с `overflow-y: auto` и настраиваемой `max-height`.
+- Использование только Bootstrap классов для стилизации.
+
+### Использование слотов
+
+Компонент поддерживает гибкое использование через слоты:
+
+```html
+<!-- С встроенной фильтрацией через items -->
+<cmp-dropdown
+    button-text="Выбрать элемент"
+    :searchable="true"
+    :items="['Элемент 1', 'Элемент 2', 'Элемент 3']">
+    <template #items="{ filteredItems }">
+        <li v-for="(item, index) in filteredItems" :key="index">
+            <dropdown-menu-item :title="item" @click="handleSelect(item)"></dropdown-menu-item>
+        </li>
+    </template>
+</cmp-dropdown>
+
+<!-- С кастомной логикой через слот -->
+<cmp-dropdown
+    button-text="Меню"
+    :searchable="true"
+    :search-function="customSearch">
+    <template #items="{ filteredItems, searchQuery }">
+        <li v-for="item in filteredItems" :key="item.id">
+            <dropdown-menu-item :title="item.name" @click="handleSelect(item)"></dropdown-menu-item>
+        </li>
+    </template>
+</cmp-dropdown>
+
+<!-- С кастомной кнопкой -->
+<cmp-dropdown :searchable="true">
+    <template #button="{ isOpen, toggle }">
+        <cmp-button
+            :label="isOpen ? 'Закрыть' : 'Открыть'"
+            @click="toggle">
+        </cmp-button>
+    </template>
+    <template #items="{ filteredItems }">
+        <!-- элементы -->
+    </template>
+</cmp-dropdown>
+```
+
+## Размещение
+- Компонент: `shared/components/dropdown.js`
+- Шаблон: `shared/templates/dropdown-template.html`
+- Зависимости: Bootstrap 5, Vue.js
+
+## Использование
+
+```html
+<!-- Базовый dropdown -->
+<cmp-dropdown button-text="Меню">
+    <template #items>
+        <li><dropdown-menu-item title="Пункт 1" @click="handleClick"></dropdown-menu-item></li>
+        <li><dropdown-menu-item title="Пункт 2" @click="handleClick"></dropdown-menu-item></li>
+    </template>
+</cmp-dropdown>
+
+<!-- С поиском -->
+<cmp-dropdown
+    button-text="Поиск элементов"
+    :searchable="true"
+    :items="items">
+    <template #items="{ filteredItems }">
+        <li v-for="item in filteredItems" :key="item.id">
+            <dropdown-menu-item :title="item.name" @click="handleSelect(item)"></dropdown-menu-item>
+        </li>
+    </template>
+</cmp-dropdown>
+
+<!-- С прокруткой -->
+<cmp-dropdown
+    button-text="Длинный список"
+    :scrollable="true"
+    max-height="400px">
+    <template #items>
+        <li v-for="item in longList" :key="item.id">
+            <dropdown-menu-item :title="item.name" @click="handleSelect(item)"></dropdown-menu-item>
+        </li>
+    </template>
+</cmp-dropdown>
+
+<!-- Программное управление через ref -->
+<cmp-dropdown
+    ref="myDropdown"
+    button-text="Управляемый dropdown"
+    @show="handleShow"
+    @hide="handleHide">
+    <template #items>
+        <!-- элементы -->
+    </template>
+</cmp-dropdown>
+
+<script>
+// В методах компонента:
+this.$refs.myDropdown.show(); // открыть
+this.$refs.myDropdown.hide(); // закрыть
+this.$refs.myDropdown.toggle(); // переключить
+const bootstrapInstance = this.$refs.myDropdown.getBootstrapInstance(); // прямой доступ к Bootstrap API
+</script>
+```
 
 > § <br> КОМПОНЕНТ DROPDOWN-MENU-ITEM
 
@@ -261,4 +536,3 @@
     @click="toggleMenu">
 </cmp-button>
 ```
-
