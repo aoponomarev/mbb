@@ -2,6 +2,9 @@
 
 Лог изменений, связанных с архитектурой, структурой файлов/компонентов, JavaScript, API, I/O.
 
+## Создание компонента dropdown-menu-item
+23.12.2025:0bf2041 ◆ Создан переиспользуемый компонент dropdown-menu-item для пунктов выпадающего меню ▶ Создан шаблон `shared/templates/dropdown-menu-item-template.html` с поддержкой иконки, заголовка, подзаголовка, суффикса (badge/icon/indicator/chevron/info), tooltips, состояний (active/disabled). Создан компонент `shared/components/dropdown-menu-item.js` с props, emits, методами обработки кликов. Реализована логика событий: по умолчанию все зоны эмитят общий click, раздельные события (click-icon, click-text, click-suffix) эмитятся всегда. Добавлена анимация chevron через Font Awesome классы (fa-rotate-90) + inline transition. Инициализация Bootstrap tooltips через data-bs-toggle. Обновлён index.html с примерами компонента в разных состояниях ◉ Создать универсальный переиспользуемый компонент для пунктов dropdown-меню с поддержкой всех необходимых функций, используя только Bootstrap классы @components @vue @bootstrap @dropdown @menu-item @shared
+
 ## Обновление формата записей в тематических логах
 22.12.2025:f033986 ◆ Обновлён формат записей в тематических логах для компактности @logs @format @refactoring
 
