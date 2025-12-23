@@ -10,6 +10,11 @@
   - *API компонента* — входные параметры (props) и выходные события (emits).
   - *Особенности реализации* — Bootstrap-совместимость, tooltips, анимация chevron.
   - *Размещение* — структура файлов компонента.
+- § Компонент button
+  - *Назначение* — универсальный компонент кнопки с иконкой, текстом и суффиксом.
+  - *API компонента* — входные параметры (props) и выходные события (emits).
+  - *Особенности реализации* — Bootstrap-совместимость, адаптивность, множественные суффиксы.
+  - *Размещение* — структура файлов компонента.
 
 > § <br> ПРИНЦИПЫ РАБОТЫ С КОМПОНЕНТАМИ
 
@@ -117,5 +122,143 @@
     </dropdown-menu-item>
   </ul>
 </div>
+```
+
+> § <br> КОМПОНЕНТ BUTTON
+
+## Назначение
+Универсальный компонент кнопки с поддержкой иконки, текста и суффикса (badge, icon, indicator, chevron, info). Обёртка над нативной Bootstrap кнопкой для единообразного отображения кнопок в приложении.
+
+## API компонента
+
+### Входные параметры (props)
+
+**Опциональные:**
+- `label` (String) — текст кнопки.
+- `icon` (String) — CSS класс иконки слева (Font Awesome, Material Symbols).
+- `suffix` (Object | Array) — суффикс справа. Может быть одиночным объектом или массивом элементов. Формат элемента:
+  ```javascript
+  {
+    type: 'badge' | 'icon' | 'indicator' | 'chevron' | 'info',
+    value: String | Number, // CSS класс для icon/indicator/info/chevron, текст для badge, число для badge
+    variant: String, // для badge: 'primary', 'secondary', 'success', 'danger', 'warning', 'info'
+    expanded: Boolean, // для chevron: состояние раскрытия (поворот на 90°)
+    tooltip: String // всплывающая подсказка для элемента суффикса
+  }
+  ```
+- `tooltipIcon` (String) — всплывающая подсказка для иконки слева.
+- `tooltipText` (String) — всплывающая подсказка для текстовой области.
+- `tooltipSuffix` (String) — всплывающая подсказка для суффикса (приоритет над `suffix.tooltip`, работает только для одиночного suffix).
+- `variant` (String, default: 'primary') — вариант Bootstrap: 'primary', 'secondary', 'success', 'danger', 'warning', 'info', 'light', 'dark', 'outline-primary', 'outline-secondary', 'outline-success', 'outline-danger', 'outline-warning', 'outline-info', 'outline-light', 'outline-dark', 'link'.
+- `size` (String) — размер кнопки: 'sm', 'lg' или null (по умолчанию).
+- `disabled` (Boolean) — отключённое состояние кнопки.
+- `loading` (Boolean) — состояние загрузки (показывает спиннер вместо иконки/текста).
+- `type` (String, default: 'button') — тип кнопки: 'button', 'submit', 'reset'.
+- `iconOpacity` (Number, default: 1) — прозрачность иконки слева (0-1).
+- `responsive` (Object) — настройки адаптивности:
+  ```javascript
+  {
+    hideTextOnMobile: true,  // скрывать текст на мобильных, если есть иконка
+    mobilePadding: 'px-2 py-2',  // паддинги на мобильных
+    desktopPadding: 'px-md-3 py-md-2'  // паддинги на десктопе
+  }
+  ```
+
+### Выходные события (emits)
+
+- `click` — общее событие клика по кнопке (эмитится всегда при клике на любую зону).
+- `click-icon` — клик по иконке слева (эмитится вместе с `click`).
+- `click-text` — клик по текстовой области (эмитится вместе с `click`).
+- `click-suffix` — клик по элементу суффикса (эмитится вместе с `click`, передаёт элемент суффикса как второй аргумент).
+
+**Примечание:** Все зоны (иконка, текст, суффикс) эмитят общее событие `click` по умолчанию. Раздельные события (`click-icon`, `click-text`, `click-suffix`) срабатывают только если назначены явно в родительском компоненте.
+
+## Особенности реализации
+
+### Bootstrap-совместимость
+- Компонент использует классы `btn`, `btn-{variant}`, `btn-{size}` Bootstrap для базовой стилизации.
+- Состояния `disabled` и `loading` применяются через атрибут `disabled` и классы Bootstrap.
+- Все стили реализованы через Bootstrap утилиты (`d-flex`, `align-items-center`, `text-break`, `text-wrap`, `px-2`, `py-2`, `opacity-50` и т.п.).
+- Поддержка тем Bootstrap через CSS-переменные (`var(--bs-body-color)`, `var(--bs-secondary-color)` и т.п.).
+- **Полная обратная совместимость:** компонент — обёртка над нативной Bootstrap кнопкой, все стандартные классы и атрибуты Bootstrap работают корректно.
+
+### Паддинги на тап-зонах
+- Паддинги переносятся с кнопки (`p-0`) на внутренний контейнер (`px-2 py-2` или через `responsive` prop).
+- Это обеспечивает корректную работу tooltips и раздельных событий кликов по зонам.
+- Паттерн проверен в `dropdown-menu-item` и безопасен для использования.
+
+### Подсказки (tooltips)
+- **Нативные подсказки браузера** через атрибут `title` (не Bootstrap Tooltip).
+- Не требуют инициализации и уничтожения — работают автоматически через браузер.
+- Раздельные подсказки для иконки (`tooltipIcon`), текста (`tooltipText`) и каждого элемента суффикса (если `suffix` — массив, каждый элемент может иметь свой `tooltip`).
+- Преимущества: простота, отсутствие зависимостей от Bootstrap JS, автоматическая работа на всех устройствах.
+
+### Анимация chevron
+- Поворот chevron на 90° через Font Awesome класс `fa-rotate-90` (при `suffix.expanded === true`).
+- Плавная анимация через inline `style="transition: transform 0.3s ease;"` (единственное исключение из запрета inline-стилей).
+
+### Адаптивность
+- Базовое поведение через Bootstrap responsive utilities в шаблоне (`d-none d-md-inline` для скрытия текста на мобильных).
+- Опциональный prop `responsive` для переопределения поведения адаптивности.
+- По умолчанию текст скрывается на мобильных устройствах, если есть иконка (для экономии места).
+- Если иконки нет, текст всегда виден.
+
+### Множественные суффиксы
+- `suffix` может быть массивом элементов для поддержки нескольких badge/icon/indicator одновременно.
+- Каждый элемент массива может иметь свой `tooltip`.
+- Элементы разделяются отступом `ms-1` (кроме первого).
+
+## Размещение
+- Компонент: `shared/components/button.js`
+- Шаблон: `shared/templates/button-template.html`
+- Зависимости: Bootstrap 5, Font Awesome 6, Vue.js
+
+## Использование
+
+**Базовые примеры:**
+```html
+<!-- Простая кнопка -->
+<cmp-button label="Сохранить" @click="handleSave"></cmp-button>
+
+<!-- С иконкой и вариантом -->
+<cmp-button
+    label="Удалить"
+    icon="fas fa-trash"
+    variant="danger"
+    @click="handleDelete">
+</cmp-button>
+
+<!-- С суффиксом badge -->
+<cmp-button
+    label="Уведомления"
+    icon="fas fa-bell"
+    :suffix="{ type: 'badge', value: 5, variant: 'secondary', tooltip: '5 новых уведомлений' }"
+    @click="handleNotifications">
+</cmp-button>
+
+<!-- Множественные badge -->
+<cmp-button
+    label="Уведомления"
+    icon="fas fa-bell"
+    :suffix="[
+        { type: 'badge', value: 5, variant: 'secondary', tooltip: '5 новых уведомлений' },
+        { type: 'badge', value: 'New', variant: 'primary', tooltip: 'Новая функция' }
+    ]"
+    @click="handleNotifications">
+</cmp-button>
+
+<!-- Состояние loading -->
+<cmp-button
+    label="Загрузка..."
+    :loading="true"
+    disabled>
+</cmp-button>
+
+<!-- С chevron -->
+<cmp-button
+    label="Меню"
+    :suffix="{ type: 'chevron', value: 'fas fa-chevron-down', expanded: isExpanded }"
+    @click="toggleMenu">
+</cmp-button>
 ```
 

@@ -1,0 +1,62 @@
+<script type="text/x-template" id="button-template">
+<button :type="type"
+        :class="buttonClasses"
+        :disabled="disabled || loading"
+        @click="handleClick"
+        class="p-0">
+    <span :class="containerClasses">
+        <!-- Спиннер загрузки -->
+        <span v-if="loading" class="spinner-border spinner-border-sm me-1" role="status" aria-hidden="true"></span>
+
+        <!-- Левая иконка -->
+        <span v-else-if="icon"
+              class="d-inline-block text-center"
+              :class="iconOpacity === 0.5 ? 'opacity-50' : ''"
+              :style="{
+                  width: '1.6em',
+                  marginRight: '0em',
+                  ...(iconOpacity !== 0.5 && iconOpacity !== 1 ? { opacity: iconOpacity } : {})
+              }"
+              :title="tooltipIcon"
+              @click.stop="handleIconClick">
+            <i :class="icon"></i>
+        </span>
+
+        <!-- Текстовая область -->
+        <span v-if="label"
+              :class="textClasses"
+              :title="tooltipText"
+              @click.stop="handleTextClick">
+            {{ label }}
+        </span>
+
+        <!-- Суффикс (массив элементов) -->
+        <span v-if="suffixArray.length > 0 && !loading"
+              class="d-flex align-items-center ms-1">
+            <template v-for="(item, index) in suffixArray" :key="index">
+                <!-- Badge -->
+                <span v-if="item.type === 'badge'"
+                      :class="['badge', `bg-${item.variant || 'secondary'}`, index > 0 ? 'ms-1' : '']"
+                      :title="item.tooltip"
+                      @click.stop="handleSuffixClick($event, item)">
+                    {{ item.value }}
+                </span>
+
+                <!-- Icon / Indicator / Info -->
+                <i v-else-if="['icon', 'indicator', 'info'].includes(item.type)"
+                   :class="[item.value, index > 0 ? 'ms-1' : '']"
+                   :title="item.tooltip"
+                   @click.stop="handleSuffixClick($event, item)"></i>
+
+                <!-- Chevron с анимацией -->
+                <i v-else-if="item.type === 'chevron'"
+                   :class="[item.value, { 'fa-rotate-90': item.expanded }, index > 0 ? 'ms-1' : '']"
+                   style="transition: transform 0.3s ease;"
+                   :title="item.tooltip"
+                   @click.stop="handleSuffixClick($event, item)"></i>
+            </template>
+        </span>
+    </span>
+</button>
+</script>
+
