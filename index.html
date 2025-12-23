@@ -220,6 +220,206 @@
             <main class="flex-grow-1 d-flex flex-column">
                 <!-- Контент приложения загружается через Vue компоненты -->
                 <div class="container flex-grow-1">
+                    <h2 class="mb-4">Примеры компонента button</h2>
+
+                    <!-- Базовые варианты -->
+                    <div class="mb-4">
+                        <h3 class="h5 mb-3">Базовые варианты</h3>
+                        <div class="d-flex flex-wrap gap-2 mb-3">
+                            <cmp-button label="Primary" variant="primary" @click="handleClick"></cmp-button>
+                            <cmp-button label="Secondary" variant="secondary" @click="handleClick"></cmp-button>
+                            <cmp-button label="Success" variant="success" @click="handleClick"></cmp-button>
+                            <cmp-button label="Danger" variant="danger" @click="handleClick"></cmp-button>
+                            <cmp-button label="Warning" variant="warning" @click="handleClick"></cmp-button>
+                            <cmp-button label="Info" variant="info" @click="handleClick"></cmp-button>
+                            <cmp-button label="Light" variant="light" @click="handleClick"></cmp-button>
+                            <cmp-button label="Dark" variant="dark" @click="handleClick"></cmp-button>
+                        </div>
+                    </div>
+
+                    <!-- Outline варианты -->
+                    <div class="mb-4">
+                        <h3 class="h5 mb-3">Outline варианты</h3>
+                        <div class="d-flex flex-wrap gap-2 mb-3">
+                            <cmp-button label="Primary" variant="outline-primary" @click="handleClick"></cmp-button>
+                            <cmp-button label="Secondary" variant="outline-secondary" @click="handleClick"></cmp-button>
+                            <cmp-button label="Success" variant="outline-success" @click="handleClick"></cmp-button>
+                            <cmp-button label="Danger" variant="outline-danger" @click="handleClick"></cmp-button>
+                        </div>
+                    </div>
+
+                    <!-- Размеры -->
+                    <div class="mb-4">
+                        <h3 class="h5 mb-3">Размеры</h3>
+                        <div class="d-flex flex-wrap align-items-center gap-2 mb-3">
+                            <cmp-button label="Small" size="sm" @click="handleClick"></cmp-button>
+                            <cmp-button label="Default" @click="handleClick"></cmp-button>
+                            <cmp-button label="Large" size="lg" @click="handleClick"></cmp-button>
+                        </div>
+                    </div>
+
+                    <!-- С иконками -->
+                    <div class="mb-4">
+                        <h3 class="h5 mb-3">С иконками</h3>
+                        <div class="d-flex flex-wrap gap-2 mb-3">
+                            <cmp-button
+                                label="Сохранить"
+                                icon="fas fa-save"
+                                tooltip-icon="Иконка: Сохранить"
+                                tooltip-text="Основной текст: Сохранить изменения"
+                                @click="handleClick">
+                            </cmp-button>
+                            <cmp-button
+                                label="Удалить"
+                                icon="fas fa-trash"
+                                variant="danger"
+                                tooltip-icon="Иконка: Удалить"
+                                tooltip-text="Основной текст: Удалить элемент"
+                                @click="handleClick">
+                            </cmp-button>
+                            <cmp-button
+                                label="Загрузить"
+                                icon="fas fa-download"
+                                variant="success"
+                                tooltip-icon="Иконка: Загрузить"
+                                tooltip-text="Основной текст: Загрузить файл"
+                                @click="handleClick">
+                            </cmp-button>
+                            <cmp-button
+                                icon="fas fa-cog"
+                                variant="secondary"
+                                tooltip-icon="Иконка: Настройки"
+                                tooltip-text="Основной текст: Открыть настройки"
+                                @click="handleClick">
+                            </cmp-button>
+                        </div>
+                    </div>
+
+                    <!-- С суффиксами -->
+                    <div class="mb-4">
+                        <h3 class="h5 mb-3">С суффиксами</h3>
+                        <div class="d-flex flex-wrap gap-2 mb-3">
+                            <cmp-button
+                                label="Уведомления"
+                                icon="fas fa-bell"
+                                tooltip-icon="Иконка: Уведомления"
+                                tooltip-text="Основной текст: Просмотр уведомлений"
+                                :suffix="{ type: 'badge', value: 5, variant: 'secondary', tooltip: 'Суффикс: 5 новых уведомлений' }"
+                                @click="handleClick">
+                            </cmp-button>
+                            <cmp-button
+                                label="Экспорт"
+                                icon="fas fa-download"
+                                tooltip-icon="Иконка: Экспорт"
+                                tooltip-text="Основной текст: Экспорт данных"
+                                :suffix="{ type: 'icon', value: 'fas fa-external-link-alt', tooltip: 'Суффикс: Открыть в новой вкладке' }"
+                                @click="handleClick"
+                                @click-suffix="handleSuffixClick">
+                            </cmp-button>
+                            <cmp-button
+                                label="Соединение"
+                                icon="fas fa-wifi"
+                                tooltip-icon="Иконка: Соединение"
+                                tooltip-text="Основной текст: Статус подключения"
+                                :suffix="{ type: 'indicator', value: 'fas fa-circle text-success', tooltip: 'Суффикс: Статус: Активен' }"
+                                @click="handleClick">
+                            </cmp-button>
+                            <cmp-button
+                                label="Меню"
+                                tooltip-text="Основной текст: Раскрыть меню"
+                                :suffix="{ type: 'chevron', value: 'fas fa-chevron-down', expanded: isMenuExpanded, tooltip: 'Суффикс: Раскрыть/свернуть меню' }"
+                                @click="toggleMenu">
+                            </cmp-button>
+                            <cmp-button
+                                label="Справка"
+                                icon="fas fa-question-circle"
+                                tooltip-icon="Иконка: Справка"
+                                tooltip-text="Основной текст: Открыть справку"
+                                :suffix="{ type: 'info', value: 'fas fa-info-circle text-info', tooltip: 'Суффикс: Открыть справку' }"
+                                @click="handleClick"
+                                @click-suffix="handleInfoClick">
+                            </cmp-button>
+                        </div>
+                    </div>
+
+                    <!-- Множественные badge -->
+                    <div class="mb-4">
+                        <h3 class="h5 mb-3">Множественные badge</h3>
+                        <div class="d-flex flex-wrap gap-2 mb-3">
+                            <cmp-button
+                                label="Уведомления"
+                                icon="fas fa-bell"
+                                tooltip-icon="Иконка: Уведомления"
+                                tooltip-text="Основной текст: Просмотр уведомлений"
+                                :suffix="[
+                                    { type: 'badge', value: 5, variant: 'secondary', tooltip: 'Суффикс 1: 5 новых уведомлений' },
+                                    { type: 'badge', value: 'New', variant: 'primary', tooltip: 'Суффикс 2: Новая функция' }
+                                ]"
+                                @click="handleClick">
+                            </cmp-button>
+                        </div>
+                    </div>
+
+                    <!-- Состояния -->
+                    <div class="mb-4">
+                        <h3 class="h5 mb-3">Состояния</h3>
+                        <div class="d-flex flex-wrap gap-2 mb-3">
+                            <cmp-button label="Active" @click="handleClick"></cmp-button>
+                            <cmp-button label="Disabled" :disabled="true" @click="handleClick"></cmp-button>
+                            <cmp-button label="Loading" :loading="true" @click="handleClick"></cmp-button>
+                            <cmp-button label="Disabled + Loading" :disabled="true" :loading="true" @click="handleClick"></cmp-button>
+                        </div>
+                    </div>
+
+                    <!-- Типы кнопок -->
+                    <div class="mb-4">
+                        <h3 class="h5 mb-3">Типы кнопок</h3>
+                        <form class="d-flex flex-wrap gap-2 mb-3">
+                            <cmp-button label="Button" type="button" @click="handleClick"></cmp-button>
+                            <cmp-button label="Submit" type="submit" variant="success" @click="handleClick"></cmp-button>
+                            <cmp-button label="Reset" type="reset" variant="warning" @click="handleClick"></cmp-button>
+                        </form>
+                    </div>
+
+                    <!-- Адаптивность (мобильные состояния) -->
+                    <div class="mb-4">
+                        <h3 class="h5 mb-3">Адаптивность (мобильные состояния)</h3>
+                        <p class="text-muted small mb-2">На мобильных устройствах текст скрывается, если есть иконка (измените размер окна для проверки)</p>
+                        <div class="d-flex flex-wrap gap-2 mb-3">
+                            <cmp-button label="Сохранить" icon="fas fa-save" @click="handleClick"></cmp-button>
+                            <cmp-button label="Удалить" icon="fas fa-trash" variant="danger" @click="handleClick"></cmp-button>
+                            <cmp-button label="Настройки" icon="fas fa-cog" variant="secondary" @click="handleClick"></cmp-button>
+                            <cmp-button
+                                label="Уведомления"
+                                icon="fas fa-bell"
+                                :suffix="{ type: 'badge', value: 5, variant: 'secondary' }"
+                                @click="handleClick">
+                            </cmp-button>
+                        </div>
+                        <p class="text-muted small mb-2">Текст всегда виден, если нет иконки:</p>
+                        <div class="d-flex flex-wrap gap-2 mb-3">
+                            <cmp-button label="Только текст" @click="handleClick"></cmp-button>
+                            <cmp-button
+                                label="Текст с badge"
+                                :suffix="{ type: 'badge', value: 'New', variant: 'primary' }"
+                                @click="handleClick">
+                            </cmp-button>
+                        </div>
+                        <p class="text-muted small mb-2">Переопределение адаптивности (текст всегда виден):</p>
+                        <div class="d-flex flex-wrap gap-2 mb-3">
+                            <cmp-button
+                                label="Сохранить"
+                                icon="fas fa-save"
+                                tooltip-icon="Иконка: Сохранить"
+                                tooltip-text="Основной текст: Сохранить изменения"
+                                :responsive="{ hideTextOnMobile: false }"
+                                @click="handleClick">
+                            </cmp-button>
+                        </div>
+                    </div>
+
+                    <hr class="my-5">
+
                     <h2 class="mb-4">Примеры компонента dropdown-menu-item</h2>
 
                     <!-- Примеры компонента в разных состояниях -->
@@ -359,51 +559,73 @@
     <!-- Vue.js 3 -->
     <script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
 
-    <!-- Загрузка шаблона компонента (ДО Vue.js) -->
+    <!-- Загрузка шаблонов компонентов (ДО Vue.js) -->
     <script>
         (function() {
-            fetch('shared/templates/dropdown-menu-item-template.html')
-                .then(response => response.text())
-                .then(html => {
-                    document.body.insertAdjacentHTML('beforeend', html);
-                    // После загрузки шаблона загружаем компонент и инициализируем Vue
-                    loadComponentAndInitVue();
-                })
-                .catch(error => {
-                    console.error('Ошибка загрузки шаблона:', error);
-                    loadComponentAndInitVue();
-                });
+            // Загружаем оба шаблона параллельно
+            Promise.all([
+                fetch('shared/templates/dropdown-menu-item-template.html').then(r => r.text()),
+                fetch('shared/templates/button-template.html').then(r => r.text())
+            ])
+            .then(([dropdownHtml, buttonHtml]) => {
+                // Вставляем шаблоны в DOM
+                document.body.insertAdjacentHTML('beforeend', dropdownHtml);
+                document.body.insertAdjacentHTML('beforeend', buttonHtml);
+                // После загрузки шаблонов загружаем компоненты и инициализируем Vue
+                loadComponentsAndInitVue();
+            })
+            .catch(error => {
+                console.error('Ошибка загрузки шаблонов:', error);
+                loadComponentsAndInitVue();
+            });
 
-            function loadComponentAndInitVue() {
-                // Загрузка компонента
-                const script = document.createElement('script');
-                script.src = 'shared/components/dropdown-menu-item.js';
-                script.onload = function() {
-                    // Инициализация Vue приложения после загрузки компонента
-                    const { createApp } = Vue;
+            function loadComponentsAndInitVue() {
+                // Загружаем оба компонента последовательно
+                const dropdownScript = document.createElement('script');
+                dropdownScript.src = 'shared/components/dropdown-menu-item.js';
+                dropdownScript.onload = function() {
+                    const buttonScript = document.createElement('script');
+                    buttonScript.src = 'shared/components/button.js';
+                    buttonScript.onload = function() {
+                        // Инициализация Vue приложения после загрузки всех компонентов
+                        const { createApp } = Vue;
 
-                    createApp({
-                        components: {
-                            'dropdown-menu-item': window.cmpDropdownMenuItem
-                        },
-                        methods: {
-                            handleClick(event) {
-                                console.log('Click на пункт меню:', event);
+                        createApp({
+                            components: {
+                                'dropdown-menu-item': window.cmpDropdownMenuItem,
+                                'cmp-button': window.cmpButton
                             },
-                            handleSuffixClick(event) {
-                                console.log('Click на суффикс:', event);
+                            data() {
+                                return {
+                                    isMenuExpanded: false
+                                };
                             },
-                            handleInfoClick(event) {
-                                console.log('Click на info (справка):', event);
-                                alert('Открыть справку');
+                            methods: {
+                                handleClick(event) {
+                                    console.log('Click на элемент:', event);
+                                },
+                                handleSuffixClick(event, item) {
+                                    console.log('Click на суффикс:', event, item);
+                                },
+                                handleInfoClick(event) {
+                                    console.log('Click на info (справка):', event);
+                                    alert('Открыть справку');
+                                },
+                                toggleMenu() {
+                                    this.isMenuExpanded = !this.isMenuExpanded;
+                                }
                             }
-                        }
-                    }).mount('#app');
+                        }).mount('#app');
+                    };
+                    buttonScript.onerror = function() {
+                        console.error('Ошибка загрузки компонента button');
+                    };
+                    document.head.appendChild(buttonScript);
                 };
-                script.onerror = function() {
-                    console.error('Ошибка загрузки компонента');
+                dropdownScript.onerror = function() {
+                    console.error('Ошибка загрузки компонента dropdown-menu-item');
                 };
-                document.head.appendChild(script);
+                document.head.appendChild(dropdownScript);
             }
         })();
     </script>
