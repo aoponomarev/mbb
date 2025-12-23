@@ -32,6 +32,14 @@ window.cmpDropdown = {
             type: String,
             default: 'Dropdown'
         },
+        buttonTextShort: {
+            type: String,
+            default: null // укороченная версия текста для мобильных (если buttonIcon не задан)
+        },
+        buttonIcon: {
+            type: String,
+            default: null // иконка для мобильной версии (Font Awesome класс)
+        },
         buttonVariant: {
             type: String,
             default: 'primary',
@@ -41,6 +49,15 @@ window.cmpDropdown = {
             type: String,
             default: null,
             validator: (value) => !value || ['sm', 'lg'].includes(value)
+        },
+        // === Адаптивность ===
+        responsive: {
+            type: Object,
+            default: () => ({
+                hideTextOnMobile: true,  // скрывать текст на мобильных, если есть иконка
+                showIconOnMobile: true,  // показывать иконку только на мобильных
+                useShortTextOnMobile: true // использовать укороченный текст на мобильных, если нет иконки
+            })
         },
 
         // === Поиск ===

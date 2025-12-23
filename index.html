@@ -422,6 +422,20 @@
                                 tooltip-text="Основной текст: Открыть настройки"
                                 @click="handleClick">
                             </cmp-button>
+                            <!-- С укороченным текстом на мобильных (без иконки) -->
+                            <cmp-button
+                                label="Сохранить изменения"
+                                label-short="Сохранить"
+                                tooltip-text="Основной текст: Сохранить все изменения"
+                                @click="handleClick">
+                            </cmp-button>
+                            <cmp-button
+                                label="Открыть настройки"
+                                label-short="Настройки"
+                                variant="secondary"
+                                tooltip-text="Основной текст: Открыть настройки приложения"
+                                @click="handleClick">
+                            </cmp-button>
                         </div>
                     </div>
 
@@ -555,72 +569,200 @@
                     <!-- Базовый dropdown -->
                     <div class="mb-4">
                         <h3 class="h5 mb-3">Базовый dropdown</h3>
-                        <cmp-dropdown button-text="Выбрать пункт">
-                            <template #items>
-                                <li><dropdown-menu-item title="Пункт 1" @click="handleClick"></dropdown-menu-item></li>
-                                <li><dropdown-menu-item title="Пункт 2" @click="handleClick"></dropdown-menu-item></li>
-                                <li><dropdown-menu-item title="Пункт 3" @click="handleClick"></dropdown-menu-item></li>
-                            </template>
-                        </cmp-dropdown>
+                        <div class="d-flex flex-wrap gap-2 mb-3">
+                            <cmp-dropdown button-text="Выбрать пункт">
+                                <template #items>
+                                    <li><dropdown-menu-item title="Пункт 1" @click="handleClick"></dropdown-menu-item></li>
+                                    <li><dropdown-menu-item title="Пункт 2" @click="handleClick"></dropdown-menu-item></li>
+                                    <li><dropdown-menu-item title="Пункт 3" @click="handleClick"></dropdown-menu-item></li>
+                                </template>
+                            </cmp-dropdown>
+                            <!-- С иконкой на мобильных -->
+                            <cmp-dropdown
+                                button-text="Выбрать пункт"
+                                button-icon="fas fa-chevron-down">
+                                <template #items>
+                                    <li><dropdown-menu-item title="Пункт 1" @click="handleClick"></dropdown-menu-item></li>
+                                    <li><dropdown-menu-item title="Пункт 2" @click="handleClick"></dropdown-menu-item></li>
+                                    <li><dropdown-menu-item title="Пункт 3" @click="handleClick"></dropdown-menu-item></li>
+                                </template>
+                            </cmp-dropdown>
+                            <!-- С укороченным текстом на мобильных -->
+                            <cmp-dropdown
+                                button-text="Выбрать пункт"
+                                button-text-short="Выбрать">
+                                <template #items>
+                                    <li><dropdown-menu-item title="Пункт 1" @click="handleClick"></dropdown-menu-item></li>
+                                    <li><dropdown-menu-item title="Пункт 2" @click="handleClick"></dropdown-menu-item></li>
+                                    <li><dropdown-menu-item title="Пункт 3" @click="handleClick"></dropdown-menu-item></li>
+                                </template>
+                            </cmp-dropdown>
+                        </div>
                     </div>
 
                     <!-- Dropdown с поиском -->
                     <div class="mb-4">
                         <h3 class="h5 mb-3">Dropdown с поиском</h3>
-                        <cmp-dropdown
-                            button-text="Поиск элементов"
-                            :searchable="true"
-                            :items="dropdownItems">
-                            <template #items="{ filteredItems }">
-                                <li v-for="item in filteredItems" :key="item.id">
-                                    <dropdown-menu-item
-                                        :title="item.name"
-                                        :subtitle="item.description"
-                                        @click="handleSelect(item)">
-                                    </dropdown-menu-item>
-                                </li>
-                            </template>
-                        </cmp-dropdown>
+                        <div class="d-flex flex-wrap gap-2 mb-3">
+                            <cmp-dropdown
+                                button-text="Поиск элементов"
+                                :searchable="true"
+                                :items="dropdownItems">
+                                <template #items="{ filteredItems }">
+                                    <li v-for="item in filteredItems" :key="item.id">
+                                        <dropdown-menu-item
+                                            :title="item.name"
+                                            :subtitle="item.description"
+                                            @click="handleSelect(item)">
+                                        </dropdown-menu-item>
+                                    </li>
+                                </template>
+                            </cmp-dropdown>
+                            <!-- С иконкой на мобильных -->
+                            <cmp-dropdown
+                                button-text="Поиск элементов"
+                                button-icon="fas fa-search"
+                                :searchable="true"
+                                :items="dropdownItems">
+                                <template #items="{ filteredItems }">
+                                    <li v-for="item in filteredItems" :key="item.id">
+                                        <dropdown-menu-item
+                                            :title="item.name"
+                                            :subtitle="item.description"
+                                            @click="handleSelect(item)">
+                                        </dropdown-menu-item>
+                                    </li>
+                                </template>
+                            </cmp-dropdown>
+                            <!-- С укороченным текстом на мобильных -->
+                            <cmp-dropdown
+                                button-text="Поиск элементов"
+                                button-text-short="Поиск"
+                                :searchable="true"
+                                :items="dropdownItems">
+                                <template #items="{ filteredItems }">
+                                    <li v-for="item in filteredItems" :key="item.id">
+                                        <dropdown-menu-item
+                                            :title="item.name"
+                                            :subtitle="item.description"
+                                            @click="handleSelect(item)">
+                                        </dropdown-menu-item>
+                                    </li>
+                                </template>
+                            </cmp-dropdown>
+                        </div>
                     </div>
 
                     <!-- Dropdown с прокруткой -->
                     <div class="mb-4">
                         <h3 class="h5 mb-3">Dropdown с прокруткой (длинный список)</h3>
-                        <cmp-dropdown
-                            button-text="Длинный список"
-                            :scrollable="true"
-                            max-height="300px">
-                            <template #items>
-                                <li v-for="item in longList" :key="item.id">
-                                    <dropdown-menu-item
-                                        :title="item.name"
-                                        :subtitle="item.description"
-                                        @click="handleSelect(item)">
-                                    </dropdown-menu-item>
-                                </li>
-                            </template>
-                        </cmp-dropdown>
+                        <div class="d-flex flex-wrap gap-2 mb-3">
+                            <cmp-dropdown
+                                button-text="Длинный список"
+                                :scrollable="true"
+                                max-height="300px">
+                                <template #items>
+                                    <li v-for="item in longList" :key="item.id">
+                                        <dropdown-menu-item
+                                            :title="item.name"
+                                            :subtitle="item.description"
+                                            @click="handleSelect(item)">
+                                        </dropdown-menu-item>
+                                    </li>
+                                </template>
+                            </cmp-dropdown>
+                            <!-- С иконкой на мобильных -->
+                            <cmp-dropdown
+                                button-text="Длинный список"
+                                button-icon="fas fa-list"
+                                :scrollable="true"
+                                max-height="300px">
+                                <template #items>
+                                    <li v-for="item in longList" :key="item.id">
+                                        <dropdown-menu-item
+                                            :title="item.name"
+                                            :subtitle="item.description"
+                                            @click="handleSelect(item)">
+                                        </dropdown-menu-item>
+                                    </li>
+                                </template>
+                            </cmp-dropdown>
+                            <!-- С укороченным текстом на мобильных -->
+                            <cmp-dropdown
+                                button-text="Длинный список"
+                                button-text-short="Список"
+                                :scrollable="true"
+                                max-height="300px">
+                                <template #items>
+                                    <li v-for="item in longList" :key="item.id">
+                                        <dropdown-menu-item
+                                            :title="item.name"
+                                            :subtitle="item.description"
+                                            @click="handleSelect(item)">
+                                        </dropdown-menu-item>
+                                    </li>
+                                </template>
+                            </cmp-dropdown>
+                        </div>
                     </div>
 
                     <!-- Dropdown с поиском и прокруткой -->
                     <div class="mb-4">
                         <h3 class="h5 mb-3">Dropdown с поиском и прокруткой</h3>
-                        <cmp-dropdown
-                            button-text="Поиск в длинном списке"
-                            :searchable="true"
-                            :scrollable="true"
-                            max-height="300px"
-                            :items="longList">
-                            <template #items="{ filteredItems }">
-                                <li v-for="item in filteredItems" :key="item.id">
-                                    <dropdown-menu-item
-                                        :title="item.name"
-                                        :subtitle="item.description"
-                                        @click="handleSelect(item)">
-                                    </dropdown-menu-item>
-                                </li>
-                            </template>
-                        </cmp-dropdown>
+                        <div class="d-flex flex-wrap gap-2 mb-3">
+                            <cmp-dropdown
+                                button-text="Поиск в длинном списке"
+                                :searchable="true"
+                                :scrollable="true"
+                                max-height="300px"
+                                :items="longList">
+                                <template #items="{ filteredItems }">
+                                    <li v-for="item in filteredItems" :key="item.id">
+                                        <dropdown-menu-item
+                                            :title="item.name"
+                                            :subtitle="item.description"
+                                            @click="handleSelect(item)">
+                                        </dropdown-menu-item>
+                                    </li>
+                                </template>
+                            </cmp-dropdown>
+                            <!-- С иконкой на мобильных -->
+                            <cmp-dropdown
+                                button-text="Поиск в длинном списке"
+                                button-icon="fas fa-search"
+                                :searchable="true"
+                                :scrollable="true"
+                                max-height="300px"
+                                :items="longList">
+                                <template #items="{ filteredItems }">
+                                    <li v-for="item in filteredItems" :key="item.id">
+                                        <dropdown-menu-item
+                                            :title="item.name"
+                                            :subtitle="item.description"
+                                            @click="handleSelect(item)">
+                                        </dropdown-menu-item>
+                                    </li>
+                                </template>
+                            </cmp-dropdown>
+                            <!-- С укороченным текстом на мобильных -->
+                            <cmp-dropdown
+                                button-text="Поиск в длинном списке"
+                                button-text-short="Поиск"
+                                :searchable="true"
+                                :scrollable="true"
+                                max-height="300px"
+                                :items="longList">
+                                <template #items="{ filteredItems }">
+                                    <li v-for="item in filteredItems" :key="item.id">
+                                        <dropdown-menu-item
+                                            :title="item.name"
+                                            :subtitle="item.description"
+                                            @click="handleSelect(item)">
+                                        </dropdown-menu-item>
+                                    </li>
+                                </template>
+                            </cmp-dropdown>
+                        </div>
                     </div>
 
                     <hr class="my-5">
