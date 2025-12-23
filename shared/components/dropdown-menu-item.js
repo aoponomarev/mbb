@@ -140,7 +140,7 @@ window.cmpDropdownMenuItem = {
     mounted() {
         // Инициализация Bootstrap tooltips для всех элементов с data-bs-toggle="tooltip"
         this.$nextTick(() => {
-            if (window.bootstrap && window.bootstrap.Tooltip) {
+            if (window.bootstrap && window.bootstrap.Tooltip && this.$el && this.$el.querySelectorAll) {
                 const tooltipElements = this.$el.querySelectorAll('[data-bs-toggle="tooltip"]');
                 tooltipElements.forEach(element => {
                     new window.bootstrap.Tooltip(element);
