@@ -143,7 +143,7 @@ window.cmpDropdown = {
         // Инициализация Bootstrap Dropdown через JavaScript API
         // КРИТИЧЕСКИ ВАЖНО: Сохраняем совместимость с Bootstrap API
         this.$nextTick(() => {
-            if (window.bootstrap && window.bootstrap.Dropdown) {
+            if (window.bootstrap && window.bootstrap.Dropdown && this.$refs.dropdownContainer) {
                 const toggleElement = this.$refs.dropdownContainer.querySelector('[data-bs-toggle="dropdown"]');
                 if (toggleElement) {
                     this.dropdownInstance = new window.bootstrap.Dropdown(toggleElement, {

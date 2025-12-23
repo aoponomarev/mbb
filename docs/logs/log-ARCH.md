@@ -2,7 +2,8 @@
 
 Лог изменений, связанных с архитектурой, структурой файлов/компонентов, JavaScript, API, I/O.
 
-## Создание компонента dropdown
+## Исправление работы приложения с file:// протоколом
+23.12.2025 ◆ Исправлена работа приложения при открытии из локальной папки: заменён Vue development build на production build, встроены шаблоны компонентов в index.html вместо загрузки через fetch (для обхода CORS ограничений file:// протокола), добавлены проверки на существование элементов в dropdown.js и dropdown-menu-item.js перед обращением к DOM @vue @production @file-protocol @cors @fix @templates @components
 23.12.2025 ◆ Создан Vue-компонент-обёртка над Bootstrap dropdown с поддержкой поиска и прокрутки ▶ Создан шаблон `shared/templates/dropdown-template.html` с поддержкой поиска, прокрутки, слотов для гибкого использования. Создан компонент `shared/components/dropdown.js` с props, emits, методами программного управления через Bootstrap API. Реализована стратегия максимальной совместимости с Bootstrap JS API: инициализация через `new bootstrap.Dropdown()`, подписка на события Bootstrap (`show.bs.dropdown`, `hide.bs.dropdown`), методы `show()`, `hide()`, `toggle()`, `getBootstrapInstance()` для прямого доступа к Bootstrap API, уничтожение экземпляров в `beforeUnmount()`. Поддержка поиска с встроенной фильтрацией и кастомными функциями, прокрутка для длинных списков, слоты для кастомной кнопки и элементов списка. Обновлён index.html с примерами компонента (базовый, с поиском, с прокруткой, комбинированный). Обновлена документация в docs/doc-components.md: добавлен раздел о компоненте dropdown, добавлена стратегия максимальной совместимости с Bootstrap как обязательное требование, обновлено оглавление ◉ Создать Vue-обёртку над Bootstrap dropdown с дополнительной функциональностью (поиск, прокрутка) при сохранении полной совместимости с Bootstrap JS API @components @vue @bootstrap @dropdown @shared @bootstrap-api
 
 ## Создание компонента button

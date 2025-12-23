@@ -2,7 +2,8 @@
 
 Лог изменений, связанных с оформлением: разметка, стили.
 
-## Исправлено отображение крестика очистки в режиме input компонента combobox
+## Встраивание шаблонов компонентов в index.html
+23.12.2025 ◆ Встроены все шаблоны компонентов (dropdown-menu-item, button, dropdown, combobox) в index.html как x-template элементы для работы с file:// протоколом, удалена загрузка шаблонов через fetch, добавлены стили для combobox-clear @templates @file-protocol @index @bootstrap
 23.12.2025 ◆ Исправлено позиционирование крестика очистки в режиме input: возвращено абсолютное позиционирование внутри поля с padding справа для input, добавлен z-index для отображения поверх input. Исправлен обработчик handleInput для режима input: добавлено немедленное обновление modelValue через emit update:modelValue для корректной работы v-model @combobox @input-mode @fix @bootstrap
 
 ## Настроена минимальная высота контейнера через Bootstrap flexbox
