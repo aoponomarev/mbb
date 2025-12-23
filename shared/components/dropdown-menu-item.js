@@ -14,7 +14,8 @@
 // - Поддержка тем Bootstrap через CSS-переменные
 // - Анимация chevron через Font Awesome классы (fa-rotate-90) + inline transition
 // - Условный рендеринг всех опциональных элементов
-// - Инициализация Bootstrap tooltips через data-bs-toggle
+// - Нативные подсказки браузера через атрибут title (по умолчанию)
+// - Опциональное использование Bootstrap tooltips через props tooltipIconBootstrap, tooltipTextBootstrap, tooltipSuffixBootstrap
 // - По умолчанию все зоны (иконка, текст, суффикс) эмитят общее событие 'click'
 //   Раздельные события (click-icon, click-text, click-suffix) срабатывают только если назначены явно
 //
@@ -68,6 +69,19 @@ window.cmpDropdownMenuItem = {
         tooltipSuffix: {
             type: String,
             default: null
+        },
+        // === Использование Bootstrap tooltips (по умолчанию - нативные браузерные через title) ===
+        tooltipIconBootstrap: {
+            type: Boolean,
+            default: false
+        },
+        tooltipTextBootstrap: {
+            type: Boolean,
+            default: false
+        },
+        tooltipSuffixBootstrap: {
+            type: Boolean,
+            default: false
         },
 
         // === Состояния ===
@@ -138,7 +152,7 @@ window.cmpDropdownMenuItem = {
     },
 
     mounted() {
-        // Инициализация Bootstrap tooltips для всех элементов с data-bs-toggle="tooltip"
+        // Инициализация Bootstrap tooltips только для элементов, где соответствующий prop = true
         this.$nextTick(() => {
             if (window.bootstrap && window.bootstrap.Tooltip && this.$el && this.$el.querySelectorAll) {
                 const tooltipElements = this.$el.querySelectorAll('[data-bs-toggle="tooltip"]');

@@ -29,8 +29,9 @@
               class="d-flex align-items-center me-2 pt-1"
               :class="iconOpacity === 0.5 ? 'opacity-50' : ''"
               :style="iconOpacity !== 0.5 ? { opacity: iconOpacity } : {}"
-              :data-bs-toggle="tooltipIcon ? 'tooltip' : null"
-              :data-bs-title="tooltipIcon"
+              :data-bs-toggle="tooltipIconBootstrap && tooltipIcon ? 'tooltip' : null"
+              :data-bs-title="tooltipIconBootstrap && tooltipIcon ? tooltipIcon : null"
+              :title="!tooltipIconBootstrap && tooltipIcon ? tooltipIcon : null"
               @click.stop="handleIconClick">
             <i :class="icon"></i>
         </span>
@@ -38,8 +39,9 @@
         <!-- Текстовая область -->
         <div class="flex-grow-1 text-break text-wrap"
              style="min-width: 0;"
-             :data-bs-toggle="tooltipText ? 'tooltip' : null"
-             :data-bs-title="tooltipText"
+             :data-bs-toggle="tooltipTextBootstrap && tooltipText ? 'tooltip' : null"
+             :data-bs-title="tooltipTextBootstrap && tooltipText ? tooltipText : null"
+             :title="!tooltipTextBootstrap && tooltipText ? tooltipText : null"
              @click.stop="handleTextClick">
             <div class="lh-sm text-wrap">{{ title }}</div>
             <small v-if="subtitle"
@@ -51,8 +53,9 @@
         <!-- Суффикс (badge/icon/indicator/chevron/info) -->
         <span v-if="suffix"
               class="d-flex align-items-center ms-2 pt-1"
-              :data-bs-toggle="suffixTooltip ? 'tooltip' : null"
-              :data-bs-title="suffixTooltip"
+              :data-bs-toggle="tooltipSuffixBootstrap && suffixTooltip ? 'tooltip' : null"
+              :data-bs-title="tooltipSuffixBootstrap && suffixTooltip ? suffixTooltip : null"
+              :title="!tooltipSuffixBootstrap && suffixTooltip ? suffixTooltip : null"
               @click.stop="handleSuffixClick">
             <!-- Badge -->
             <span v-if="suffix.type === 'badge'"
@@ -96,11 +99,21 @@
         </span>
 
         <!-- Текстовая область -->
-        <span v-if="label"
+        <span v-if="label || labelShort"
               :class="textClasses"
               :title="tooltipText"
               @click.stop="handleTextClick">
-            {{ label }}
+            <!-- Укороченный текст (только на мобильных, если нет иконки, но есть labelShort) -->
+            <span v-if="!icon && labelShort"
+                  class="d-inline d-md-none">
+                {{ labelShort }}
+            </span>
+
+            <!-- Полный текст -->
+            <span v-if="label"
+                  :class="(icon || labelShort) && responsive.hideTextOnMobile ? 'd-none d-md-inline' : 'd-inline'">
+                {{ label }}
+            </span>
         </span>
 
         <!-- Суффикс (массив элементов) -->
@@ -143,7 +156,21 @@
         :aria-expanded="isOpen"
         @click="handleToggle">
         <slot name="button-content">
-            {{ buttonText }}
+            <!-- Иконка (только на мобильных, если задана) -->
+            <i v-if="buttonIcon && responsive.showIconOnMobile"
+               :class="[buttonIcon, 'd-inline', 'd-md-none']"></i>
+
+            <!-- Укороченный текст (только на мобильных, если нет иконки, но есть buttonTextShort) -->
+            <span v-if="!buttonIcon && buttonTextShort && responsive.useShortTextOnMobile"
+                  class="d-inline d-md-none">
+                {{ buttonTextShort }}
+            </span>
+
+            <!-- Полный текст -->
+            <span v-if="buttonText"
+                  :class="(buttonIcon || (buttonTextShort && responsive.useShortTextOnMobile)) && responsive.hideTextOnMobile ? 'd-none d-md-inline' : 'd-inline'">
+                {{ buttonText }}
+            </span>
         </slot>
     </button>
 

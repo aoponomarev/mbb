@@ -35,6 +35,10 @@ window.cmpButton = {
             type: String,
             default: null
         },
+        labelShort: {
+            type: String,
+            default: null // укороченная версия текста для мобильных (если нет иконки)
+        },
 
         // === Опциональные ===
         icon: {

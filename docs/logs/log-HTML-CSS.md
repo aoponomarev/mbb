@@ -2,6 +2,9 @@
 
 Лог изменений, связанных с оформлением: разметка, стили.
 
+## Обновление шаблонов и примеров для адаптивности
+23.12.2025 ◆ Обновлены шаблоны компонентов и примеры в index.html для поддержки адаптивности на мобильных устройствах ▶ В core/templates-inline.js обновлён шаблон button-template: добавлена логика условного отображения labelShort на мобильных (d-inline d-md-none) при отсутствии иконки, полный label отображается на десктопе (d-none d-md-inline) или если нет labelShort. Обновлён шаблон dropdown-template: добавлена логика отображения buttonIcon только на мобильных (d-inline d-md-none), buttonTextShort на мобильных при отсутствии иконки, полный buttonText на десктопе. Обновлены примеры в index.html для демонстрации адаптивности: добавлены примеры button с labelShort, dropdown с buttonIcon и buttonTextShort @templates @adaptivity @responsive @mobile @button @dropdown @index
+
 ## Вынос шаблонов компонентов из index.html
 23.12.2025 ◆ Вынесены встроенные шаблоны компонентов из index.html в core/templates-inline.js, удалены встроенные шаблоны (~370 строк) из разметки, добавлены подключения новых модулей @templates @refactoring @index @modularity
 
