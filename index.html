@@ -220,6 +220,136 @@
             <main class="flex-grow-1 d-flex flex-column">
                 <!-- Контент приложения загружается через Vue компоненты -->
                 <div class="container flex-grow-1">
+                    <h2 class="mb-4">Примеры компонента combobox</h2>
+
+                    <!-- Базовый комбобокс -->
+                    <div class="mb-4">
+                        <h3 class="h5 mb-3">Базовый комбобокс</h3>
+                        <div style="max-width: 400px;">
+                            <cmp-combobox
+                                v-model="comboboxValue1"
+                                :items="comboboxItems"
+                                placeholder="Выберите или введите..."
+                                @select="handleComboboxSelect">
+                            </cmp-combobox>
+                            <p class="mt-2 text-muted small">Выбрано: {{ comboboxValue1 || '(пусто)' }}</p>
+                        </div>
+                    </div>
+
+                    <!-- Комбобокс с иконкой -->
+                    <div class="mb-4">
+                        <h3 class="h5 mb-3">С иконкой</h3>
+                        <div style="max-width: 400px;">
+                            <cmp-combobox
+                                v-model="comboboxValue2"
+                                :items="comboboxItems"
+                                icon="fas fa-search"
+                                placeholder="Поиск..."
+                                @select="handleComboboxSelect">
+                            </cmp-combobox>
+                            <p class="mt-2 text-muted small">Выбрано: {{ comboboxValue2 || '(пусто)' }}</p>
+                        </div>
+                    </div>
+
+                    <!-- Комбобокс с автодополнением и подсветкой -->
+                    <div class="mb-4">
+                        <h3 class="h5 mb-3">С автодополнением и подсветкой</h3>
+                        <div style="max-width: 400px;">
+                            <cmp-combobox
+                                v-model="comboboxValue3"
+                                :items="comboboxItems"
+                                :highlight-matches="true"
+                                placeholder="Начните вводить..."
+                                @select="handleComboboxSelect">
+                            </cmp-combobox>
+                            <p class="mt-2 text-muted small">Выбрано: {{ comboboxValue3 || '(пусто)' }}</p>
+                        </div>
+                    </div>
+
+                    <!-- Комбобокс с прокруткой -->
+                    <div class="mb-4">
+                        <h3 class="h5 mb-3">С прокруткой (длинный список)</h3>
+                        <div style="max-width: 400px;">
+                            <cmp-combobox
+                                v-model="comboboxValue4"
+                                :items="comboboxLongList"
+                                :scrollable="true"
+                                max-height="200px"
+                                placeholder="Выберите из списка..."
+                                @select="handleComboboxSelect">
+                            </cmp-combobox>
+                            <p class="mt-2 text-muted small">Выбрано: {{ comboboxValue4 || '(пусто)' }}</p>
+                        </div>
+                    </div>
+
+                    <!-- Комбобокс только из списка (strict) -->
+                    <div class="mb-4">
+                        <h3 class="h5 mb-3">Только из списка (strict, без произвольного ввода)</h3>
+                        <div style="max-width: 400px;">
+                            <cmp-combobox
+                                v-model="comboboxValue5"
+                                :items="comboboxItems"
+                                :strict="true"
+                                :allow-custom="false"
+                                placeholder="Только из списка..."
+                                @select="handleComboboxSelect">
+                            </cmp-combobox>
+                            <p class="mt-2 text-muted small">Выбрано: {{ comboboxValue5 || '(пусто)' }}</p>
+                        </div>
+                    </div>
+
+                    <!-- Комбобокс в режиме простого input -->
+                    <div class="mb-4">
+                        <h3 class="h5 mb-3">Режим простого текстового поля (mode="input")</h3>
+                        <div style="max-width: 400px;">
+                            <cmp-combobox
+                                v-model="comboboxValue6"
+                                mode="input"
+                                placeholder="Простое текстовое поле..."
+                                @input="handleComboboxInput">
+                            </cmp-combobox>
+                            <p class="mt-2 text-muted small">Значение: {{ comboboxValue6 || '(пусто)' }}</p>
+                        </div>
+                    </div>
+
+                    <!-- Комбобокс с кастомной фильтрацией -->
+                    <div class="mb-4">
+                        <h3 class="h5 mb-3">С кастомной функцией фильтрации</h3>
+                        <div style="max-width: 400px;">
+                            <cmp-combobox
+                                v-model="comboboxValue7"
+                                :items="comboboxItems"
+                                :filter-function="customFilterFunction"
+                                placeholder="Поиск по описанию..."
+                                @select="handleComboboxSelect">
+                            </cmp-combobox>
+                            <p class="mt-2 text-muted small">Выбрано: {{ comboboxValue7 || '(пусто)' }}</p>
+                        </div>
+                    </div>
+
+                    <!-- Комбобокс с длинным списком -->
+                    <div class="mb-4">
+                        <h3 class="h5 mb-3">С длинным списком (без прокрутки)</h3>
+                        <div class="input-group mb-3" style="max-width: 400px;">
+                            <input type="text" class="form-control" placeholder="Выберите элемент..." aria-label="Комбобокс">
+                            <button class="btn btn-outline-secondary dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false"></button>
+                            <ul class="dropdown-menu dropdown-menu-end">
+                                <li><a class="dropdown-item" href="#">Элемент 1</a></li>
+                                <li><a class="dropdown-item" href="#">Элемент 2</a></li>
+                                <li><a class="dropdown-item" href="#">Элемент 3</a></li>
+                                <li><a class="dropdown-item" href="#">Элемент 4</a></li>
+                                <li><a class="dropdown-item" href="#">Элемент 5</a></li>
+                                <li><a class="dropdown-item" href="#">Элемент 6</a></li>
+                                <li><a class="dropdown-item" href="#">Элемент 7</a></li>
+                                <li><a class="dropdown-item" href="#">Элемент 8</a></li>
+                                <li><a class="dropdown-item" href="#">Элемент 9</a></li>
+                                <li><a class="dropdown-item" href="#">Элемент 10</a></li>
+                            </ul>
+                        </div>
+                    </div>
+
+                    <hr class="my-5">
+
                     <h2 class="mb-4">Примеры компонента button</h2>
 
                     <!-- Базовые варианты -->
@@ -641,13 +771,15 @@
             Promise.all([
                 fetch('shared/templates/dropdown-menu-item-template.html').then(r => r.text()),
                 fetch('shared/templates/button-template.html').then(r => r.text()),
-                fetch('shared/templates/dropdown-template.html').then(r => r.text())
+                fetch('shared/templates/dropdown-template.html').then(r => r.text()),
+                fetch('shared/templates/combobox-template.html').then(r => r.text())
             ])
-            .then(([dropdownMenuItemHtml, buttonHtml, dropdownHtml]) => {
+            .then(([dropdownMenuItemHtml, buttonHtml, dropdownHtml, comboboxHtml]) => {
                 // Вставляем шаблоны в DOM
                 document.body.insertAdjacentHTML('beforeend', dropdownMenuItemHtml);
                 document.body.insertAdjacentHTML('beforeend', buttonHtml);
                 document.body.insertAdjacentHTML('beforeend', dropdownHtml);
+                document.body.insertAdjacentHTML('beforeend', comboboxHtml);
                 // После загрузки шаблонов загружаем компоненты и инициализируем Vue
                 loadComponentsAndInitVue();
             })
@@ -664,9 +796,12 @@
                     const buttonScript = document.createElement('script');
                     buttonScript.src = 'shared/components/button.js';
                     buttonScript.onload = function() {
-                        const dropdownScript = document.createElement('script');
-                        dropdownScript.src = 'shared/components/dropdown.js';
-                        dropdownScript.onload = function() {
+                    const dropdownScript = document.createElement('script');
+                    dropdownScript.src = 'shared/components/dropdown.js';
+                    dropdownScript.onload = function() {
+                        const comboboxScript = document.createElement('script');
+                        comboboxScript.src = 'shared/components/combobox.js';
+                        comboboxScript.onload = function() {
                             // Инициализация Vue приложения после загрузки всех компонентов
                             const { createApp } = Vue;
 
@@ -674,7 +809,8 @@
                                 components: {
                                     'dropdown-menu-item': window.cmpDropdownMenuItem,
                                     'cmp-button': window.cmpButton,
-                                    'cmp-dropdown': window.cmpDropdown
+                                    'cmp-dropdown': window.cmpDropdown,
+                                    'cmp-combobox': window.cmpCombobox
                                 },
                             data() {
                                 return {
@@ -691,7 +827,30 @@
                                         name: `Элемент ${i + 1}`,
                                         description: `Описание элемента ${i + 1}`
                                     })),
-                                    isMenuExpanded: false
+                                    isMenuExpanded: false,
+                                    // Данные для combobox
+                                    comboboxValue1: '',
+                                    comboboxValue2: '',
+                                    comboboxValue3: '',
+                                    comboboxValue4: '',
+                                    comboboxValue5: '',
+                                    comboboxValue6: '',
+                                    comboboxValue7: '',
+                                    comboboxItems: [
+                                        { id: 1, label: 'Москва', value: 'moscow' },
+                                        { id: 2, label: 'Санкт-Петербург', value: 'spb' },
+                                        { id: 3, label: 'Новосибирск', value: 'novosibirsk' },
+                                        { id: 4, label: 'Екатеринбург', value: 'ekaterinburg' },
+                                        { id: 5, label: 'Казань', value: 'kazan' },
+                                        { id: 6, label: 'Нижний Новгород', value: 'nn' },
+                                        { id: 7, label: 'Челябинск', value: 'chelyabinsk' },
+                                        { id: 8, label: 'Самара', value: 'samara' }
+                                    ],
+                                    comboboxLongList: Array.from({ length: 100 }, (_, i) => ({
+                                        id: i + 1,
+                                        label: `Город ${i + 1}`,
+                                        value: `city-${i + 1}`
+                                    }))
                                 };
                             },
                             methods: {
@@ -711,9 +870,29 @@
                                 handleSelect(item) {
                                     console.log('Выбран элемент:', item);
                                     alert(`Выбран: ${item.name}`);
+                                },
+                                handleComboboxSelect(event) {
+                                    console.log('Combobox select:', event);
+                                },
+                                handleComboboxInput(value) {
+                                    console.log('Combobox input:', value);
+                                },
+                                customFilterFunction(items, query) {
+                                    // Кастомная фильтрация: ищем по label и value
+                                    const lowerQuery = query.toLowerCase();
+                                    return items.filter(item => {
+                                        const label = (item.label || '').toLowerCase();
+                                        const value = (item.value || '').toLowerCase();
+                                        return label.includes(lowerQuery) || value.includes(lowerQuery);
+                                    });
                                 }
                             }
                         }).mount('#app');
+                    };
+                    comboboxScript.onerror = function() {
+                        console.error('Ошибка загрузки компонента combobox');
+                    };
+                    document.head.appendChild(comboboxScript);
                     };
                     dropdownScript.onerror = function() {
                         console.error('Ошибка загрузки компонента dropdown');
