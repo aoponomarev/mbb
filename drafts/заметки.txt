@@ -1,0 +1,785 @@
+--
+Проведи полную ревизию документации и приведи документацию в полное соотвествие с ФАКТИЧЕСКИМ состоянием кодовой базы.
+--
+
+Cursor поддерживает Agent Skills от Anthropic в nightly-версии (канал обновлений Nightly, с 22 декабря 2025), где навыки интегрируются аналогично VS Code: как папки с SKILL.md, загружаемые по мере необходимости для задач.
+​
+
+Текущий статус поддержки
+Официальная документация Cursor упоминает Agent Skills как открытый стандарт для расширения агентов (cursor.com/docs/context/skills), но полная интеграция доступна только в nightly-канале (версия 2.3.5+). В стабильной версии (2.3.4) настройки Skills не видны — пользователи жалуются на форуме, но в nightly они появляются после создания ~/.claude/skills или .cursor/skills.
+​
+
+Логотип Cursor есть на agentskills.io, подтверждая совместимость.
+​
+
+Как активировать в Cursor
+Перейдите в Settings (Cmd/Ctrl + ,) → General → Updates → выберите "Nightly". Перезапустите Cursor — появится вкладка Rules/Skills для импорта из anthropics/skills или создания своих.
+​
+
+Установите openskills (npm i -g openskills; openskills install anthropics/skills) для универсальной поддержки в Cursor без nightly.
+​
+
+Для ваших задач
+Идеально для трейдинг-ботов: создайте skill для анализа MACD/RSI с примерами Vue.js-компонентов и Bybit API. Cursor Agent автоматически подхватит по запросу "analyze trading indicators using skill". Это дополнит ваши Cursor Pro-агенты без лимитов промптов, как в VS Code Copilot.
+​
+.cursorrules и Agent Skills решают похожие задачи (шаблоны инструкций для агентов), но Agent Skills — открытый модульный стандарт для множества ИИ (Cursor, VS Code, Claude, GitHub), а .cursorrules — проприетарный файл Cursor только для глобальных/проектных правил. Ваш file.cursorrules (14k символов) содержит детальные workflow (MBB, git staging, docs логи), которые идеально мигрируют в отдельные skills.
+​
+
+Ключевые различия
+Аспект	.cursorrules	Agent Skills
+Формат	Один большой Markdown файл	Папки с SKILL.md + ресурсы
+Область	Глобальная/проектная (всегда активна)	Контекстная (по задаче/файлу)
+Платформы	Только Cursor	Cursor, VS Code, Claude, GitHub Copilot
+Загрузка	Весь файл целиком	Прогрессивно (метаданные → инструкции)
+Управление	Ручное редактирование	Централизованное (командное одобрение)
+Применение	Автоматически ко всем задачам	По команде "use skill" или автоопределение
+Ваш .cursorrules — монолит с git-протоколами, MBB-логированием, Vue/Bootstrap правилами. Skills разобьют это на 5-10 модулей.
+​
+​
+
+Преимущества Skills над .cursorrules
+Модульность: Ваш "do-overs staging" → отдельный skill .claude/skills/staging-doovers
+
+Кросс-платформенность: Работает в Cursor Pro + VS Code (где вы искали агенты)
+
+Экономия токенов: Cursor загружает только ваш git-workflow skill, а не 14k правил
+
+Командная работа: Коллеги подключают только нужные skills (docs, Vue, trading)
+
+Ресурсы: Skills хранят примеры кода, шаблоны .vue, Bybit API specs — .cursorrules только текст
+​
+
+Как мигрировать ваш .cursorrules
+Из вашего файла выделяются 4 ключевых протокола — преобразуйте в skills:
+
+text
+.claude/skills/mbb-architect/
+├── SKILL.md (инструкции из docsdoc-architect.md)
+└── example-arch.vue
+
+.claude/skills/git-staging/
+├── SKILL.md (ваш staging workflow: git status → Cursor MBB → commit)
+└── git-log-template.md
+
+.claude/skills/vue-bootstrap/
+├── SKILL.md (правила из docsdoc-lib-vue.md + Bootstrap btn-group)
+└── composables-example.js
+
+.claude/skills/daily-logs/
+└── SKILL.md (End of day MM-DD логирование)
+Пример SKILL.md для вашего staging:
+
+text
+---
+name: Git Staging Do-Overs
+description: MBB staging протокол из .cursorrules
+appliesTo: *.js,*.vue, docs/
+---
+## Протокол
+1. git status, staging
+2. Cursor MBB ARCH, HTML-CSS, DOCS
+3. git add .vscode, .cursorrules → commit "TITLE - DD.MM.YYYY"
+Как использовать после миграции
+В Cursor Nightly: @workspace Use git-staging skill для do-overs — применит только ваш протокол.
+​
+В VS Code: Автоматически по файлу (appliesTo: *.vue) или "use mbb-architect skill".
+​
+Переход: Сохраните .cursorrules как fallback, добавляйте skills постепенно.
+
++++++++++++++++++++++++++++++++++++++++
+Cursor Nightly — это канал обновлений Cursor IDE с экспериментальными функциями (например, Agent Skills), которые появляются раньше стабильной версии, но могут быть нестабильными. Переключается в настройках: Cmd/Ctrl + , → Beta → Update channel → Nightly, затем перезапуск и проверка обновлений.
+​
+
+Зачем нужен Nightly
+Nightly получает фичи из dev-ветки раньше: Agent Skills появилась 22 декабря 2025 именно там (версия 2.3.5+), в стабильной 2.3.4 её нет — пользователи на форуме жалуются, что toggle не виден. Идеально для вас: тестируйте skills для .cursorrules миграции без ожидания января 2026.
+​
+
+Риски: баги, вылеты (как в старых nightly), но для Pro-подписки — безопасно с бэкапом настроек.
+​
+
+Как включить шаг за шагом
+Cursor → Settings (Cmd/Ctrl + ,)
+
+Beta (в сайдбаре) → Update channel → Nightly
+
+Cursor → Help → Check for Updates (или Restart to Update)
+
+Версия станет 2.3.5+ (проверьте Help → About)
+
+Settings → Rules → Agent Skills toggle появится
+​
+
+На Windows/macOS/Linux работает одинаково. После — импортируйте skills из anthropics/skills или создайте для MBB/git из вашего .cursorrules.
+​
+
+Отличия каналов
+Канал	Фичи	Стабильность	Пример версии
+Default	Базовые	Высокая	2.3.4
+Early Access	Новые + тесты	Средняя	2.3.4+
+Nightly	Эксперимент (Skills)	Низкая	2.3.5+
+​
+Рекомендация: для ваших трейдинг-ботов и Vue-компонентов — Nightly на 1-2 дня теста skills, потом rollback в Default если баги.
+​
+
+
+===============================================
+
+СПЕЦИФИКАЦИЯ: Vue 3 Компонент <ButtonGroup>
+
+📋 ИСХОДНЫЕ ДАННЫЕ
+├── Смотри .cursorrules проекта
+├── Документация: /docs/ + doc-components.md (file:40)
+├── Образец: button.js (file:41), button-template.html (file:42)
+└── Bootstrap 5: button-group, buttons (без изменений CSS/JS)
+
+---
+
+🎯 ТРЕБОВАНИЯ К КОМПОНЕНТУ
+
+1. **Рендер**: <div class="btn-group [btn-group-sm/lg] [btn-group-vertical]">
+2. **Прозрачность**: 100% совместимость с Bootstrap JS (Button, Dropdown, Tooltip)
+3. **Кнопки**:
+   - type="action" → <Button> (button.js) со ВСЕМИ пропсами
+   - type="checkbox/radio" → нативный Bootstrap btn-check + label
+
+---
+
+📥 ПРОПСЫ ButtonGroup (TypeScript интерфейс)
+
+interface ButtonGroupProps {
+size?: 'sm' | 'lg' | ''
+vertical?: boolean
+role?: string // default: 'group'
+ariaLabel?: string
+class?: string | string[]
+buttons: ButtonConfig[] // обязательный!
+}
+
+interface ButtonConfig {
+type: 'action' | 'checkbox' | 'radio'
+// Для action: ВСЕ пропсы <Button> из button.js
+label?: string
+labelShort?: string
+icon?: string
+variant?: string // 'primary', 'outline-secondary'...
+size?: string // 'sm' | 'lg' (переопределение группового)
+disabled?: boolean
+loading?: boolean
+active?: boolean
+responsive?: {
+hideTextOnMobile?: boolean
+showIconOnMobile?: boolean
+useShortTextOnMobile?: boolean
+}
+suffix?: {
+type: 'badge' | 'icon' | 'indicator' | 'chevron' | 'info'
+value: string | number
+variant?: string
+tooltip?: string
+expanded?: boolean // для chevron
+}
+tooltip?: string
+tooltipIcon?: string
+tooltipText?: string
+tooltipSuffix?: string
+tooltipIconBootstrap?: boolean
+tooltipTextBootstrap?: boolean
+tooltipSuffixBootstrap?: boolean
+// Bootstrap data-* (прозрачность JS)
+[key: data-bs-${string}]: any
+// Любые другие атрибуты
+[key: string]: any
+}
+
+text
+
+---
+
+📤 СЛОТЫ
+<slot name="default"> // fallback: buttons
+<slot name="button-{index}"> // переопределение кнопки №N
+
+text
+
+---
+
+🔧 ЛОГИКА РЕНДЕРА КНОПОК
+
+<template v-for="(button, index) in buttons" :key="index"> <Button v-if="button.type === 'action'" v-bind="button" :class="['flex-grow-0', button.class]" /> <!-- Checkbox --> <template v-else-if="button.type === 'checkbox'"> <input :id="`btn-check-${groupId}-${index}`" class="btn-check" type="checkbox" v-bind="button" > <label :for="`btn-check-${groupId}-${index}`" class="btn" :class="button.variant" v-bind="omit(button, ['type'])" > {{ button.label }} </label> </template> <!-- Radio (аналогично checkbox) --> </template> ```
+✅ ПРОВЕРКА ПРАВИЛЬНОСТИ (обязательные тесты)
+
+Bootstrap JS прозрачность:
+
+text
+const group = document.querySelector('.btn-group')
+const btn = group.querySelector('.btn')
+new bootstrap.Button(btn).toggle()  // работает
+new bootstrap.Dropdown(group).toggle()  // dropdown внутри группы
+Responsive (из button.js):
+
+text
+<ButtonGroup :buttons="[{type:'action', label:'Длинный текст', labelShort:'Короткий', responsive:{hideTextOnMobile:true}}]"/>
+<!-- Mobile: иконка + "Короткий" | Desktop: "Длинный текст" -->
+Suffix + Tooltip:
+
+text
+:buttons="[{
+  type:'action',
+  label:'С бейджем',
+  suffix:{type:'badge', value:5, variant:'secondary', tooltip:'5 новых'},
+  tooltipIconBootstrap:true
+}]"
+📤 ВЫВОД ФАЙЛОВ
+
+ButtonGroup.vue — полный <script setup lang="ts">
+
+ButtonGroup.test.ts — unit-тесты (Vue Testing Library)
+
+examples/ButtonGroup.examples.md — 6+ примеров (action/checkbox/radio/responsive/dropdown)
+
+🚫 НЕ ДЕЛАЙ
+
+Изменения в button.js
+
+Свои CSS классы (только Bootstrap утилиты)
+
+Ломку data-bs-* атрибутов
+
+Игнор responsive/suffix из button.js
+
+✅ ГОТОВО, КОГДА:
+
+Все пропсы <Button> работают в группе
+
+Bootstrap JS находит кнопки через querySelector
+
+Responsive + suffix рендерятся корректно
+
+Checkbox/radio синхронизируются (:checked~label)
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+задача для кодинг-агента
+
+🎯 СПЕЦИФИКАЦИЯ: Vue 3 Компонент <ButtonGroup>
+
+📋 ИСХОДНЫЕ ДАННЫЕ
+├── Смотри .cursorrules проекта
+├── Документация: /docs/ + doc-components.md
+├── Образец: button.js , button-template.html
+└── Bootstrap 5: button-group, buttons (без изменений CSS/JS)
+
+---
+
+🎯 ТРЕБОВАНИЯ К КОМПОНЕНТУ
+
+1. **Рендер**: <div class="btn-group [btn-group-sm/lg] [btn-group-vertical]">
+2. **Прозрачность**: 100% совместимость с Bootstrap JS (Button, Dropdown, Tooltip)
+3. **Кнопки**:
+   - type="button" → <Button> (button.js) со ВСЕМИ пропсами
+   - type="checkbox/radio" → нативный Bootstrap btn-check + label
+
+---
+
+📥 ПРОПСЫ ButtonGroup (TypeScript интерфейс)
+
+interface ButtonGroupProps {
+size?: 'sm' | 'lg' | ''
+vertical?: boolean
+role?: string // default: 'group'
+ariaLabel?: string
+class?: string | string[]
+buttons: ButtonConfig[] // обязательный!
+}
+
+interface ButtonConfig {
+type: 'button' | 'checkbox' | 'radio' // ✅ Bootstrap HTML type
+// Для type='button': ВСЕ пропсы <Button> из button.js
+label?: string
+labelShort?: string
+icon?: string
+variant?: string // 'primary', 'outline-secondary'...
+size?: string // 'sm' | 'lg' (переопределение группового)
+disabled?: boolean
+loading?: boolean
+active?: boolean
+responsive?: {
+hideTextOnMobile?: boolean
+showIconOnMobile?: boolean
+useShortTextOnMobile?: boolean
+}
+suffix?: {
+type: 'badge' | 'icon' | 'indicator' | 'chevron' | 'info'
+value: string | number
+variant?: string
+tooltip?: string
+expanded?: boolean // для chevron
+}
+tooltip?: string
+tooltipIcon?: string
+tooltipText?: string
+tooltipSuffix?: string
+tooltipIconBootstrap?: boolean
+tooltipTextBootstrap?: boolean
+tooltipSuffixBootstrap?: boolean
+// Bootstrap data-* (прозрачность JS)
+[key: data-bs-${string}]: any
+// Любые другие атрибуты
+[key: string]: any
+}
+
+---
+
+📤 СЛОТЫ
+<slot name="default"> // fallback: buttons
+<slot name="button-{index}"> // переопределение кнопки №N
+
+---
+
+🔧 ЛОГИКА РЕНДЕРА КНОПОК
+
+<template v-for="(button, index) in buttons" :key="index"> <!-- BUTTON: полноценный <Button> со ВСЕМИ пропсами --> <Button v-if="button.type === 'button'" v-bind="button" :class="['flex-grow-0', button.class]" /> <!-- CHECKBOX: нативный Bootstrap --> <template v-else-if="button.type === 'checkbox'"> <input :id="`btn-check-${groupId}-${index}`" class="btn-check" type="checkbox" v-bind="button" > <label :for="`btn-check-${groupId}-${index}`" class="btn" :class="button.variant" v-bind="omit(button, ['type'])" > {{ button.label }} </label> </template> <!-- RADIO: аналогично checkbox --> </template> ```
+✅ ПРОВЕРКА ПРАВИЛЬНОСТИ (обязательные тесты)
+
+Bootstrap JS прозрачность:
+
+const group = document.querySelector('.btn-group')
+const btn = group.querySelector('.btn')
+new bootstrap.Button(btn).toggle()  // работает
+new bootstrap.Dropdown(group).toggle()  // dropdown внутри группы
+Смешанный состав:
+
+<ButtonGroup :buttons="[
+  {type:'button', label:'Добавить', variant:'primary'},
+  {type:'checkbox', label:'Фильтр 1'},
+  {type:'radio', label:'Радио 2'}
+]"/>
+Responsive + Suffix:
+
+:buttons="[{
+  type:'button',
+  label:'С бейджем',
+  responsive:{hideTextOnMobile:true},
+  suffix:{type:'badge', value:5, variant:'secondary'}
+}]"
+📤 ВЫВОД ФАЙЛОВ
+
+ButtonGroup.vue — полный <script setup lang="ts">
+
+ButtonGroup.test.ts — unit-тесты (Vue Testing Library)
+
+examples/ButtonGroup.examples.md — 6+ примеров (button/checkbox/radio/responsive/dropdown)
+
+🚫 НЕ ДЕЛАЙ
+
+Изменения в button.js
+
+Свои CSS классы (только Bootstrap утилиты)
+
+Ломку data-bs-* атрибутов
+
+Игнор responsive/suffix из button.js
+
+✅ ГОТОВО, КОГДА:
+
+Все типы (button/checkbox/radio) рендерятся корректно
+
+Bootstrap JS находит кнопки через querySelector
+
+Responsive + suffix работают в button-типах
+
+Checkbox/radio синхронизируются (:checked~label)
+
+
+✅ Автоматическая синхронизация стилей
+ts
+// В ButtonConfig
+interface ButtonConfig {
+  type: 'button' | 'checkbox' | 'radio'
+  variant?: string        // если не указан → наследует от ButtonGroup
+  size?: string           // если не указан → наследует от ButtonGroup
+  // ...
+}
+
+// В ButtonGroupProps
+interface ButtonGroupProps {
+  size?: 'sm' | 'lg' | ''     // применяется ко ВСЕМ кнопкам
+  variant?: string            // НОВОЕ: базовый variant для группы
+  // ...
+}
+🔧 Логика в template
+
+<Button
+  v-if="button.type === 'button'"
+  v-bind="{
+    ...button,
+    variant: button.variant || props.variant || 'secondary',  // наследование
+    size: button.size || props.size,                         // наследование
+  }"
+  :class="['flex-grow-0', button.class]"
+/>
+
+<!-- Для checkbox/radio -->
+<label
+  class="btn"
+  :class="[button.variant || props.variant || 'outline-secondary']"
+  // ...
+>
+Обновлённый фрагмент промпта
+
+🔧 ЛОГИКА РЕНДЕРА КНОПОК (с консистентностью)
+
+<!-- BUTTON: <Button> с НАСЛЕДОВАНИЕМ стилей группы -->
+<Button v-if="button.type === 'button'" :variant="button.variant || props.variant || 'secondary'" :size="button.size || props.size" v-bind="omit(button, ['variant', 'size'])" :class="['flex-grow-0', button.class]" />
+
+<!-- CHECKBOX/RADIO: тоже наследуют -->
+<label :class="[ 'btn', button.variant || props.variant || 'outline-secondary', props.size ? `btn-${props.size}` : '' ]" />
+
+✅ **КОНСИСТЕНТНОСТЬ ГРУППЫ**:
+- Если `ButtonGroup variant="primary"` → все кнопки primary (если не переопределено)
+- Если `ButtonGroup size="lg"` → все кнопки lg
+- Смешанный: `{type:'button', variant:'danger'}` → только эта красная, остальные группы
+Пример использования
+
+<!-- Все кнопки primary + lg -->
+<ButtonGroup variant="primary" size="lg" :buttons="[...]">
+
+<!-- Переопределение только для одной -->
+:buttons="[
+  {type:'button'},           // primary lg (наследует)
+  {type:'button', variant:'danger'},  // красная lg
+  {type:'checkbox'}          // primary lg
+]"
+✅ Итоговая рекомендация
+Добавить в промпт:
+
+variant?: string в ButtonGroupProps
+
+Наследование variant/size для всех типов кнопок
+
+Тест консистентности в ButtonGroup.test.ts
+
+
+test('group styles inherit to all button types', () => {
+  render(<ButtonGroup variant="success" size="sm" :buttons="buttons" />)
+  expect(screen.getAllByRole('button')[0]).toHaveClass('btn-success', 'btn-sm')
+  expect(screen.getByLabelText('Checkbox')).toHaveClass('btn-success', 'btn-sm')
+})
+Без этого группа будет выглядеть разнобоем — кнопки разного размера/цвета.
+
+ButtonGroup задаёт "по умолчанию для всех", а каждая кнопка может переопределить только то, что нужно.
+
+ВАЖНО: предусмотреть title-подсказки для checkbox и radio тоже транслировались из ButtonGroup
+
+ВАЖНО: предусмотреть пропс для адаптивности - задание значения брейкпоинта,
+при весь набор кнопок превращается в выпадающий список dropdown,
+а входящие в его состав кнопки - в соотвествующие пункты dropdown-menu-item.
+Возможно ли вообще сделать такого уровня единую интеграцию
+- в единый компоенент без повреждения совместимости с Bootstrap utilities???
+
+Мы можем превращать ButtonGroup (горизонтальный список) в Dropdown (вертикальное меню) при достижении брейкпоинта, сохраняя 100% совместимость с Bootstrap utilities.​
+
+Как это реализовать (архитектура)
+Мы будем использовать дублирование рендера с CSS-переключением (подход Bootstrap d-none d-md-flex и d-md-none). Это гарантирует мгновенную реакцию без JS-лагов.​
+
+1. Два режима рендера внутри одного компонента:
+text
+<!-- Режим 1: Кнопочная группа (видна ВЫШЕ брейкпоинта) -->
+<div :class="['btn-group', `d-none d-${breakpoint}-inline-flex`]">
+  <template v-for="btn in buttons">
+    <Button v-if="btn.type === 'button'" v-bind="btn" />
+    <template v-else><!-- checkbox/radio --></template>
+  </template>
+</div>
+
+<!-- Режим 2: Выпадающий список (виден НИЖЕ брейкпоинта) -->
+<div :class="['dropdown', `d-${breakpoint}-none`]">
+  <Dropdown :button-text="dropdownLabel" v-bind="dropdownProps">
+    <template #items>
+      <DropdownMenuItem
+        v-for="btn in buttons"
+        :title="btn.label"
+        :icon="btn.icon"
+        v-bind="btn"
+      />
+    </template>
+  </Dropdown>
+</div>
+✅ Почему это НЕ ломает совместимость
+Bootstrap Native Classes: Мы используем стандартные d-sm-none, d-md-flex, d-lg-inline-flex. Это «родной» язык Bootstrap.
+
+Прозрачность событий: Клик по DropdownMenuItem должен вызывать тот же эмит/экшен, что и кнопка в группе.
+
+Совместимость с JS: И btn-group, и dropdown — это независимые JS-сущности Bootstrap. Мы просто управляем их видимостью.​
+
+ts
+// В ButtonGroupProps
+interface ButtonGroupProps {
+  // ... старые пропсы ...
+  collapseBreakpoint?: 'sm' | 'md' | 'lg' | 'xl' | 'xxl' // Когда схлопывать в dropdown
+  dropdownLabel?: string // Текст на кнопке dropdown (например, "Меню" или "Действия")
+  dropdownVariant?: string // Variant кнопки dropdown (по умолчанию наследует от группы)
+}
+🔧 Логика маппинга (ButtonGroup → Dropdown)
+Свойство Button	Свойство DropdownMenuItem	Результат
+label	title	Текст пункта меню
+icon	icon	Иконка слева ​
+suffix	suffix	Бейджи/индикаторы справа ​
+type="checkbox"	active / icon="check"	Галочка в пункте меню
+disabled	disabled	Неактивный пункт
+🎯 Обновленный раздел промпта
+text
+🔄 АДАПТИВНОЕ СХЛОПЫВАНИЕ (Dropdown Collapse)
+
+Если передан пропс `collapseBreakpoint`:
+1. Рендери две версии компонента:
+   - `.btn-group` с классом `d-none d-{breakpoint}-inline-flex`
+   - `<Dropdown>` (из dropdown.js) с классом `d-{breakpoint}-none`
+2. Маппинг `buttons[]` в `DropdownMenuItem`:
+   - `label` -> `title`
+   - `icon` -> `icon`
+   - `suffix` -> `suffix`
+   - `type="checkbox/radio" + active` -> превращаются в пункты с иконками состояния
+3. **События**: клик по пункту меню должен имитировать клик по соответствующей кнопке группы.
+Резюме: Это кажется рабочая схема. Она делает интерфейс «резиновым» (например, на десктопе ряд кнопок «Купить/Продать/Обменять», а на мобилке — одна кнопка «Торговать» с выпадающим списком).
+
+Что-то типа такого:
+
+📋 ИСХОДНЫЕ ДАННЫЕ
+├── Смотри .cursorrules проекта
+├── Документация: /docs/ + doc-components.md [file:40]
+├── Образцы: button.js [file:41], dropdown.js [file:46], dropdown-menu-item.js [file:45]
+└── Bootstrap 5: CSS/JS utilities
+
+---
+
+🎯 ТРЕБОВАНИЯ К КОМПОНЕНТУ
+
+1. **Режим 1 (Десктоп)**: <div class="btn-group"> с кнопками/чекбоксами.
+2. **Режим 2 (Мобильный)**: <Dropdown> (из dropdown.js), куда все кнопки превращаются в пункты меню.
+3. **Переключение**: через CSS-классы `d-{bp}-none`/`d-{bp}-inline-flex` (без JS resize listener).
+4. **Консистентность**: стили (variant/size) наследуются от группы ко всем элементам.
+
+---
+
+📥 ПРОПСЫ (TypeScript интерфейс)
+
+interface ButtonGroupProps {
+// Базовые
+size?: 'sm' | 'lg' | ''
+variant?: string // базовый стиль для всех кнопок
+vertical?: boolean
+role?: string // default: 'group'
+ariaLabel?: string
+class?: string | string[]
+
+// АДАПТИВНОСТЬ (Новое!)
+collapseBreakpoint?: 'sm' | 'md' | 'lg' | 'xl' | 'xxl' // Брейкпоинт схлопывания
+dropdownLabel?: string // Текст кнопки Dropdown ("Действия")
+dropdownIcon?: string // Иконка кнопки Dropdown ("fas fa-bars")
+dropdownVariant?: string // Если нужен отличный от variant группы
+
+// Конфигурация кнопок
+buttons: ButtonConfig[]
+}
+
+interface ButtonConfig {
+type: 'button' | 'checkbox' | 'radio'
+label: string // текст (и для кнопки, и для меню)
+tooltip?: string // title=""
+
+// Стили (переопределение групповых)
+variant?: string
+size?: string
+
+// Контент
+icon?: string
+suffix?: SuffixConfig // бейджи (отображаются и в кнопке, и в меню)
+
+// Логика
+disabled?: boolean
+active?: boolean // для checkbox/radio
+
+// Bootstrap JS (для кнопок)
+[key: data-bs-${string}]: any
+}
+
+---
+
+🔧 ЛОГИКА РЕНДЕРА (Двойной рендер)
+
+1. **Контейнер `.btn-group`** (виден >= breakpoint):
+   - Классы: `['btn-group', props.collapseBreakpoint ? d-none d-${props.collapseBreakpoint}-inline-flex : '']`
+   - Внутри: цикл по `buttons` (как в прошлой версии: Button + input/label).
+
+2. **Контейнер `<Dropdown>`** (виден < breakpoint):
+   - Условие: `v-if="props.collapseBreakpoint"`
+   - Классы: `d-${props.collapseBreakpoint}-none`
+   - Компонент: Используй `<Dropdown>` из dropdown.js
+   - **Маппинг Items**:
+     ```
+     <DropdownMenuItem
+       v-for="(btn, idx) in buttons"
+       :title="btn.label"
+       :icon="btn.icon"
+       :suffix="btn.suffix"
+       :active="btn.active"     <!-- Для checkbox/radio показывает галочку -->
+       :disabled="btn.disabled"
+       @click="handleMenuClick(btn, idx)"
+     />
+     ```
+
+---
+
+🔄 СИНХРОНИЗАЦИЯ СОБЫТИЙ
+
+- Клик по `DropdownMenuItem` должен:
+  - Для `type='button'`: вызывать те же обработчики (`@click`), что и кнопка.
+  - Для `checkbox/radio`: переключать состояние (эмулировать клик по input или обновлять v-model).
+
+---
+
+✅ ПРОВЕРКА (Тесты)
+
+1. **CSS переключение**:
+<!-- При collapseBreakpoint="md" --> <div class="btn-group d-none d-md-inline-flex">...</div> <div class="dropdown d-md-none">...</div> ```
+Маппинг контента:
+
+suffix кнопки (бейджик "5") должен попасть в DropdownMenuItem (там есть такой же пропс).
+
+checkbox (active=true) в меню должен отображаться как активный пункт.
+
+Смешанный состав:
+
+Группа [Button, Checkbox] корректно отображается и в строке, и в выпадающем списке.
+
+📤 ВЫВОД ФАЙЛОВ
+
+ButtonGroup.vue (полный код с двойным шаблоном)
+
+ButtonGroup.test.ts (проверка классов видимости)
+
+examples.md (пример "Responsive Toolbar" с схлопыванием на md)
+
+Давай обсудим перед реализацией, возможно у этого плана есть скрытые проблемы,
+которые надо предвидеть и заранее устранить в плане совместимости, адаптивности, прозрачности и пр.
+Опиши как ты понял задачу и как нам лучше всего синхронизировать между собой кнопки и пункты меню.
+Ну раз они между друг другом взаимозаменяемы будут, то может быть они должны иметь
+идентичные пропсы и структуру? Возможно и кнопки требуют теперь доработки или модификации?
+
+=======================================================
+
+
+помоги грамотно составить промпт для работы ии-агента:
+----------------------------------------------------
+Проектируй Vue 3 компонент `<ButtonGroup>` — обёртку над Bootstrap 5 `.btn-group`.
+
+📋 **ИСХОДНЫЕ ДАННЫЕ**
+- Смотри .cursorrules проекта
+- Читай документацию в /docs/
+- Бери за образец существующий компонент простой кнопки `<Button>`
+
+🎯 **ЗАДАЧА**
+Создай **полностью прозрачную** обёртку:
+1. Рендерит `<div class="btn-group">` с правильными `role`/`aria-*`
+2. **НЕ ломает** Bootstrap JS (Button, Dropdown, Tooltip) — все data-* атрибуты проходят сквозь
+3. Поддерживает все Bootstrap классы/размеры (`btn-group-sm/lg`, `btn-group-vertical`)
+
+🔧 **ЛОГИКА ПО `type`**:
+- `action` → `<button type="button" class="btn">`
+- `checkbox` → `<input type="checkbox" class="btn-check"> + <label class="btn">`
+- `radio` → `<input type="radio" class="btn-check"> + <label class="btn">`
+
+📤 **СЛОТЫ**
+<slot name="default"> — содержимое кнопок (fallback)
+<slot name="button-{index}"> — конкретная кнопка (переопределение)
+
+
+теперь соотнеси с доками по компоненту button (про доп. пропсы и адаптивность в частности). так как кнопки внутри группы должны включать компоненты кнопок, когда они типа "action". объясни как понял задачу
+
+
+
+
+
+
+
+
+
+
+
+на основе .cursorrules и документации в /docs/
+надо спроектировать vue-компонент обертку над компонентом Bootstrap btn-group,
+подобно тому как это было сделано с простой кнопкой.
+Только теперь все дополнительные пропсы должны передаваться
+каждой из кнопк в составе btn-group.
+также пропсы должны передаваться дляназначения типа кнопки
+action/checkbox/radio (какие есть ещё?).
+Новый компонент должен быть прозрачен для плагинов и скриптов
+работающих с btn-group в экосистеме Bootstrap.
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
