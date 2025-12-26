@@ -9,6 +9,7 @@
 // - Кастомной кнопки через слот
 // - Динамической загрузки элементов
 // - Адаптивности кнопки триггера через CSS классы (.dropdown-responsive)
+// - Детерминированных хэшей экземпляров (instanceHash) для идентификации и кастомной стилизации
 //
 // ПРИНЦИПЫ:
 // - Максимальная совместимость с Bootstrap JS API (обязательное требование)
@@ -116,7 +117,7 @@ window.cmpDropdown = {
     computed: {
         // CSS классы для кнопки
         buttonClasses() {
-            const classes = ['btn', `btn-${this.buttonVariant}`, 'dropdown-toggle', 'dropdown-responsive'];
+            const classes = ['btn', `btn-${this.buttonVariant}`, 'dropdown-toggle', 'dropdown-responsive', this.instanceHash];
 
             // Условные классы для адаптивности
             if (this.buttonIcon) classes.push('has-icon');
@@ -124,6 +125,49 @@ window.cmpDropdown = {
 
             if (this.buttonSize) classes.push(`btn-${this.buttonSize}`);
             return classes.join(' ');
+        },
+
+        // Детерминированный хэш экземпляра на основе родительского контекста и props
+        instanceHash() {
+            if (!window.hashGenerator) {
+                console.warn('hashGenerator not found, using fallback');
+                return 'avto-00000000';
+            }
+
+            const parentContext = this.getParentContext();
+            const instanceId = this.dropdownId || this.buttonText || this.buttonIcon || 'dropdown';
+            const uniqueId = `${parentContext}:${instanceId}`;
+            return window.hashGenerator.generateMarkupClass(uniqueId);
+        }
+    },
+
+    methods: {
+        // Получить родительский контекст (класс avto-* или ID родителя)
+        // Вызывается из computed, поэтому $el может быть еще не доступен
+        getParentContext() {
+            if (!this.$el) {
+                return 'root';
+            }
+
+            if (!this.$el.parentElement) {
+                return 'root';
+            }
+
+            let parent = this.$el.parentElement;
+            let depth = 0;
+            const maxDepth = 5;
+
+            while (parent && depth < maxDepth) {
+                const avtoClass = Array.from(parent.classList).find(cls => cls.startsWith('avto-'));
+                if (avtoClass) return avtoClass;
+
+                if (parent.id) return `#${parent.id}`;
+
+                parent = parent.parentElement;
+                depth++;
+            }
+
+            return 'root';
         },
 
         // Отфильтрованные элементы (если используется встроенная фильтрация)

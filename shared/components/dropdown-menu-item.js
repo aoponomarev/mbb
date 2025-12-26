@@ -9,6 +9,7 @@
 // - Состояния (active, disabled)
 // - Раздельные события для кликов по зонам (по умолчанию все эмитят общий click)
 // - Адаптивности элементов через CSS классы (.dropdown-menu-item-responsive)
+// - Детерминированных хэшей экземпляров (instanceHash) для идентификации и кастомной стилизации
 //
 // ПРИНЦИПЫ:
 // - Использование только Bootstrap классов (запрет кастомных стилей, кроме inline transition для chevron)
@@ -94,6 +95,10 @@ window.cmpDropdownMenuItem = {
             type: Boolean,
             default: false
         },
+        itemId: {
+            type: String,
+            default: null
+        }, // Для instanceHash (идентификация экземпляра)
 
         // === Стилизация ===
         iconOpacity: {
@@ -119,16 +124,57 @@ window.cmpDropdownMenuItem = {
 
         // CSS классы для корневого элемента
         itemClasses() {
-            const classes = ['dropdown-menu-item-responsive'];
+            const classes = ['dropdown-menu-item-responsive', this.instanceHash];
             if (this.subtitle) {
                 // По умолчанию подзаголовок скрыт на мобильных
                 classes.push('hide-subtitle-mobile');
             }
             return classes.join(' ');
+        },
+
+        // Детерминированный хэш экземпляра на основе родительского контекста и props
+        instanceHash() {
+            if (!window.hashGenerator) {
+                console.warn('hashGenerator not found, using fallback');
+                return 'avto-00000000';
+            }
+
+            const parentContext = this.getParentContext();
+            const instanceId = this.itemId || this.title || this.icon || 'menu-item';
+            const uniqueId = `${parentContext}:${instanceId}`;
+            return window.hashGenerator.generateMarkupClass(uniqueId);
         }
     },
 
     methods: {
+        // Получить родительский контекст (класс avto-* или ID родителя)
+        // Вызывается из computed, поэтому $el может быть еще не доступен
+        getParentContext() {
+            if (!this.$el) {
+                return 'root';
+            }
+
+            if (!this.$el.parentElement) {
+                return 'root';
+            }
+
+            let parent = this.$el.parentElement;
+            let depth = 0;
+            const maxDepth = 5;
+
+            while (parent && depth < maxDepth) {
+                const avtoClass = Array.from(parent.classList).find(cls => cls.startsWith('avto-'));
+                if (avtoClass) return avtoClass;
+
+                if (parent.id) return `#${parent.id}`;
+
+                parent = parent.parentElement;
+                depth++;
+            }
+
+            return 'root';
+        },
+
         // Обработчик клика по всему пункту меню
         handleClick(event) {
             if (this.disabled) return;
