@@ -113,7 +113,7 @@
   // ============================================
   // Настройки интерфейса
   // ============================================
-  "workbench.colorTheme": "Visual Studio Light",
+  "workbench.colorTheme": "Prism (No Bold)",
   "workbench.iconTheme": "vs-seti",
   "workbench.editor.enablePreview": false,
   "workbench.editor.enablePreviewFromQuickOpen": false,
