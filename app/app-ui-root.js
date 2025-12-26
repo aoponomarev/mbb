@@ -129,6 +129,14 @@
                                 }
                             }
                         }).mount('#app');
+
+                        // Инициализация автоматической маркировки элементов после монтирования Vue
+                        // Ждем, чтобы Vue успел смонтировать все компоненты
+                        setTimeout(() => {
+                            if (window.autoMarkup) {
+                                window.autoMarkup.init();
+                            }
+                        }, 200);
                     };
                     comboboxScript.onerror = function() {
                         console.error('Ошибка загрузки компонента combobox');

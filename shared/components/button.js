@@ -10,6 +10,7 @@
 // - Размеры (sm, lg)
 // - Состояния (disabled, loading)
 // - Адаптивность через CSS классы (.btn-responsive с вложенными селекторами)
+// - Детерминированные хэши экземпляров (instanceHash) для идентификации и кастомной стилизации
 // - Раздельные события для кликов по зонам
 //
 // ПРИНЦИПЫ:
@@ -107,6 +108,10 @@ window.cmpButton = {
             default: 'button',
             validator: (value) => ['button', 'submit', 'reset'].includes(value)
         },
+        buttonId: {
+            type: String,
+            default: null
+        }, // Для instanceHash (идентификация экземпляра)
 
         // === Стилизация ===
         iconOpacity: {
@@ -128,7 +133,7 @@ window.cmpButton = {
 
         // CSS классы для кнопки
         buttonClasses() {
-            const classes = ['btn', 'btn-responsive'];
+            const classes = ['btn', 'btn-responsive', this.instanceHash];
 
             // Условные классы для адаптивности
             if (this.icon) classes.push('has-icon');
@@ -151,10 +156,66 @@ window.cmpButton = {
         // CSS классы для внутреннего контейнера
         containerClasses() {
             return 'd-flex align-items-center px-3 py-2 px-md-3 py-md-2';
+        },
+
+        // Детерминированный хэш экземпляра на основе родительского контекста и props
+        // Стабилен между сессиями - один и тот же контекст + идентификатор всегда дает один и тот же хэш
+        instanceHash() {
+            if (!window.hashGenerator) {
+                console.warn('hashGenerator not found, using fallback');
+                return 'avto-00000000';
+            }
+
+            // Родительский контекст (стабильный маркер родителя)
+            const parentContext = this.getParentContext();
+
+            // Идентификатор экземпляра из props
+            const instanceId = this.buttonId || this.label || this.icon || 'button';
+
+            // Комбинация для уникальности
+            const uniqueId = `${parentContext}:${instanceId}`;
+            return window.hashGenerator.generateMarkupClass(uniqueId);
         }
     },
 
     methods: {
+        // Получить родительский контекст (класс avto-* или ID родителя)
+        // Вызывается из computed, поэтому $el может быть еще не доступен
+        getParentContext() {
+            // Проверяем доступность DOM элемента
+            if (!this.$el) {
+                return 'root';
+            }
+
+            // Проверяем наличие родителя
+            if (!this.$el.parentElement) {
+                return 'root';
+            }
+
+            // Ищем родительский элемент с классом avto-* или ID
+            let parent = this.$el.parentElement;
+            let depth = 0;
+            const maxDepth = 5; // Ограничение глубины поиска
+
+            while (parent && depth < maxDepth) {
+                // Проверяем классы avto-*
+                const avtoClass = Array.from(parent.classList).find(cls => cls.startsWith('avto-'));
+                if (avtoClass) {
+                    return avtoClass;
+                }
+
+                // Проверяем ID
+                if (parent.id) {
+                    return `#${parent.id}`;
+                }
+
+                parent = parent.parentElement;
+                depth++;
+            }
+
+            return 'root'; // fallback
+        },
+
         // Обработчик клика по кнопке
         handleClick(event) {
             if (this.disabled || this.loading) return;
