@@ -9,7 +9,7 @@
 // - Варианты Bootstrap (primary, secondary, success, danger, warning, info, light, dark, outline-*, link)
 // - Размеры (sm, lg)
 // - Состояния (disabled, loading)
-// - Адаптивность (скрытие текста на мобильных, адаптивные паддинги)
+// - Адаптивность через CSS классы (.btn-responsive с вложенными селекторами)
 // - Раздельные события для кликов по зонам
 //
 // ПРИНЦИПЫ:
@@ -115,15 +115,6 @@ window.cmpButton = {
             validator: (value) => value >= 0 && value <= 1
         },
 
-        // === Адаптивность (опционально) ===
-        responsive: {
-            type: Object,
-            default: () => ({
-                hideTextOnMobile: true,  // скрывать текст на мобильных, если есть иконка
-                mobilePadding: 'px-3 py-2',      // симметрично: 1rem слева и справа
-                desktopPadding: 'px-md-3 py-md-2' // симметрично: 1rem слева и справа
-            })
-        }
     },
 
     emits: ['click', 'click-icon', 'click-text', 'click-suffix'],
@@ -137,7 +128,12 @@ window.cmpButton = {
 
         // CSS классы для кнопки
         buttonClasses() {
-            const classes = ['btn'];
+            const classes = ['btn', 'btn-responsive'];
+
+            // Условные классы для адаптивности
+            if (this.icon) classes.push('has-icon');
+            if (this.labelShort) classes.push('has-label-short');
+
 
             // Если disabled и не loading - используем нейтральные цвета (без цвета из темы)
             if (this.disabled && !this.loading) {
@@ -154,35 +150,7 @@ window.cmpButton = {
 
         // CSS классы для внутреннего контейнера
         containerClasses() {
-            // Мердж дефолтных значений с переданными (чтобы частичное переопределение не теряло дефолты)
-            const defaultResponsive = {
-                hideTextOnMobile: true,
-                mobilePadding: 'px-3 py-2',
-                desktopPadding: 'px-md-3 py-md-2'
-            };
-            const merged = { ...defaultResponsive, ...this.responsive };
-
-            return [
-                'd-flex align-items-center',
-                merged.mobilePadding,
-                merged.desktopPadding
-            ].filter(Boolean).join(' ');
-        },
-
-        // CSS классы для текста
-        textClasses() {
-            // Мердж дефолтных значений с переданными (чтобы частичное переопределение не теряло дефолты)
-            const defaultResponsive = {
-                hideTextOnMobile: true,
-                mobilePadding: 'px-3 py-2',
-                desktopPadding: 'px-md-3 py-md-2'
-            };
-            const merged = { ...defaultResponsive, ...this.responsive };
-
-            return [
-                'text-nowrap', // запрет переноса строк
-                merged.hideTextOnMobile && this.icon ? 'd-none d-md-inline' : ''
-            ].filter(Boolean).join(' ');
+            return 'd-flex align-items-center px-3 py-2 px-md-3 py-md-2';
         }
     },
 
@@ -214,6 +182,7 @@ window.cmpButton = {
             this.$emit('click-suffix', event, item);
         }
     },
+
 
     // Примечание: подсказки реализованы через нативный атрибут title браузера,
     // не требуют инициализации и уничтожения

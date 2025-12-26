@@ -1,0 +1,162 @@
+/**
+ * Кастомные брейкпоинты для адаптивности компонентов
+ *
+ * ЦЕЛЬ: Предоставить адаптивность компонентов через классы компонентов и вложенные селекторы
+ *
+ * ПРОБЛЕМА: Bootstrap использует брейкпоинты для глобальной разметки (XS, SM, MD, LG, XL, XXL),
+ * но компонентам нужен точный брейкпоинт 576px (SM Bootstrap) для управления видимостью элементов.
+ *
+ * РЕШЕНИЕ: Классы компонентов (.btn-responsive, .dropdown-responsive) с вложенными селекторами
+ * для элементов (.icon, .label, .label-short, .suffix). Логика видимости управляется через
+ * @media queries с брейкпоинтом 576px (mobile-first подход).
+ *
+ * ПРЕИМУЩЕСТВА:
+ * - Вся логика адаптивности в CSS (не в JavaScript)
+ * - Гибкость через классы-модификаторы (has-icon, has-label-short)
+ * - Использование стандартного SM Bootstrap брейкпоинта (576px)
+ * - Совместимость с Bootstrap responsive utilities
+ * - Готовность к расширению через хэши для кастомных стилей (Фаза 2)
+ */
+
+/* ============================================================================
+   КОМПОНЕНТ BUTTON
+   ============================================================================ */
+
+/* Базовые стили (mobile-first) */
+.btn-responsive .icon {
+  display: inline-block;
+}
+
+.btn-responsive .label {
+  display: none;
+}
+
+.btn-responsive .label-short {
+  display: none;
+}
+
+/* Если есть иконка - скрыть текст на мобильных (текст показывается на десктопе через @media) */
+.btn-responsive.has-icon .label {
+  display: none;
+}
+
+.btn-responsive.has-icon .label-short {
+  display: none;
+}
+
+/* Если нет иконки, но есть короткий текст - показать его на мобильных */
+.btn-responsive.has-label-short:not(.has-icon) .label-short {
+  display: inline;
+}
+
+.btn-responsive.has-label-short:not(.has-icon) .label {
+  display: none;
+}
+
+/* Десктоп 576px */
+@media (min-width: 576px) {
+  .btn-responsive .icon {
+    display: none;
+  }
+
+  .btn-responsive .label {
+    display: inline;
+  }
+
+  .btn-responsive.has-icon .label {
+    display: inline;
+  }
+
+  .btn-responsive.has-label-short:not(.has-icon) .label-short {
+    display: none;
+  }
+
+  .btn-responsive.has-label-short:not(.has-icon) .label {
+    display: inline;
+  }
+}
+
+/* ============================================================================
+   КОМПОНЕНТ DROPDOWN
+   ============================================================================ */
+
+/* Базовые стили (mobile-first) */
+.dropdown-responsive .icon {
+  display: inline;
+}
+
+.dropdown-responsive .button-text {
+  display: none;
+}
+
+.dropdown-responsive .button-text-short {
+  display: none;
+}
+
+/* Если есть иконка - скрыть текст на мобильных */
+.dropdown-responsive.has-icon .button-text {
+  display: none;
+}
+
+.dropdown-responsive.has-icon .button-text-short {
+  display: none;
+}
+
+/* Если нет иконки, но есть короткий текст - показать его на мобильных */
+.dropdown-responsive.has-text-short:not(.has-icon) .button-text-short {
+  display: inline;
+}
+
+.dropdown-responsive.has-text-short:not(.has-icon) .button-text {
+  display: none;
+}
+
+/* Десктоп 576px */
+@media (min-width: 576px) {
+  .dropdown-responsive .icon {
+    display: none;
+  }
+
+  .dropdown-responsive .button-text {
+    display: inline;
+  }
+
+  .dropdown-responsive.has-icon .button-text {
+    display: inline;
+  }
+
+  .dropdown-responsive.has-text-short:not(.has-icon) .button-text-short {
+    display: none;
+  }
+
+  .dropdown-responsive.has-text-short:not(.has-icon) .button-text {
+    display: inline;
+  }
+}
+
+/* ============================================================================
+   КОМПОНЕНТ DROPDOWN-MENU-ITEM
+   ============================================================================ */
+
+/* Базовые стили (mobile-first) */
+.dropdown-menu-item-responsive .icon {
+  display: flex;
+}
+
+.dropdown-menu-item-responsive .subtitle {
+  display: block;
+}
+
+/* Десктоп 576px */
+@media (min-width: 576px) {
+  .dropdown-menu-item-responsive .subtitle {
+    display: block;
+  }
+}
+
+/* Скрытие подзаголовка на мобильных (если нужно) */
+@media (max-width: 575px) {
+  .dropdown-menu-item-responsive.hide-subtitle-mobile .subtitle {
+    display: none;
+  }
+}

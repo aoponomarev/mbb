@@ -21,12 +21,12 @@
     // Шаблоны компонентов как строки
     const TEMPLATES = {
         'dropdown-menu-item-template': `<li class="dropdown-item p-0"
-    :class="{ 'active': active, 'disabled': disabled }"
+    :class="[itemClasses, { 'active': active, 'disabled': disabled }]"
     @click="handleClick">
     <div class="d-flex align-items-start px-2 py-2">
         <!-- Левая иконка -->
         <span v-if="icon"
-              class="d-flex align-items-center me-2 pt-1"
+              class="icon d-flex align-items-center me-2 pt-1"
               :class="iconOpacity === 0.5 ? 'opacity-50' : ''"
               :style="iconOpacity !== 0.5 ? { opacity: iconOpacity } : {}"
               :data-bs-toggle="tooltipIconBootstrap && tooltipIcon ? 'tooltip' : null"
@@ -45,7 +45,7 @@
              @click.stop="handleTextClick">
             <div class="lh-sm text-wrap">{{ title }}</div>
             <small v-if="subtitle"
-                   class="d-block mt-1 lh-sm"
+                   class="subtitle d-block mt-1 lh-sm"
                    :class="subtitleOpacity === 0.5 ? 'opacity-50' : ''"
                    :style="subtitleOpacity !== 0.5 ? { opacity: subtitleOpacity } : {}">{{ subtitle }}</small>
         </div>
@@ -86,7 +86,7 @@
 
         <!-- Левая иконка -->
         <span v-else-if="icon"
-              class="d-inline-block text-center"
+              class="icon d-inline-block text-center"
               :class="iconOpacity === 0.5 ? 'opacity-50' : ''"
               :style="{
                   width: '1.6em',
@@ -100,18 +100,18 @@
 
         <!-- Текстовая область -->
         <span v-if="label || labelShort"
-              :class="textClasses"
+              class="text-nowrap"
               :title="tooltipText"
               @click.stop="handleTextClick">
             <!-- Укороченный текст (только на мобильных, если нет иконки, но есть labelShort) -->
             <span v-if="!icon && labelShort"
-                  class="d-inline d-md-none">
+                  class="label-short">
                 {{ labelShort }}
             </span>
 
             <!-- Полный текст -->
             <span v-if="label"
-                  :class="(icon || labelShort) && responsive.hideTextOnMobile ? 'd-none d-md-inline' : 'd-inline'">
+                  class="label">
                 {{ label }}
             </span>
         </span>
@@ -157,18 +157,18 @@
         @click="handleToggle">
         <slot name="button-content">
             <!-- Иконка (только на мобильных, если задана) -->
-            <i v-if="buttonIcon && responsive.showIconOnMobile"
-               :class="[buttonIcon, 'd-inline', 'd-md-none']"></i>
+            <i v-if="buttonIcon"
+               :class="[buttonIcon, 'icon']"></i>
 
             <!-- Укороченный текст (только на мобильных, если нет иконки, но есть buttonTextShort) -->
-            <span v-if="!buttonIcon && buttonTextShort && responsive.useShortTextOnMobile"
-                  class="d-inline d-md-none">
+            <span v-if="!buttonIcon && buttonTextShort"
+                  class="button-text-short">
                 {{ buttonTextShort }}
             </span>
 
             <!-- Полный текст -->
             <span v-if="buttonText"
-                  :class="(buttonIcon || (buttonTextShort && responsive.useShortTextOnMobile)) && responsive.hideTextOnMobile ? 'd-none d-md-inline' : 'd-inline'">
+                  class="button-text">
                 {{ buttonText }}
             </span>
         </slot>

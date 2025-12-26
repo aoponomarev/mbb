@@ -2,6 +2,9 @@
 
 Лог изменений, связанных с оформлением: разметка, стили.
 
+## Рефакторинг адаптивности: переход на CSS классы компонентов
+26.12.2025 ◆ Переписана система адаптивности компонентов с пропсов на CSS классы ▶ Создан app/styles/responsive-breakpoints.css с классами компонентов (.btn-responsive, .dropdown-responsive, .dropdown-menu-item-responsive) и вложенными селекторами для элементов (.icon, .label, .label-short, .suffix, .button-text, .button-text-short, .subtitle). Удалены все классы d-collapse-* и CSS-переменные через data-атрибуты. Логика видимости управляется через @media queries с брейкпоинтом 576px (mobile-first подход). Обновлены шаблоны в core/templates-inline.js: добавлены классы элементов, убраны d-collapse-* классы и data-атрибуты. Обновлены примеры в index.html: убраны все responsive prop ◉ Перенести всю логику адаптивности из JavaScript в CSS, использовать классы компонентов с вложенными селекторами для управления видимостью элементов @adaptivity @responsive @css @refactoring @mobile @breakpoints
+
 ## Обновление шаблонов и примеров для адаптивности
 23.12.2025:a4dc95b ◆ Обновлены шаблоны компонентов и примеры в index.html для поддержки адаптивности на мобильных устройствах ▶ В core/templates-inline.js обновлён шаблон button-template: добавлена логика условного отображения labelShort на мобильных (d-inline d-md-none) при отсутствии иконки, полный label отображается на десктопе (d-none d-md-inline) или если нет labelShort. Обновлён шаблон dropdown-template: добавлена логика отображения buttonIcon только на мобильных (d-inline d-md-none), buttonTextShort на мобильных при отсутствии иконки, полный buttonText на десктопе. Обновлены примеры в index.html для демонстрации адаптивности: добавлены примеры button с labelShort, dropdown с buttonIcon и buttonTextShort @templates @adaptivity @responsive @mobile @button @dropdown @index
 
