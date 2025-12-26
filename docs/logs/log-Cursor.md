@@ -3,7 +3,7 @@
 Лог изменений, связанных с настройками Cursor, правилами работы ИИ-агента, конфигурацией проекта.
 
 ## Обновление настроек редактора
-26.12.2025 ◆ Обновлены настройки редактора: изменена тема на "Prism (No Bold)", удалена папка drafts/ из .gitignore @editor @settings @theme @gitignore
+26.12.2025 ◆ Обновлены настройки редактора: изменена тема на "Prism (No Bold)", добавлена папка drafts/ в .gitignore @editor @settings @theme @gitignore
 
 ## Настройка окончаний строк для markdown файлов
 23.12.2025:a1112e5 ◆ Создан .gitattributes для явной настройки окончаний строк в markdown файлах (LF) @git @eol @markdown @settings
