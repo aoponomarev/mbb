@@ -8,6 +8,7 @@
 // - Суффикс (badge/icon/indicator/chevron/info) с tooltip
 // - Состояния (active, disabled)
 // - Раздельные события для кликов по зонам (по умолчанию все эмитят общий click)
+// - Адаптивности элементов через CSS классы (.dropdown-menu-item-responsive)
 //
 // ПРИНЦИПЫ:
 // - Использование только Bootstrap классов (запрет кастомных стилей, кроме inline transition для chevron)
@@ -104,7 +105,8 @@ window.cmpDropdownMenuItem = {
             type: Number,
             default: 0.5,
             validator: (value) => value >= 0 && value <= 1
-        }
+        },
+
     },
 
     emits: ['click', 'click-icon', 'click-text', 'click-suffix'],
@@ -113,6 +115,16 @@ window.cmpDropdownMenuItem = {
         // Подсказка для суффикса (приоритет у tooltipSuffix)
         suffixTooltip() {
             return this.tooltipSuffix || (this.suffix && this.suffix.tooltip) || null;
+        },
+
+        // CSS классы для корневого элемента
+        itemClasses() {
+            const classes = ['dropdown-menu-item-responsive'];
+            if (this.subtitle) {
+                // По умолчанию подзаголовок скрыт на мобильных
+                classes.push('hide-subtitle-mobile');
+            }
+            return classes.join(' ');
         }
     },
 

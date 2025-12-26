@@ -8,6 +8,7 @@
 // - Полной совместимости с Bootstrap JS API
 // - Кастомной кнопки через слот
 // - Динамической загрузки элементов
+// - Адаптивности кнопки триггера через CSS классы (.dropdown-responsive)
 //
 // ПРИНЦИПЫ:
 // - Максимальная совместимость с Bootstrap JS API (обязательное требование)
@@ -49,15 +50,6 @@ window.cmpDropdown = {
             type: String,
             default: null,
             validator: (value) => !value || ['sm', 'lg'].includes(value)
-        },
-        // === Адаптивность ===
-        responsive: {
-            type: Object,
-            default: () => ({
-                hideTextOnMobile: true,  // скрывать текст на мобильных, если есть иконка
-                showIconOnMobile: true,  // показывать иконку только на мобильных
-                useShortTextOnMobile: true // использовать укороченный текст на мобильных, если нет иконки
-            })
         },
 
         // === Поиск ===
@@ -124,7 +116,12 @@ window.cmpDropdown = {
     computed: {
         // CSS классы для кнопки
         buttonClasses() {
-            const classes = ['btn', `btn-${this.buttonVariant}`, 'dropdown-toggle'];
+            const classes = ['btn', `btn-${this.buttonVariant}`, 'dropdown-toggle', 'dropdown-responsive'];
+
+            // Условные классы для адаптивности
+            if (this.buttonIcon) classes.push('has-icon');
+            if (this.buttonTextShort) classes.push('has-text-short');
+
             if (this.buttonSize) classes.push(`btn-${this.buttonSize}`);
             return classes.join(' ');
         },
