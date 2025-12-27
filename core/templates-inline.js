@@ -145,7 +145,7 @@
     </span>
 </button>`,
 
-        'dropdown-template': `<div class="dropdown" ref="dropdownContainer">
+        'dropdown-template': `<div :class="dropdownClasses" ref="dropdownContainer">
     <!-- Кнопка триггера -->
     <button
         v-if="!$slots.button"
@@ -212,7 +212,7 @@
         </template>
 
         <!-- Пустое состояние при поиске -->
-        <li v-if="searchable && filteredItems.length === 0 && searchQuery" class="px-3 py-2 text-muted text-center">
+        <li v-if="searchable && filteredItems && filteredItems.length === 0 && searchQuery" class="px-3 py-2 text-muted text-center">
             {{ emptySearchText }}
         </li>
     </ul>
