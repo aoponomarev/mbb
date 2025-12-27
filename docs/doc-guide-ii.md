@@ -78,10 +78,7 @@
 
 ### Значения padding
 
-Значения соответствуют нативным значениям Bootstrap для каждого размера:
-- `btn-sm` / `form-control-sm`: `0.25rem` (4px)
-- `btn` / `form-control` (default): `0.375rem` (6px)
-- `btn-lg` / `form-control-lg`: `0.5rem` (8px)
+Значения соответствуют нативным значениям Bootstrap для каждого размера. Конкретные значения см. в комментариях CSS файла `app/styles/responsive-breakpoints.css`.
 
 ### Горизонтальный padding
 
