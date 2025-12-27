@@ -115,13 +115,20 @@ window.cmpDropdown = {
     },
 
     computed: {
-        // CSS классы для кнопки
-        buttonClasses() {
-            const classes = ['btn', `btn-${this.buttonVariant}`, 'dropdown-toggle', 'dropdown-responsive', this.instanceHash];
+        // CSS классы для корневого элемента dropdown
+        dropdownClasses() {
+            const classes = ['dropdown', 'dropdown-responsive', this.instanceHash];
 
             // Условные классы для адаптивности
             if (this.buttonIcon) classes.push('has-icon');
             if (this.buttonTextShort) classes.push('has-text-short');
+
+            return classes.join(' ');
+        },
+
+        // CSS классы для кнопки
+        buttonClasses() {
+            const classes = ['btn', `btn-${this.buttonVariant}`, 'dropdown-toggle'];
 
             if (this.buttonSize) classes.push(`btn-${this.buttonSize}`);
             return classes.join(' ');
@@ -172,18 +179,20 @@ window.cmpDropdown = {
 
         // Отфильтрованные элементы (если используется встроенная фильтрация)
         filteredItems() {
+            // Защита от undefined/null items
+            const items = this.items || [];
             if (!this.searchable || !this.searchQuery) {
-                return this.items;
+                return items;
             }
 
             // Если указана кастомная функция поиска
             if (this.searchFunction) {
-                return this.searchFunction(this.items, this.searchQuery);
+                return this.searchFunction(items, this.searchQuery);
             }
 
             // Встроенная фильтрация по строке (ищет в значениях объектов)
             const query = this.searchQuery.toLowerCase();
-            return this.items.filter(item => {
+            return items.filter(item => {
                 if (typeof item === 'string') {
                     return item.toLowerCase().includes(query);
                 }
