@@ -962,22 +962,38 @@
     <!-- Bootstrap 5 JS Bundle -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/js/bootstrap.bundle.min.js" integrity="sha384-FKyoEForCGlyvwx9Hj09JcYn3nv7wiPVlz7YYwJrWVcXK/BmnVDxM+D2scQbITxI" crossorigin="anonymous"></script>
 
-    <!-- Утилита генерации хэшей (загружается ДО Vue.js) -->
-    <script src="shared/utils/hash-generator.js"></script>
+    <!-- Модульная система загрузки скриптов -->
+    <!-- Конфигурация модулей (описывает все модули и их зависимости) -->
+    <script src="core/modules-config.js"></script>
+    <!-- Загрузчик модулей (автоматически загружает модули в правильном порядке) -->
+    <script src="core/module-loader.js"></script>
+    <!-- Загрузка всех модулей через модульную систему -->
+    <script>
+        (function() {
+            'use strict';
+            // Загружаем все модули после загрузки DOM
+            function initModules() {
+                if (!window.moduleLoader || !window.moduleLoader.hasConfig()) {
+                    console.error('module-loader: загрузчик модулей или конфигурация не найдены');
+                    return;
+                }
 
-    <!-- Утилита автоматической маркировки элементов (загружается ДО Vue.js) -->
-    <script src="shared/utils/auto-markup.js"></script>
-    <!-- Утилита для склонения русских числительных -->
-    <script src="shared/utils/pluralize.js"></script>
+                window.moduleLoader.load()
+                    .then(function() {
+                        console.log('module-loader: все модули загружены, приложение готово');
+                    })
+                    .catch(function(error) {
+                        console.error('module-loader: ошибка загрузки модулей:', error);
+                    });
+            }
 
-    <!-- Встроенные шаблоны компонентов (загружаются ДО Vue.js, работают с file:// протоколом) -->
-    <script src="core/templates-inline.js"></script>
-
-    <!-- Vue.js 3 (Production Build) -->
-    <script src="https://unpkg.com/vue@3/dist/vue.global.prod.js"></script>
-
-    <!-- Инициализация приложения (загружает компоненты и инициализирует Vue) -->
-    <script src="app/app-ui-root.js"></script>
+            if (document.readyState === 'loading') {
+                document.addEventListener('DOMContentLoaded', initModules);
+            } else {
+                initModules();
+            }
+        })();
+    </script>
 
     <!-- Стили для компонентов -->
     <style>
