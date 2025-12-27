@@ -3,10 +3,10 @@
 Лог изменений, связанных с настройками Cursor, правилами работы ИИ-агента, конфигурацией проекта.
 
 ## Настройка папки drafts/ для коммитов с защитой от индексации
-26.12.2025 ◆ Настроена папка drafts/ для коммитов через Git с защитой от индексации Cursor: убрана из .gitignore, добавлена в .cursorignore, добавлено правило в .cursorrules, создан drafts/.cursorrules с правилами защиты @drafts @gitignore @cursorignore @cursorrules @settings
+26.12.2025:7c4f58c ◆ Настроена папка drafts/ для коммитов через Git с защитой от индексации Cursor: убрана из .gitignore, добавлена в .cursorignore, добавлено правило в .cursorrules, создан drafts/.cursorrules с правилами защиты @drafts @gitignore @cursorignore @cursorrules @settings
 
 ## Обновление настроек редактора
-26.12.2025 ◆ Обновлены настройки редактора: изменена тема на "Prism (No Bold)", добавлена папка drafts/ в .gitignore @editor @settings @theme @gitignore
+26.12.2025:95568cd ◆ Обновлены настройки редактора: изменена тема на "Prism (No Bold)", добавлена папка drafts/ в .gitignore @editor @settings @theme @gitignore
 
 ## Настройка окончаний строк для markdown файлов
 23.12.2025:a1112e5 ◆ Создан .gitattributes для явной настройки окончаний строк в markdown файлах (LF) @git @eol @markdown @settings
