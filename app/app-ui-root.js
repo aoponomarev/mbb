@@ -97,27 +97,21 @@
             },
             methods: {
                 handleClick(event) {
-                    console.log('Click на элемент:', event);
                 },
                 handleSuffixClick(event, item) {
-                    console.log('Click на суффикс:', event, item);
                 },
                 handleInfoClick(event) {
-                    console.log('Click на info (справка):', event);
                     alert('Открыть справку');
                 },
                 toggleMenu() {
                     this.isMenuExpanded = !this.isMenuExpanded;
                 },
                 handleSelect(item) {
-                    console.log('Выбран элемент:', item);
                     alert(`Выбран: ${item.name}`);
                 },
                 handleComboboxSelect(event) {
-                    console.log('Combobox select:', event);
                 },
                 handleComboboxInput(value) {
-                    console.log('Combobox input:', value);
                 },
                 customFilterFunction(items, query) {
                     // Кастомная фильтрация: ищем по label и value

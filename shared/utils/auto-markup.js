@@ -213,8 +213,7 @@ window.autoMarkup = {
     }
 
     // Первичная маркировка существующих элементов
-    const marked = this.markupTree(document.body);
-    console.log(`autoMarkup: marked ${marked} elements`);
+    this.markupTree(document.body);
 
     // Запуск наблюдателя для будущих изменений
     this.initObserver();

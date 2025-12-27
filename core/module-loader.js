@@ -53,7 +53,6 @@
         return new Promise((resolve, reject) => {
             // Проверка кэша
             if (loadedModulesCache.has(src)) {
-                console.log(`module-loader: модуль ${src} уже загружен (из кэша)`);
                 resolve(true);
                 return;
             }
@@ -113,11 +112,9 @@
                     if (module.condition && typeof module.condition === 'function') {
                         try {
                             if (!module.condition()) {
-                                console.log(`module-loader: модуль ${module.id} пропущен (условие не выполнено)`);
                                 continue;
                             }
                         } catch (error) {
-                            console.warn(`module-loader: ошибка проверки условия для модуля ${module.id}:`, error);
                             // При ошибке проверки условия загружаем модуль по умолчанию
                         }
                     }
@@ -271,11 +268,8 @@
             throw new Error('module-loader: конфигурация модулей не найдена (window.modulesConfig)');
         }
 
-        console.log('module-loader: начало загрузки модулей...');
-
         // Собираем все модули
         const modules = collectModules(config);
-        console.log(`module-loader: найдено ${modules.length} модулей`);
 
         if (modules.length === 0) {
             throw new Error('module-loader: не найдено модулей для загрузки');
@@ -292,47 +286,33 @@
 
         // Топологическая сортировка
         const sortedModules = topologicalSort(graph, moduleMap);
-        console.log(`module-loader: порядок загрузки: ${sortedModules.map(m => m.id).join(' → ')}`);
 
         // Загружаем модули последовательно (асинхронно для всех протоколов)
         const failedModules = [];
         for (let i = 0; i < sortedModules.length; i++) {
             const module = sortedModules[i];
-            console.log(`module-loader: [${i + 1}/${sortedModules.length}] загрузка ${module.id}...`);
 
             try {
                 await loadModule(module);
-                console.log(`module-loader: ✓ ${module.id} загружен`);
             } catch (error) {
-                console.error(`module-loader: ✗ ошибка загрузки ${module.id}:`, error);
                 failedModules.push({ module, error });
 
                 // Для критичных модулей (app, vue, templates) прерываем загрузку
-                if (module.category === 'app' || module.id === 'vue' || module.id === 'templates-inline') {
+                // Для критичных модулей (app, vue, шаблоны) прерываем загрузку
+                const criticalModules = ['vue', 'button-template', 'dropdown-menu-item-template', 'dropdown-template', 'combobox-template'];
+                if (module.category === 'app' || criticalModules.includes(module.id)) {
                     throw new Error(`Критичный модуль ${module.id} не загружен. Приложение не может продолжить работу.`);
                 }
 
-                // Для некритичных модулей продолжаем загрузку с предупреждением
-                console.warn(`module-loader: модуль ${module.id} не загружен, но загрузка продолжается`);
+                // Для некритичных модулей продолжаем загрузку
             }
         }
-
-        // Если были ошибки загрузки некритичных модулей, выводим сводку
-        if (failedModules.length > 0) {
-            console.warn(`module-loader: не удалось загрузить ${failedModules.length} модулей:`,
-                failedModules.map(f => f.module.id).join(', '));
-        }
-
-        console.log('module-loader: все модули загружены успешно');
 
         // Вызываем инициализацию приложения, если она определена
         // Ждём готовности DOM, если он ещё не загружен
         function callAppInit() {
             if (typeof window.appInit === 'function') {
-                console.log('module-loader: вызов инициализации приложения...');
                 window.appInit();
-            } else {
-                console.warn('module-loader: функция инициализации приложения (window.appInit) не найдена');
             }
         }
 
@@ -369,7 +349,6 @@
          */
         clearCache: function() {
             loadedModulesCache.clear();
-            console.log('module-loader: кэш загруженных модулей очищен');
         },
 
         /**
@@ -382,4 +361,5 @@
         }
     };
 })();
+
 

@@ -204,8 +204,29 @@
         // Шаблоны (загружаются до Vue.js)
         templates: [
             {
-                id: 'templates-inline',
-                src: 'core/templates-inline.js',
+                id: 'button-template',
+                src: 'shared/templates/button-template.js',
+                type: 'local',
+                deps: [],
+                category: 'templates'
+            },
+            {
+                id: 'dropdown-menu-item-template',
+                src: 'shared/templates/dropdown-menu-item-template.js',
+                type: 'local',
+                deps: [],
+                category: 'templates'
+            },
+            {
+                id: 'dropdown-template',
+                src: 'shared/templates/dropdown-template.js',
+                type: 'local',
+                deps: [],
+                category: 'templates'
+            },
+            {
+                id: 'combobox-template',
+                src: 'shared/templates/combobox-template.js',
                 type: 'local',
                 deps: [],
                 category: 'templates'
@@ -218,7 +239,7 @@
                 id: 'vue',
                 src: 'https://unpkg.com/vue@3/dist/vue.global.prod.js',
                 type: 'external',
-                deps: ['templates-inline'],
+                deps: ['button-template', 'dropdown-menu-item-template', 'dropdown-template', 'combobox-template'],
                 category: 'libraries'
             }
         ],
@@ -261,7 +282,7 @@
                 id: 'app-ui-root',
                 src: 'app/app-ui-root.js',
                 type: 'local',
-                deps: ['dropdown-menu-item', 'button', 'dropdown', 'combobox', 'templates-inline'],
+                deps: ['dropdown-menu-item', 'button', 'dropdown', 'combobox'],
                 category: 'app'
             }
         ]

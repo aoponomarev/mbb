@@ -290,7 +290,7 @@ Vue-обёртка над Bootstrap dropdown с поддержкой поиск�
 
 ## Размещение
 - Компонент: `shared/components/dropdown.js`
-- Шаблон: встроен в `core/templates-inline.js` (ID: `dropdown-template`)
+- Шаблон: `shared/templates/dropdown-template.js` (ID: `dropdown-template`)
 - Зависимости: Bootstrap 5, Vue.js
 
 > § <br> КОМПОНЕНТ COMBOBOX
@@ -443,7 +443,7 @@ Vue-обёртка над Bootstrap `input-group` + `dropdown` с поддерж
 
 ## Размещение
 - Компонент: `shared/components/combobox.js`
-- Шаблон: встроен в `core/templates-inline.js` (ID: `combobox-template`)
+- Шаблон: `shared/templates/combobox-template.js` (ID: `combobox-template`)
 - Зависимости: Bootstrap 5, Font Awesome 6, Vue.js
 
 ## Использование
@@ -600,7 +600,7 @@ const bootstrapInstance = this.$refs.myDropdown.getBootstrapInstance(); // пр�
 
 ## Размещение
 - Компонент: `shared/components/dropdown-menu-item.js`
-- Шаблон: встроен в `core/templates-inline.js` (ID: `dropdown-menu-item-template`)
+- Шаблон: `shared/templates/dropdown-menu-item-template.js` (ID: `dropdown-menu-item-template`)
 - Зависимости: Bootstrap 5, Font Awesome 6, Vue.js
 
 ## Использование нативного Bootstrap dropdown-menu
@@ -765,7 +765,7 @@ const bootstrapInstance = this.$refs.myDropdown.getBootstrapInstance(); // пр�
 
 ## Размещение
 - Компонент: `shared/components/button.js`
-- Шаблон: встроен в `core/templates-inline.js` (ID: `button-template`)
+- Шаблон: `shared/templates/button-template.js` (ID: `button-template`)
 - Зависимости: Bootstrap 5, Font Awesome 6, Vue.js
 
 ## Использование
