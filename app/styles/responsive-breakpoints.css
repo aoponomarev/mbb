@@ -28,29 +28,59 @@
 }
 
 .btn-responsive .label {
-  display: none;
+  visibility: hidden;
+  font-size: 0;
+  line-height: 0;
+  max-width: 0;
+  overflow: hidden;
+  display: inline;
 }
 
 .btn-responsive .label-short {
-  display: none;
+  visibility: hidden;
+  font-size: 0;
+  line-height: 0;
+  max-width: 0;
+  overflow: hidden;
+  display: inline;
 }
 
 /* Если есть иконка - скрыть текст на мобильных (текст показывается на десктопе через @media) */
 .btn-responsive.has-icon .label {
-  display: none;
+  visibility: hidden;
+  font-size: 0;
+  line-height: 0;
+  max-width: 0;
+  overflow: hidden;
+  display: inline;
 }
 
 .btn-responsive.has-icon .label-short {
-  display: none;
+  visibility: hidden;
+  font-size: 0;
+  line-height: 0;
+  max-width: 0;
+  overflow: hidden;
+  display: inline;
 }
 
 /* Если нет иконки, но есть короткий текст - показать его на мобильных */
 .btn-responsive.has-label-short:not(.has-icon) .label-short {
+  visibility: visible;
+  font-size: inherit;
+  line-height: inherit;
+  max-width: none;
+  overflow: visible;
   display: inline;
 }
 
 .btn-responsive.has-label-short:not(.has-icon) .label {
-  display: none;
+  visibility: hidden;
+  font-size: 0;
+  line-height: 0;
+  max-width: 0;
+  overflow: hidden;
+  display: inline;
 }
 
 /* Десктоп 576px */
@@ -60,20 +90,62 @@
   }
 
   .btn-responsive .label {
+    visibility: visible;
+    font-size: inherit;
+    line-height: inherit;
+    max-width: none;
+    overflow: visible;
     display: inline;
   }
 
   .btn-responsive.has-icon .label {
+    visibility: visible;
+    font-size: inherit;
+    line-height: inherit;
+    max-width: none;
+    overflow: visible;
     display: inline;
   }
 
   .btn-responsive.has-label-short:not(.has-icon) .label-short {
-    display: none;
+    visibility: hidden;
+    font-size: 0;
+    line-height: 0;
+    max-width: 0;
+    overflow: hidden;
+    display: inline;
   }
 
   .btn-responsive.has-label-short:not(.has-icon) .label {
+    visibility: visible;
+    font-size: inherit;
+    line-height: inherit;
+    max-width: none;
+    overflow: visible;
     display: inline;
   }
+}
+
+/* Скрыть стандартный Bootstrap chevron для кнопок с классом dropdown-toggle внутри btn-responsive */
+.btn-responsive.dropdown-toggle::after {
+  display: none !important;
+}
+
+/* Вертикальный padding для внутреннего контейнера кнопки в зависимости от размера */
+/* Привязка к классам размеров Bootstrap: btn-sm, btn-lg */
+.btn-responsive.btn-sm > .d-flex {
+  padding-top: 0.25rem !important; /* Соответствует btn-sm padding-y */
+  padding-bottom: 0.25rem !important;
+}
+
+.btn-responsive:not(.btn-sm):not(.btn-lg) > .d-flex {
+  padding-top: 0.375rem !important; /* Соответствует btn default padding-y */
+  padding-bottom: 0.375rem !important;
+}
+
+.btn-responsive.btn-lg > .d-flex {
+  padding-top: 0.5rem !important; /* Соответствует btn-lg padding-y */
+  padding-bottom: 0.5rem !important;
 }
 
 /* ============================================================================
@@ -86,29 +158,59 @@
 }
 
 .dropdown-responsive .button-text {
-  display: none;
+  visibility: hidden;
+  font-size: 0;
+  line-height: 0;
+  max-width: 0;
+  overflow: hidden;
+  display: inline;
 }
 
 .dropdown-responsive .button-text-short {
-  display: none;
+  visibility: hidden;
+  font-size: 0;
+  line-height: 0;
+  max-width: 0;
+  overflow: hidden;
+  display: inline;
 }
 
 /* Если есть иконка - скрыть текст на мобильных */
 .dropdown-responsive.has-icon .button-text {
-  display: none;
+  visibility: hidden;
+  font-size: 0;
+  line-height: 0;
+  max-width: 0;
+  overflow: hidden;
+  display: inline;
 }
 
 .dropdown-responsive.has-icon .button-text-short {
-  display: none;
+  visibility: hidden;
+  font-size: 0;
+  line-height: 0;
+  max-width: 0;
+  overflow: hidden;
+  display: inline;
 }
 
 /* Если нет иконки, но есть короткий текст - показать его на мобильных */
 .dropdown-responsive.has-text-short:not(.has-icon) .button-text-short {
+  visibility: visible;
+  font-size: inherit;
+  line-height: inherit;
+  max-width: none;
+  overflow: visible;
   display: inline;
 }
 
 .dropdown-responsive.has-text-short:not(.has-icon) .button-text {
-  display: none;
+  visibility: hidden;
+  font-size: 0;
+  line-height: 0;
+  max-width: 0;
+  overflow: hidden;
+  display: inline;
 }
 
 /* Десктоп 576px */
@@ -118,18 +220,38 @@
   }
 
   .dropdown-responsive .button-text {
+    visibility: visible;
+    font-size: inherit;
+    line-height: inherit;
+    max-width: none;
+    overflow: visible;
     display: inline;
   }
 
   .dropdown-responsive.has-icon .button-text {
+    visibility: visible;
+    font-size: inherit;
+    line-height: inherit;
+    max-width: none;
+    overflow: visible;
     display: inline;
   }
 
   .dropdown-responsive.has-text-short:not(.has-icon) .button-text-short {
-    display: none;
+    visibility: hidden;
+    font-size: 0;
+    line-height: 0;
+    max-width: 0;
+    overflow: hidden;
+    display: inline;
   }
 
   .dropdown-responsive.has-text-short:not(.has-icon) .button-text {
+    visibility: visible;
+    font-size: inherit;
+    line-height: inherit;
+    max-width: none;
+    overflow: visible;
     display: inline;
   }
 }

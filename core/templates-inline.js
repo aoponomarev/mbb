@@ -79,6 +79,7 @@
         :class="buttonClasses"
         :disabled="disabled || loading"
         @click="handleClick"
+        v-bind="buttonAttrs"
         class="p-0">
     <span :class="containerClasses">
         <!-- Спиннер загрузки -->
@@ -146,33 +147,17 @@
 </button>`,
 
         'dropdown-template': `<div :class="dropdownClasses" ref="dropdownContainer">
-    <!-- Кнопка триггера -->
-    <button
+    <!-- Кнопка триггера через cmp-button -->
+    <cmp-button
         v-if="!$slots.button"
-        :class="buttonClasses"
-        type="button"
-        :id="dropdownId"
-        data-bs-toggle="dropdown"
-        :aria-expanded="isOpen"
-        @click="handleToggle">
-        <slot name="button-content">
-            <!-- Иконка (только на мобильных, если задана) -->
-            <i v-if="buttonIcon"
-               :class="[buttonIcon, 'icon']"></i>
-
-            <!-- Укороченный текст (только на мобильных, если нет иконки, но есть buttonTextShort) -->
-            <span v-if="!buttonIcon && buttonTextShort"
-                  class="button-text-short">
-                {{ buttonTextShort }}
-            </span>
-
-            <!-- Полный текст -->
-            <span v-if="buttonText"
-                  class="button-text">
-                {{ buttonText }}
-            </span>
-        </slot>
-    </button>
+        ref="dropdownButton"
+        :label="buttonText"
+        :label-short="buttonTextShort"
+        :icon="buttonIcon"
+        :variant="buttonVariant"
+        :size="buttonSize"
+        :button-attributes="buttonAttributes">
+    </cmp-button>
 
     <!-- Кастомная кнопка через слот -->
     <slot name="button" :isOpen="isOpen" :toggle="handleToggle"></slot>
