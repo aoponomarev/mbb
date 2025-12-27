@@ -113,6 +113,15 @@ window.cmpButton = {
             default: null
         }, // Для instanceHash (идентификация экземпляра)
 
+        // === Произвольные атрибуты для использования в комплексных компонентах ===
+        buttonAttributes: {
+            type: Object,
+            default: () => ({})
+            // Пример: { 'data-bs-toggle': 'dropdown', 'aria-expanded': false, 'id': 'dropdown-button', 'class': 'dropdown-toggle' }
+            // Используется для передачи data-атрибутов, aria-атрибутов и дополнительных классов
+            // для интеграции с Bootstrap API (dropdown, modal и т.д.)
+        },
+
         // === Стилизация ===
         iconOpacity: {
             type: Number,
@@ -127,8 +136,22 @@ window.cmpButton = {
     computed: {
         // Нормализация suffix в массив
         suffixArray() {
-            if (!this.suffix) return [];
-            return Array.isArray(this.suffix) ? this.suffix : [this.suffix];
+            const baseSuffix = this.suffix ? (Array.isArray(this.suffix) ? this.suffix : [this.suffix]) : [];
+
+            // Автоматически добавляем chevron для dropdown-toggle
+            if (this.buttonAttributes?.class?.includes('dropdown-toggle') ||
+                (typeof this.buttonAttributes?.class === 'string' && this.buttonAttributes.class.includes('dropdown-toggle'))) {
+                // Проверяем, нет ли уже chevron в suffix
+                const hasChevron = baseSuffix.some(item =>
+                    (typeof item === 'object' && item.type === 'chevron') ||
+                    item === 'chevron'
+                );
+                if (!hasChevron) {
+                    return [...baseSuffix, { type: 'chevron', value: 'fas fa-chevron-down' }];
+                }
+            }
+
+            return baseSuffix;
         },
 
         // CSS классы для кнопки
@@ -150,12 +173,31 @@ window.cmpButton = {
 
             if (this.size) classes.push(`btn-${this.size}`);
             if (this.disabled) classes.push('disabled');
+
+            // Добавить дополнительные классы из buttonAttributes (если есть)
+            if (this.buttonAttributes.class) {
+                const extraClasses = Array.isArray(this.buttonAttributes.class)
+                    ? this.buttonAttributes.class
+                    : this.buttonAttributes.class.split(' ');
+                classes.push(...extraClasses);
+            }
+
             return classes.join(' ');
         },
 
+        // Атрибуты для передачи на корневой элемент (исключая class, который обрабатывается отдельно)
+        buttonAttrs() {
+            const attrs = { ...this.buttonAttributes };
+            // Удаляем class из копии, так как он обрабатывается в buttonClasses
+            delete attrs.class;
+            return attrs;
+        },
+
         // CSS классы для внутреннего контейнера
+        // ВАЖНО: Вертикальный padding (py-*) управляется через CSS в зависимости от размера кнопки
+        // Горизонтальный padding (px-*) остается нативным Bootstrap
         containerClasses() {
-            return 'd-flex align-items-center px-3 py-2 px-md-3 py-md-2';
+            return 'd-flex align-items-center px-3 px-md-3';
         },
 
         // Детерминированный хэш экземпляра на основе родительского контекста и props

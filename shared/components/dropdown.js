@@ -10,6 +10,7 @@
 // - Динамической загрузки элементов
 // - Адаптивности кнопки триггера через CSS классы (.dropdown-responsive)
 // - Детерминированных хэшей экземпляров (instanceHash) для идентификации и кастомной стилизации
+// - Использования компонента cmp-button для кнопки триггера (полная совместимость с Bootstrap API)
 //
 // ПРИНЦИПЫ:
 // - Максимальная совместимость с Bootstrap JS API (обязательное требование)
@@ -18,6 +19,8 @@
 // - Подписка на события Bootstrap (show.bs.dropdown, hide.bs.dropdown)
 // - Программный доступ к Bootstrap API через ref
 // - Поддержка тем Bootstrap через CSS-переменные
+// - Использование компонента cmp-button для кнопки триггера: атрибуты Bootstrap передаются через buttonAttributes,
+//   доступ к реальному DOM-элементу через $refs.dropdownButton.$el для инициализации Bootstrap API
 //
 // АРХИТЕКТУРА:
 // - Шаблон: shared/templates/dropdown-template.html
@@ -27,6 +30,9 @@
 
 window.cmpDropdown = {
     template: '#dropdown-template',
+    components: {
+        'cmp-button': window.cmpButton
+    },
 
     props: {
         // === Кнопка триггера ===
@@ -126,12 +132,14 @@ window.cmpDropdown = {
             return classes.join(' ');
         },
 
-        // CSS классы для кнопки
-        buttonClasses() {
-            const classes = ['btn', `btn-${this.buttonVariant}`, 'dropdown-toggle'];
-
-            if (this.buttonSize) classes.push(`btn-${this.buttonSize}`);
-            return classes.join(' ');
+        // Атрибуты для кнопки триггера (для передачи в cmp-button)
+        buttonAttributes() {
+            return {
+                'data-bs-toggle': 'dropdown',
+                'aria-expanded': this.isOpen,
+                'id': this.dropdownId,
+                'class': 'dropdown-toggle'
+            };
         },
 
         // Детерминированный хэш экземпляра на основе родительского контекста и props
@@ -145,6 +153,34 @@ window.cmpDropdown = {
             const instanceId = this.dropdownId || this.buttonText || this.buttonIcon || 'dropdown';
             const uniqueId = `${parentContext}:${instanceId}`;
             return window.hashGenerator.generateMarkupClass(uniqueId);
+        },
+
+        // Отфильтрованные элементы (если используется встроенная фильтрация)
+        filteredItems() {
+            // Защита от undefined/null items
+            const items = this.items || [];
+            if (!this.searchable || !this.searchQuery) {
+                return items;
+            }
+
+            // Если указана кастомная функция поиска
+            if (this.searchFunction) {
+                return this.searchFunction(items, this.searchQuery);
+            }
+
+            // Встроенная фильтрация по строке (ищет в значениях объектов)
+            const query = this.searchQuery.toLowerCase();
+            return items.filter(item => {
+                if (typeof item === 'string') {
+                    return item.toLowerCase().includes(query);
+                }
+                if (typeof item === 'object') {
+                    return Object.values(item).some(value =>
+                        String(value).toLowerCase().includes(query)
+                    );
+                }
+                return false;
+            });
         }
     },
 
@@ -177,32 +213,48 @@ window.cmpDropdown = {
             return 'root';
         },
 
-        // Отфильтрованные элементы (если используется встроенная фильтрация)
-        filteredItems() {
-            // Защита от undefined/null items
-            const items = this.items || [];
-            if (!this.searchable || !this.searchQuery) {
-                return items;
-            }
+        // Обработчик переключения dropdown
+        handleToggle(event) {
+            // Bootstrap сам управляет открытием/закрытием через data-bs-toggle
+            // Этот метод можно использовать для дополнительной логики
+        },
 
-            // Если указана кастомная функция поиска
-            if (this.searchFunction) {
-                return this.searchFunction(items, this.searchQuery);
-            }
+        // Обработчик поиска
+        handleSearch() {
+            this.$emit('search', this.searchQuery);
+        },
 
-            // Встроенная фильтрация по строке (ищет в значениях объектов)
-            const query = this.searchQuery.toLowerCase();
-            return items.filter(item => {
-                if (typeof item === 'string') {
-                    return item.toLowerCase().includes(query);
-                }
-                if (typeof item === 'object') {
-                    return Object.values(item).some(value =>
-                        String(value).toLowerCase().includes(query)
-                    );
-                }
-                return false;
-            });
+        // Обработчик Escape (закрытие при поиске)
+        handleEscape() {
+            if (this.dropdownInstance) {
+                this.dropdownInstance.hide();
+            }
+        },
+
+        // Программное открытие dropdown (через Bootstrap API)
+        show() {
+            if (this.dropdownInstance) {
+                this.dropdownInstance.show();
+            }
+        },
+
+        // Программное закрытие dropdown (через Bootstrap API)
+        hide() {
+            if (this.dropdownInstance) {
+                this.dropdownInstance.hide();
+            }
+        },
+
+        // Программное переключение dropdown (через Bootstrap API)
+        toggle() {
+            if (this.dropdownInstance) {
+                this.dropdownInstance.toggle();
+            }
+        },
+
+        // Получение экземпляра Bootstrap Dropdown (для прямого доступа к API)
+        getBootstrapInstance() {
+            return this.dropdownInstance;
         }
     },
 
@@ -211,7 +263,16 @@ window.cmpDropdown = {
         // КРИТИЧЕСКИ ВАЖНО: Сохраняем совместимость с Bootstrap API
         this.$nextTick(() => {
             if (window.bootstrap && window.bootstrap.Dropdown && this.$refs.dropdownContainer) {
-                const toggleElement = this.$refs.dropdownContainer.querySelector('[data-bs-toggle="dropdown"]');
+                // Получаем реальный DOM-элемент кнопки через ref на Vue-компоненте или querySelector
+                let toggleElement = null;
+                if (this.$refs.dropdownButton) {
+                    // Вариант 1: Через ref на Vue-компоненте (более надежно)
+                    toggleElement = this.$refs.dropdownButton.$el;
+                } else {
+                    // Вариант 2: Через querySelector (fallback)
+                    toggleElement = this.$refs.dropdownContainer.querySelector('[data-bs-toggle="dropdown"]');
+                }
+
                 if (toggleElement) {
                     this.dropdownInstance = new window.bootstrap.Dropdown(toggleElement, {
                         // Опции Bootstrap Dropdown можно передать через props при необходимости
@@ -255,52 +316,6 @@ window.cmpDropdown = {
         if (this.dropdownInstance) {
             this.dropdownInstance.dispose();
             this.dropdownInstance = null;
-        }
-    },
-
-    methods: {
-        // Обработчик переключения dropdown
-        handleToggle(event) {
-            // Bootstrap сам управляет открытием/закрытием через data-bs-toggle
-            // Этот метод можно использовать для дополнительной логики
-        },
-
-        // Обработчик поиска
-        handleSearch() {
-            this.$emit('search', this.searchQuery);
-        },
-
-        // Обработчик Escape (закрытие при поиске)
-        handleEscape() {
-            if (this.dropdownInstance) {
-                this.dropdownInstance.hide();
-            }
-        },
-
-        // Программное открытие dropdown (через Bootstrap API)
-        show() {
-            if (this.dropdownInstance) {
-                this.dropdownInstance.show();
-            }
-        },
-
-        // Программное закрытие dropdown (через Bootstrap API)
-        hide() {
-            if (this.dropdownInstance) {
-                this.dropdownInstance.hide();
-            }
-        },
-
-        // Программное переключение dropdown (через Bootstrap API)
-        toggle() {
-            if (this.dropdownInstance) {
-                this.dropdownInstance.toggle();
-            }
-        },
-
-        // Получение экземпляра Bootstrap Dropdown (для прямого доступа к API)
-        getBootstrapInstance() {
-            return this.dropdownInstance;
         }
     }
 };
