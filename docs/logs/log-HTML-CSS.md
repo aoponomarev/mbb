@@ -7,6 +7,7 @@
 
 ## Исправление шаблона dropdown: добавление dropdownClasses и защита от undefined
 26.12.2025:7e0bc9a ◆ Исправлен шаблон dropdown для корректной работы адаптивности и защиты от ошибок ▶ В dropdown-template корневой div использует :class="dropdownClasses" вместо class="dropdown" для применения адаптивных классов и instanceHash. Добавлена проверка filteredItems && перед обращением к .length в условии отображения пустого состояния поиска (v-if="searchable && filteredItems && filteredItems.length === 0 && searchQuery") ◉ Обеспечить корректное применение CSS классов адаптивности и предотвратить ошибку при отсутствии filteredItems @templates @dropdown @fix @adaptivity
+
 ## Автоматическая маркировка элементов DOM через классы avto-{hash}
 26.12.2025:39b3a5e ◆ Реализована автоматическая маркировка значимых элементов DOM через классы avto-{hash} ▶ Создан shared/utils/auto-markup.js с MutationObserver для автоматической маркировки элементов при загрузке и при добавлении новых элементов. Правила маркировки: основные секции (main, section, article, aside, header, footer, nav), заголовки (h1-h6), контейнеры (.container, .container-fluid), функциональные блоки (.card, .card-body, .card-header, .card-footer), элементы с data-markup. Исключения: элементы внутри Vue компонентов, мелкие обертки (.row, .col-*), элементы с data-no-markup, элементы с ID, служебные элементы (script, style, noscript). Хэш генерируется на основе пути элемента в DOM (tagName, позиция среди siblings, классы) для детерминированности. Батчинг через requestAnimationFrame для производительности. Ручной вызов markupContainer() для асинхронно загружаемых блоков ◉ Обеспечить автоматическую маркировку всех значимых элементов DOM для навигации в коде через DevTools и указания агенту места в разметке @markup @dom @automation @mutation-observer
 
@@ -21,6 +22,8 @@
 
 ## Встраивание шаблонов компонентов в index.html
 23.12.2025:ca794ba ◆ Встроены все шаблоны компонентов (dropdown-menu-item, button, dropdown, combobox) в index.html как x-template элементы для работы с file:// протоколом, удалена загрузка шаблонов через fetch, добавлены стили для combobox-clear @templates @file-protocol @index @bootstrap
+
+## Исправление позиционирования крестика очистки в combobox
 23.12.2025:0756216 ◆ Исправлено позиционирование крестика очистки в режиме input: возвращено абсолютное позиционирование внутри поля с padding справа для input, добавлен z-index для отображения поверх input. Исправлен обработчик handleInput для режима input: добавлено немедленное обновление modelValue через emit update:modelValue для корректной работы v-model @combobox @input-mode @fix @bootstrap
 
 ## Настроена минимальная высота контейнера через Bootstrap flexbox
