@@ -16,6 +16,15 @@
  * - Использование стандартного SM Bootstrap брейкпоинта (576px)
  * - Совместимость с Bootstrap responsive utilities
  * - Готовность к расширению через хэши для кастомных стилей (Фаза 2)
+ *
+ * ПРИНЦИП ОРГАНИЗАЦИИ СЕКЦИЙ:
+ * Секции компонентов организованы по принципу "от простого к сложному":
+ * 1. Базовые компоненты (BUTTON, BUTTON GROUP) - простые, самодостаточные элементы
+ * 2. Элементы составных компонентов (DROPDOWN-MENU-ITEM) - базовые элементы, используемые внутри контейнеров
+ * 3. Составные контейнеры (DROPDOWN) - сложные компоненты, использующие базовые элементы
+ *
+ * Это обеспечивает логичную последовательность: при чтении CSS для составного компонента
+ * уже известны стили базовых элементов, которые он использует.
  */
 
 /* ============================================================================
@@ -55,15 +64,8 @@
   margin-right: 0.5rem; /* 8px - эквивалент gap-2 */
 }
 
-.btn-responsive .label {
-  visibility: hidden;
-  font-size: 0;
-  line-height: 0;
-  max-width: 0;
-  overflow: hidden;
-  display: inline;
-}
-
+/* Базовое скрытие текста на мобильных */
+.btn-responsive .label,
 .btn-responsive .label-short {
   visibility: hidden;
   font-size: 0;
@@ -74,15 +76,7 @@
 }
 
 /* Если есть иконка - скрыть текст на мобильных (текст показывается на десктопе через @media) */
-.btn-responsive.has-icon .label {
-  visibility: hidden;
-  font-size: 0;
-  line-height: 0;
-  max-width: 0;
-  overflow: hidden;
-  display: inline;
-}
-
+.btn-responsive.has-icon .label,
 .btn-responsive.has-icon .label-short {
   visibility: hidden;
   font-size: 0;
@@ -139,15 +133,8 @@
     margin-right: 0.5rem; /* 8px - эквивалент gap-2 */
   }
 
-  .btn-responsive .label {
-    visibility: visible;
-    font-size: inherit;
-    line-height: inherit;
-    max-width: none;
-    overflow: visible;
-    display: inline;
-  }
-
+  /* Показываем текст на desktop */
+  .btn-responsive .label,
   .btn-responsive.has-icon .label {
     visibility: visible;
     font-size: inherit;
@@ -204,169 +191,21 @@
   padding-bottom: 0.5rem;
 }
 
-/* Переопределение для случая с p-0 - более специфичный селектор (0,3,1 vs 0,2,1) */
-.btn-responsive.btn-sm > .d-flex.p-0 {
+/* Переопределение для случая с p-0 - убираем padding для всех размеров */
+.btn-responsive > .d-flex.p-0 {
   padding-top: 0;
   padding-bottom: 0;
 }
 
-.btn-responsive:not(.btn-sm):not(.btn-lg) > .d-flex.p-0 {
-  padding-top: 0;
-  padding-bottom: 0;
-}
-
-.btn-responsive.btn-lg > .d-flex.p-0 {
-  padding-top: 0;
-  padding-bottom: 0;
-}
-
-/* ============================================================================
-   КОМПОНЕНТ DROPDOWN
-   ============================================================================ */
-
-/* Скрытие суффиксов (chevron) в кнопке dropdown при использовании класса hide-suffix */
-.dropdown-responsive.hide-suffix .suffix-container,
+/* Скрытие суффиксов (chevron) в кнопке при использовании класса hide-suffix */
 .btn-responsive.hide-suffix .suffix-container {
   display: none !important;
 }
 
-/* Переопределение отступов для особых случаев
-   ============================================================================ */
-
+/* Переопределение отступов для особых случаев */
 /* Кнопки только с иконкой (без текста и суффикса) - убираем margin-right */
 .btn-responsive.icon-only .icon {
   margin-right: 0 !important;
-}
-
-/* Базовые стили (mobile-first) */
-.dropdown-responsive .icon {
-  display: inline;
-}
-
-.dropdown-responsive .button-text {
-  visibility: hidden;
-  font-size: 0;
-  line-height: 0;
-  max-width: 0;
-  overflow: hidden;
-  display: inline;
-}
-
-.dropdown-responsive .button-text-short {
-  visibility: hidden;
-  font-size: 0;
-  line-height: 0;
-  max-width: 0;
-  overflow: hidden;
-  display: inline;
-}
-
-/* Если есть иконка - скрыть текст на мобильных */
-.dropdown-responsive.has-icon .button-text {
-  visibility: hidden;
-  font-size: 0;
-  line-height: 0;
-  max-width: 0;
-  overflow: hidden;
-  display: inline;
-}
-
-.dropdown-responsive.has-icon .button-text-short {
-  visibility: hidden;
-  font-size: 0;
-  line-height: 0;
-  max-width: 0;
-  overflow: hidden;
-  display: inline;
-}
-
-/* Если нет иконки, но есть короткий текст - показать его на мобильных */
-.dropdown-responsive.has-text-short:not(.has-icon) .button-text-short {
-  visibility: visible;
-  font-size: inherit;
-  line-height: inherit;
-  max-width: none;
-  overflow: visible;
-  display: inline;
-}
-
-.dropdown-responsive.has-text-short:not(.has-icon) .button-text {
-  visibility: hidden;
-  font-size: 0;
-  line-height: 0;
-  max-width: 0;
-  overflow: hidden;
-  display: inline;
-}
-
-/* Десктоп 576px */
-@media (min-width: 576px) {
-  .dropdown-responsive .icon {
-    display: none;
-  }
-
-  .dropdown-responsive .button-text {
-    visibility: visible;
-    font-size: inherit;
-    line-height: inherit;
-    max-width: none;
-    overflow: visible;
-    display: inline;
-  }
-
-  .dropdown-responsive.has-icon .button-text {
-    visibility: visible;
-    font-size: inherit;
-    line-height: inherit;
-    max-width: none;
-    overflow: visible;
-    display: inline;
-  }
-
-  .dropdown-responsive.has-text-short:not(.has-icon) .button-text-short {
-    visibility: hidden;
-    font-size: 0;
-    line-height: 0;
-    max-width: 0;
-    overflow: hidden;
-    display: inline;
-  }
-
-  .dropdown-responsive.has-text-short:not(.has-icon) .button-text {
-    visibility: visible;
-    font-size: inherit;
-    line-height: inherit;
-    max-width: none;
-    overflow: visible;
-    display: inline;
-  }
-}
-
-/* ============================================================================
-   КОМПОНЕНТ DROPDOWN-MENU-ITEM
-   ============================================================================ */
-
-/* Базовые стили (mobile-first) */
-.dropdown-menu-item-responsive .icon {
-  display: flex;
-}
-
-.dropdown-menu-item-responsive .subtitle {
-  display: block;
-}
-
-/* Десктоп 576px */
-@media (min-width: 576px) {
-  .dropdown-menu-item-responsive .subtitle {
-    display: block;
-  }
-}
-
-/* Скрытие подзаголовка на мобильных (если нужно) */
-@media (max-width: 575px) {
-  .dropdown-menu-item-responsive.hide-subtitle-mobile .subtitle {
-    display: none;
-  }
 }
 
 /* ============================================================================
@@ -484,402 +323,112 @@
 }
 
 /* ============================================================================
-   КОМПОНЕНТ BUTTON GROUP - Адаптивная вертикальная ориентация (MD: 768px)
+   КОМПОНЕНТ DROPDOWN-MENU-ITEM
    ============================================================================ */
 
-/* На мобильных (< 768px) - применяем стили .btn-group-vertical */
-@media (max-width: 767.98px) {
-  .btn-group-responsive-vertical-md {
-    flex-direction: column;
-  }
-
-  .btn-group-responsive-vertical-md > * {
-    width: 100%;
-  }
-
-  .btn-group-responsive-vertical-md > .btn:first-child,
-  .btn-group-responsive-vertical-md > label.btn:first-child,
-  .btn-group-responsive-vertical-md > *:first-child,
-  .btn-group-responsive-vertical-md > *:first-child > .btn,
-  .btn-group-responsive-vertical-md > *:first-child > button.btn,
-  .btn-group-responsive-vertical-md > *:first-child button.btn {
-    border-top-left-radius: 0.375rem !important;
-    border-top-right-radius: 0.375rem !important;
-    border-bottom-left-radius: 0 !important;
-    border-bottom-right-radius: 0 !important;
-  }
-
-  .btn-group-responsive-vertical-md > .btn:first-child,
-  .btn-group-responsive-vertical-md > label.btn:first-child,
-  .btn-group-responsive-vertical-md > *:first-child {
-    margin-left: -1px;
-  }
-
-  .btn-group-responsive-vertical-md > .btn:last-child,
-  .btn-group-responsive-vertical-md > label.btn:last-child,
-  .btn-group-responsive-vertical-md > *:last-child > .btn {
-    border-top-left-radius: 0;
-    border-top-right-radius: 0;
-    border-bottom-left-radius: 0.375rem;
-    border-bottom-right-radius: 0.375rem;
-  }
-
-  .btn-group-responsive-vertical-md > .btn:not(:first-child):not(:last-child),
-  .btn-group-responsive-vertical-md > label.btn:not(:first-child):not(:last-child),
-  .btn-group-responsive-vertical-md > *:not(:first-child):not(:last-child) > .btn {
-    border-radius: 0;
-  }
-
-  .btn-group-responsive-vertical-md > .btn + .btn,
-  .btn-group-responsive-vertical-md > label.btn + label.btn,
-  .btn-group-responsive-vertical-md > .btn + label.btn,
-  .btn-group-responsive-vertical-md > label.btn + .btn {
-    margin-top: -1px;
-    margin-left: 0;
-  }
-
-  .btn-group-responsive-vertical-md > *:not(:first-child) {
-    margin-top: -1px;
-  }
-
-  .btn-group-responsive-vertical-md > .btn:not(:first-child),
-  .btn-group-responsive-vertical-md > label.btn:not(:first-child),
-  .btn-group-responsive-vertical-md > *:not(:first-child) > .btn {
-    border-top: 0;
-  }
-
-  .btn-group-responsive-vertical-md .btn-responsive .label,
-  .btn-group-responsive-vertical-md .btn-responsive.has-icon .label {
-    visibility: visible !important;
-    font-size: inherit !important;
-    line-height: inherit !important;
-    max-width: none !important;
-    overflow: visible !important;
-    display: inline !important;
-  }
-
-  .btn-group-responsive-vertical-md .btn-responsive .label-short,
-  .btn-group-responsive-vertical-md .btn-responsive.has-icon .label-short {
-    visibility: hidden !important;
-    font-size: 0 !important;
-    line-height: 0 !important;
-    max-width: 0 !important;
-    overflow: hidden !important;
-  }
+/* Базовые стили (mobile-first) */
+.dropdown-menu-item-responsive .icon {
+  display: flex;
 }
 
-@media (min-width: 768px) {
-  .btn-group-responsive-vertical-md {
-    flex-direction: row;
-  }
+.dropdown-menu-item-responsive .subtitle {
+  display: block;
+}
 
-  .btn-group-responsive-vertical-md > * {
-    width: auto;
-  }
-
-  .btn-group-responsive-vertical-md > .btn:first-child,
-  .btn-group-responsive-vertical-md > label.btn:first-child,
-  .btn-group-responsive-vertical-md > *:first-child {
-    margin-left: 0;
+/* Скрытие подзаголовка на мобильных (если нужно) */
+@media (max-width: 575px) {
+  .dropdown-menu-item-responsive.hide-subtitle-mobile .subtitle {
+    display: none;
   }
 }
 
 /* ============================================================================
-   КОМПОНЕНТ BUTTON GROUP - Адаптивная вертикальная ориентация (LG: 992px)
+   КОМПОНЕНТ DROPDOWN
    ============================================================================ */
 
-@media (max-width: 991.98px) {
-  .btn-group-responsive-vertical-lg {
-    flex-direction: column;
-  }
-
-  .btn-group-responsive-vertical-lg > * {
-    width: 100%;
-  }
-
-  .btn-group-responsive-vertical-lg > .btn:first-child,
-  .btn-group-responsive-vertical-lg > label.btn:first-child,
-  .btn-group-responsive-vertical-lg > *:first-child,
-  .btn-group-responsive-vertical-lg > *:first-child > .btn,
-  .btn-group-responsive-vertical-lg > *:first-child > button.btn,
-  .btn-group-responsive-vertical-lg > *:first-child button.btn {
-    border-top-left-radius: 0.375rem !important;
-    border-top-right-radius: 0.375rem !important;
-    border-bottom-left-radius: 0 !important;
-    border-bottom-right-radius: 0 !important;
-  }
-
-  .btn-group-responsive-vertical-lg > .btn:first-child,
-  .btn-group-responsive-vertical-lg > label.btn:first-child,
-  .btn-group-responsive-vertical-lg > *:first-child {
-    margin-left: -1px;
-  }
-
-  .btn-group-responsive-vertical-lg > .btn:last-child,
-  .btn-group-responsive-vertical-lg > label.btn:last-child,
-  .btn-group-responsive-vertical-lg > *:last-child > .btn {
-    border-top-left-radius: 0;
-    border-top-right-radius: 0;
-    border-bottom-left-radius: 0.375rem;
-    border-bottom-right-radius: 0.375rem;
-  }
-
-  .btn-group-responsive-vertical-lg > .btn:not(:first-child):not(:last-child),
-  .btn-group-responsive-vertical-lg > label.btn:not(:first-child):not(:last-child),
-  .btn-group-responsive-vertical-lg > *:not(:first-child):not(:last-child) > .btn {
-    border-radius: 0;
-  }
-
-  .btn-group-responsive-vertical-lg > .btn + .btn,
-  .btn-group-responsive-vertical-lg > label.btn + label.btn,
-  .btn-group-responsive-vertical-lg > .btn + label.btn,
-  .btn-group-responsive-vertical-lg > label.btn + .btn {
-    margin-top: -1px;
-    margin-left: 0;
-  }
-
-  .btn-group-responsive-vertical-lg > *:not(:first-child) {
-    margin-top: -1px;
-  }
-
-  .btn-group-responsive-vertical-lg > .btn:not(:first-child),
-  .btn-group-responsive-vertical-lg > label.btn:not(:first-child),
-  .btn-group-responsive-vertical-lg > *:not(:first-child) > .btn {
-    border-top: 0;
-  }
-
-  .btn-group-responsive-vertical-lg .btn-responsive .label,
-  .btn-group-responsive-vertical-lg .btn-responsive.has-icon .label {
-    visibility: visible !important;
-    font-size: inherit !important;
-    line-height: inherit !important;
-    max-width: none !important;
-    overflow: visible !important;
-    display: inline !important;
-  }
-
-  .btn-group-responsive-vertical-lg .btn-responsive .label-short,
-  .btn-group-responsive-vertical-lg .btn-responsive.has-icon .label-short {
-    visibility: hidden !important;
-    font-size: 0 !important;
-    line-height: 0 !important;
-    max-width: 0 !important;
-    overflow: hidden !important;
-  }
+/* Скрытие суффиксов (chevron) в кнопке dropdown при использовании класса hide-suffix */
+.dropdown-responsive.hide-suffix .suffix-container {
+  display: none !important;
 }
 
-@media (min-width: 992px) {
-  .btn-group-responsive-vertical-lg {
-    flex-direction: row;
-  }
-
-  .btn-group-responsive-vertical-lg > * {
-    width: auto;
-  }
-
-  .btn-group-responsive-vertical-lg > .btn:first-child,
-  .btn-group-responsive-vertical-lg > label.btn:first-child,
-  .btn-group-responsive-vertical-lg > *:first-child {
-    margin-left: 0;
-  }
+/* Базовые стили (mobile-first) */
+.dropdown-responsive .icon {
+  display: inline;
 }
 
-/* ============================================================================
-   КОМПОНЕНТ BUTTON GROUP - Адаптивная вертикальная ориентация (XL: 1200px)
-   ============================================================================ */
-
-@media (max-width: 1199.98px) {
-  .btn-group-responsive-vertical-xl {
-    flex-direction: column;
-  }
-
-  .btn-group-responsive-vertical-xl > * {
-    width: 100%;
-  }
-
-  .btn-group-responsive-vertical-xl > .btn:first-child,
-  .btn-group-responsive-vertical-xl > label.btn:first-child,
-  .btn-group-responsive-vertical-xl > *:first-child,
-  .btn-group-responsive-vertical-xl > *:first-child > .btn,
-  .btn-group-responsive-vertical-xl > *:first-child > button.btn,
-  .btn-group-responsive-vertical-xl > *:first-child button.btn {
-    border-top-left-radius: 0.375rem !important;
-    border-top-right-radius: 0.375rem !important;
-    border-bottom-left-radius: 0 !important;
-    border-bottom-right-radius: 0 !important;
-  }
-
-  .btn-group-responsive-vertical-xl > .btn:first-child,
-  .btn-group-responsive-vertical-xl > label.btn:first-child,
-  .btn-group-responsive-vertical-xl > *:first-child {
-    margin-left: -1px;
-  }
-
-  .btn-group-responsive-vertical-xl > .btn:last-child,
-  .btn-group-responsive-vertical-xl > label.btn:last-child,
-  .btn-group-responsive-vertical-xl > *:last-child > .btn {
-    border-top-left-radius: 0;
-    border-top-right-radius: 0;
-    border-bottom-left-radius: 0.375rem;
-    border-bottom-right-radius: 0.375rem;
-  }
-
-  .btn-group-responsive-vertical-xl > .btn:not(:first-child):not(:last-child),
-  .btn-group-responsive-vertical-xl > label.btn:not(:first-child):not(:last-child),
-  .btn-group-responsive-vertical-xl > *:not(:first-child):not(:last-child) > .btn {
-    border-radius: 0;
-  }
-
-  .btn-group-responsive-vertical-xl > .btn + .btn,
-  .btn-group-responsive-vertical-xl > label.btn + label.btn,
-  .btn-group-responsive-vertical-xl > .btn + label.btn,
-  .btn-group-responsive-vertical-xl > label.btn + .btn {
-    margin-top: -1px;
-    margin-left: 0;
-  }
-
-  .btn-group-responsive-vertical-xl > *:not(:first-child) {
-    margin-top: -1px;
-  }
-
-  .btn-group-responsive-vertical-xl > .btn:not(:first-child),
-  .btn-group-responsive-vertical-xl > label.btn:not(:first-child),
-  .btn-group-responsive-vertical-xl > *:not(:first-child) > .btn {
-    border-top: 0;
-  }
-
-  .btn-group-responsive-vertical-xl .btn-responsive .label,
-  .btn-group-responsive-vertical-xl .btn-responsive.has-icon .label {
-    visibility: visible !important;
-    font-size: inherit !important;
-    line-height: inherit !important;
-    max-width: none !important;
-    overflow: visible !important;
-    display: inline !important;
-  }
-
-  .btn-group-responsive-vertical-xl .btn-responsive .label-short,
-  .btn-group-responsive-vertical-xl .btn-responsive.has-icon .label-short {
-    visibility: hidden !important;
-    font-size: 0 !important;
-    line-height: 0 !important;
-    max-width: 0 !important;
-    overflow: hidden !important;
-  }
+/* Базовое скрытие текста на мобильных */
+.dropdown-responsive .button-text,
+.dropdown-responsive .button-text-short {
+  visibility: hidden;
+  font-size: 0;
+  line-height: 0;
+  max-width: 0;
+  overflow: hidden;
+  display: inline;
 }
 
-@media (min-width: 1200px) {
-  .btn-group-responsive-vertical-xl {
-    flex-direction: row;
-  }
-
-  .btn-group-responsive-vertical-xl > * {
-    width: auto;
-  }
-
-  .btn-group-responsive-vertical-xl > .btn:first-child,
-  .btn-group-responsive-vertical-xl > label.btn:first-child,
-  .btn-group-responsive-vertical-xl > *:first-child {
-    margin-left: 0;
-  }
+/* Если есть иконка - скрыть текст на мобильных */
+.dropdown-responsive.has-icon .button-text,
+.dropdown-responsive.has-icon .button-text-short {
+  visibility: hidden;
+  font-size: 0;
+  line-height: 0;
+  max-width: 0;
+  overflow: hidden;
+  display: inline;
 }
 
-/* ============================================================================
-   КОМПОНЕНТ BUTTON GROUP - Адаптивная вертикальная ориентация (XXL: 1400px)
-   ============================================================================ */
-
-@media (max-width: 1399.98px) {
-  .btn-group-responsive-vertical-xxl {
-    flex-direction: column;
-  }
-
-  .btn-group-responsive-vertical-xxl > * {
-    width: 100%;
-  }
-
-  .btn-group-responsive-vertical-xxl > .btn:first-child,
-  .btn-group-responsive-vertical-xxl > label.btn:first-child,
-  .btn-group-responsive-vertical-xxl > *:first-child,
-  .btn-group-responsive-vertical-xxl > *:first-child > .btn,
-  .btn-group-responsive-vertical-xxl > *:first-child > button.btn,
-  .btn-group-responsive-vertical-xxl > *:first-child button.btn {
-    border-top-left-radius: 0.375rem !important;
-    border-top-right-radius: 0.375rem !important;
-    border-bottom-left-radius: 0 !important;
-    border-bottom-right-radius: 0 !important;
-  }
-
-  .btn-group-responsive-vertical-xxl > .btn:first-child,
-  .btn-group-responsive-vertical-xxl > label.btn:first-child,
-  .btn-group-responsive-vertical-xxl > *:first-child {
-    margin-left: -1px;
-  }
-
-  .btn-group-responsive-vertical-xxl > .btn:last-child,
-  .btn-group-responsive-vertical-xxl > label.btn:last-child,
-  .btn-group-responsive-vertical-xxl > *:last-child > .btn {
-    border-top-left-radius: 0;
-    border-top-right-radius: 0;
-    border-bottom-left-radius: 0.375rem;
-    border-bottom-right-radius: 0.375rem;
-  }
-
-  .btn-group-responsive-vertical-xxl > .btn:not(:first-child):not(:last-child),
-  .btn-group-responsive-vertical-xxl > label.btn:not(:first-child):not(:last-child),
-  .btn-group-responsive-vertical-xxl > *:not(:first-child):not(:last-child) > .btn {
-    border-radius: 0;
-  }
-
-  .btn-group-responsive-vertical-xxl > .btn + .btn,
-  .btn-group-responsive-vertical-xxl > label.btn + label.btn,
-  .btn-group-responsive-vertical-xxl > .btn + label.btn,
-  .btn-group-responsive-vertical-xxl > label.btn + .btn {
-    margin-top: -1px;
-    margin-left: 0;
-  }
-
-  .btn-group-responsive-vertical-xxl > *:not(:first-child) {
-    margin-top: -1px;
-  }
-
-  .btn-group-responsive-vertical-xxl > .btn:not(:first-child),
-  .btn-group-responsive-vertical-xxl > label.btn:not(:first-child),
-  .btn-group-responsive-vertical-xxl > *:not(:first-child) > .btn {
-    border-top: 0;
-  }
-
-  .btn-group-responsive-vertical-xxl .btn-responsive .label,
-  .btn-group-responsive-vertical-xxl .btn-responsive.has-icon .label {
-    visibility: visible !important;
-    font-size: inherit !important;
-    line-height: inherit !important;
-    max-width: none !important;
-    overflow: visible !important;
-    display: inline !important;
-  }
-
-  .btn-group-responsive-vertical-xxl .btn-responsive .label-short,
-  .btn-group-responsive-vertical-xxl .btn-responsive.has-icon .label-short {
-    visibility: hidden !important;
-    font-size: 0 !important;
-    line-height: 0 !important;
-    max-width: 0 !important;
-    overflow: hidden !important;
-  }
+/* Если нет иконки, но есть короткий текст - показать его на мобильных */
+.dropdown-responsive.has-text-short:not(.has-icon) .button-text-short {
+  visibility: visible;
+  font-size: inherit;
+  line-height: inherit;
+  max-width: none;
+  overflow: visible;
+  display: inline;
 }
 
-@media (min-width: 1400px) {
-  .btn-group-responsive-vertical-xxl {
-    flex-direction: row;
+.dropdown-responsive.has-text-short:not(.has-icon) .button-text {
+  visibility: hidden;
+  font-size: 0;
+  line-height: 0;
+  max-width: 0;
+  overflow: hidden;
+  display: inline;
+}
+
+/* Десктоп 576px */
+@media (min-width: 576px) {
+  .dropdown-responsive .icon {
+    display: none;
   }
 
-  .btn-group-responsive-vertical-xxl > * {
-    width: auto;
+  /* Показываем текст на desktop */
+  .dropdown-responsive .button-text,
+  .dropdown-responsive.has-icon .button-text {
+    visibility: visible;
+    font-size: inherit;
+    line-height: inherit;
+    max-width: none;
+    overflow: visible;
+    display: inline;
   }
 
-  .btn-group-responsive-vertical-xxl > .btn:first-child,
-  .btn-group-responsive-vertical-xxl > label.btn:first-child,
-  .btn-group-responsive-vertical-xxl > *:first-child {
-    margin-left: 0;
+  .dropdown-responsive.has-text-short:not(.has-icon) .button-text-short {
+    visibility: hidden;
+    font-size: 0;
+    line-height: 0;
+    max-width: 0;
+    overflow: hidden;
+    display: inline;
+  }
+
+  .dropdown-responsive.has-text-short:not(.has-icon) .button-text {
+    visibility: visible;
+    font-size: inherit;
+    line-height: inherit;
+    max-width: none;
+    overflow: visible;
+    display: inline;
   }
 }

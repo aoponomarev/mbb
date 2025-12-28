@@ -5,6 +5,9 @@
 <!-- ПРАВИЛА ФОРМАТИРОВАНИЯ ЗАПИСЕЙ
 **КРИТИЧЕСКИ ВАЖНО**: При упоминании HTML-тегов в записях **ЗАПРЕЩЕНО** использовать обычные угловые скобки `<script>`, `<div>`, `<style>` и т.п. — они блокируют Markdown-превью. **ОБЯЗАТЕЛЬНО** использовать математические угловые скобки: ⟨script⟩, ⟨div⟩, ⟨style⟩ (U+27E8/U+27E9). Для скрытых комментариев используйте HTML-комментарии -->
 
+## Упрощение валидатора verticalBreakpoint в button-group
+28.12.2025 ◆ Упрощен валидатор prop verticalBreakpoint после удаления неиспользуемых breakpoints ▶ В button-group.js обновлен валидатор verticalBreakpoint: изменен с ['sm', 'md', 'lg', 'xl', 'xxl'] на value === 'sm' (теперь принимает только 'sm' или null). В docs/doc-components.md обновлено описание prop verticalBreakpoint: указано, что поддерживается только 'sm' (576px) ◉ Упростить валидацию после удаления неиспользуемых breakpoints, обновить документацию @components @button-group @validation @refactoring
+
 ## Добавление горизонтальных отступов mx-1 для иконок, текста и суффиксов в кнопках
 28.12.2025 ◆ Добавлены минимальные горизонтальные отступы mx-1 для всех элементов кнопки через Bootstrap классы ▶ В button.js добавлен mx-1 в baseClasses для iconClasses(), labelClasses() и suffixClasses(). Для суффикса заменён ms-1 на mx-1 для симметричных отступов. Удалены debug fetch вызовы из iconClasses(), labelClasses(), suffixClasses(). В button-template.js удалены inline стили aspectRatio, width и marginRight из обертки иконки, отступы теперь управляются только через Bootstrap классы ◉ Обеспечить единообразные минимальные горизонтальные отступы для всех элементов кнопки (иконка, текст, суффикс) через нативные Bootstrap классы @components @button @spacing @bootstrap @refactoring
 

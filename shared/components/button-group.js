@@ -50,7 +50,7 @@ window.cmpButtonGroup = {
         verticalBreakpoint: {
             type: String,
             default: null,
-            validator: (value) => !value || ['sm', 'md', 'lg', 'xl', 'xxl'].includes(value)
+            validator: (value) => !value || value === 'sm'
         },
         role: {
             type: String,
