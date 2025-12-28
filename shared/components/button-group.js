@@ -144,9 +144,6 @@ window.cmpButtonGroup = {
     computed: {
         // CSS классы для группы кнопок
         groupClasses() {
-            // #region agent log
-            fetch('http://127.0.0.1:7243/ingest/6397d191-f6f2-43f4-b4da-44a3482bedec',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'button-group.js:groupClasses',message:'groupClasses ENTRY',data:{classesAdd:this.classesAdd,classesRemove:this.classesRemove,size:this.size,vertical:this.vertical,verticalBreakpoint:this.verticalBreakpoint,collapseBreakpoint:this.collapseBreakpoint},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'G'})}).catch(()=>{});
-            // #endregion
             const baseClasses = ['btn-group'];
             if (this.size) baseClasses.push(`btn-group-${this.size}`);
 
@@ -185,9 +182,6 @@ window.cmpButtonGroup = {
                 this.classesAdd?.root,
                 this.classesRemove?.root
             );
-            // #region agent log
-            fetch('http://127.0.0.1:7243/ingest/6397d191-f6f2-43f4-b4da-44a3482bedec',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'button-group.js:groupClasses',message:'groupClasses EXIT',data:{result,baseClasses},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'G'})}).catch(()=>{});
-            // #endregion
             return result;
         },
 

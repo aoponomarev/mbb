@@ -165,9 +165,6 @@ window.cmpButton = {
 
         // CSS классы для корневого элемента (root)
         buttonClasses() {
-            // #region agent log
-            fetch('http://127.0.0.1:7243/ingest/6397d191-f6f2-43f4-b4da-44a3482bedec',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'button.js:buttonClasses',message:'buttonClasses ENTRY',data:{classesAdd:this.classesAdd,classesAddRoot:this.classesAdd?.root,classesRemove:this.classesRemove,classesRemoveRoot:this.classesRemove?.root,buttonAttributesClass:this.buttonAttributes?.class},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'A,B,C'})}).catch(()=>{});
-            // #endregion
             const baseClasses = ['btn', 'btn-responsive', this.instanceHash];
 
             // Условные классы для адаптивности
@@ -204,9 +201,6 @@ window.cmpButton = {
                 this.classesAdd?.root,
                 this.classesRemove?.root
             );
-            // #region agent log
-            fetch('http://127.0.0.1:7243/ingest/6397d191-f6f2-43f4-b4da-44a3482bedec',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'button.js:buttonClasses',message:'buttonClasses EXIT',data:{result,baseClasses},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'A,B,C'})}).catch(()=>{});
-            // #endregion
             return result;
         },
 
@@ -226,25 +220,16 @@ window.cmpButton = {
 
             const classesAddIcon = this.classesAdd?.icon;
             const classesRemoveIcon = this.classesRemove?.icon;
-            // #region agent log
-            fetch('http://127.0.0.1:7243/ingest/6397d191-f6f2-43f4-b4da-44a3482bedec',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'button.js:iconClasses',message:'iconClasses BEFORE processClassesToString',data:{classesAddIcon,classesRemoveIcon,baseClasses},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'A,B'})}).catch(()=>{});
-            // #endregion
             const result = window.classManager.processClassesToString(
                 baseClasses,
                 classesAddIcon,
                 classesRemoveIcon
             );
-            // #region agent log
-            fetch('http://127.0.0.1:7243/ingest/6397d191-f6f2-43f4-b4da-44a3482bedec',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'button.js:iconClasses',message:'iconClasses EXIT',data:{result,baseClasses,classesAddIcon,classesRemoveIcon},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'A,B'})}).catch(()=>{});
-            // #endregion
             return result;
         },
 
         // CSS классы для обертки текста (label)
         labelClasses() {
-            // #region agent log
-            fetch('http://127.0.0.1:7243/ingest/6397d191-f6f2-43f4-b4da-44a3482bedec',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'button.js:labelClasses',message:'labelClasses ENTRY',data:{classesAdd:this.classesAdd,classesAddLabel:this.classesAdd?.label,classesRemove:this.classesRemove,classesRemoveLabel:this.classesRemove?.label},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'A,B'})}).catch(()=>{});
-            // #endregion
             const baseClasses = ['text-nowrap'];
 
             if (!window.classManager) {
@@ -257,17 +242,11 @@ window.cmpButton = {
                 this.classesAdd?.label,
                 this.classesRemove?.label
             );
-            // #region agent log
-            fetch('http://127.0.0.1:7243/ingest/6397d191-f6f2-43f4-b4da-44a3482bedec',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'button.js:labelClasses',message:'labelClasses EXIT',data:{result,baseClasses},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'A,B'})}).catch(()=>{});
-            // #endregion
             return result;
         },
 
         // CSS классы для обертки суффиксов (suffix)
         suffixClasses() {
-            // #region agent log
-            fetch('http://127.0.0.1:7243/ingest/6397d191-f6f2-43f4-b4da-44a3482bedec',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'button.js:suffixClasses',message:'suffixClasses ENTRY',data:{classesAdd:this.classesAdd,classesAddSuffix:this.classesAdd?.suffix,classesRemove:this.classesRemove,classesRemoveSuffix:this.classesRemove?.suffix},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'A,B'})}).catch(()=>{});
-            // #endregion
             const baseClasses = ['d-flex', 'align-items-center', 'ms-1', 'suffix-container'];
 
             if (!window.classManager) {
@@ -280,9 +259,6 @@ window.cmpButton = {
                 this.classesAdd?.suffix,
                 this.classesRemove?.suffix
             );
-            // #region agent log
-            fetch('http://127.0.0.1:7243/ingest/6397d191-f6f2-43f4-b4da-44a3482bedec',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'button.js:suffixClasses',message:'suffixClasses EXIT',data:{result,baseClasses},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'A,B'})}).catch(()=>{});
-            // #endregion
             return result;
         },
 

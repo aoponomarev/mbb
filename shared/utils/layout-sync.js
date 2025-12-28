@@ -42,6 +42,7 @@
     let footerObserver = null;
     let headerResizeObserver = null;
     let footerResizeObserver = null;
+    let resizeHandler = null;
     let isActive = false;
 
     /**
@@ -93,6 +94,12 @@
         }
 
         isActive = true;
+
+        // Добавляем обработчик resize события (если еще не добавлен)
+        if (!resizeHandler) {
+            resizeHandler = update;
+            window.addEventListener('resize', resizeHandler);
+        }
 
         // Наблюдение за header
         if (header) {
@@ -170,6 +177,12 @@
             footerResizeObserver = null;
         }
 
+        // Удаляем обработчик resize события
+        if (resizeHandler) {
+            window.removeEventListener('resize', resizeHandler);
+            resizeHandler = null;
+        }
+
         isActive = false;
     }
 
@@ -222,7 +235,7 @@
         tryStart();
     }
 
-    // Также обновляем при изменении размера окна (на случай, если высота зависит от viewport)
-    window.addEventListener('resize', update);
+    // Обработчик resize будет добавлен в start() при первом запуске
+    // Это предотвращает добавление обработчика до инициализации наблюдения
 })();
 

@@ -131,6 +131,21 @@
   display: none !important;
 }
 
+/* Единый line-height для всех элементов кнопки (текст, иконки, суффиксы) */
+/* Bootstrap использует line-height: 1.5 для кнопок, Font Awesome наследует line-height от родителя */
+/* Применяем line-height: 1 ко всем элементам для идеально одинаковой высоты */
+.btn-responsive > .d-flex,
+.btn-responsive > .d-flex > *,
+.btn-responsive > .d-flex > * > i,
+.btn-responsive > .d-flex .label,
+.btn-responsive > .d-flex .label-short,
+.btn-responsive > .d-flex .icon,
+.btn-responsive > .d-flex .suffix-container,
+.btn-responsive > .d-flex .suffix-container > *,
+.btn-responsive > .d-flex .badge {
+  line-height: 1;
+}
+
 /* Вертикальный padding для внутреннего контейнера кнопки в зависимости от размера */
 /* Привязка к классам размеров Bootstrap: btn-sm, btn-lg */
 /* БЕЗ !important - используем специфичность селекторов */
