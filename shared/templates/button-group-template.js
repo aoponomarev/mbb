@@ -127,7 +127,7 @@
             :button-text="dropdownLabel"
             :button-icon="dropdownIcon"
             :button-variant="computedDropdownVariant"
-            :button-size="size">
+            :button-size="computedDropdownSize">
             <template #items>
                 <li v-for="(menuItem, index) in menuItems" :key="index">
                     <cmp-dropdown-menu-item

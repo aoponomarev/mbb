@@ -47,6 +47,11 @@ window.cmpButtonGroup = {
             type: Boolean,
             default: false
         },
+        verticalBreakpoint: {
+            type: String,
+            default: null,
+            validator: (value) => !value || ['sm', 'md', 'lg', 'xl', 'xxl'].includes(value)
+        },
         role: {
             type: String,
             default: 'group'
@@ -77,6 +82,11 @@ window.cmpButtonGroup = {
         dropdownVariant: {
             type: String,
             default: null // если не указан, наследует от variant группы
+        },
+        dropdownSize: {
+            type: String,
+            default: null, // если не указан, наследует от size группы
+            validator: (value) => !value || ['sm', 'lg'].includes(value)
         },
 
         // === Конфигурация кнопок ===
@@ -129,7 +139,23 @@ window.cmpButtonGroup = {
         groupClasses() {
             const classes = ['btn-group'];
             if (this.size) classes.push(`btn-group-${this.size}`);
-            if (this.vertical) classes.push('btn-group-vertical');
+
+            // Проверяем, есть ли адаптивный класс для вертикальной ориентации в prop class
+            const hasAdaptiveVertical = this.class && (
+                (typeof this.class === 'string' && this.class.includes('btn-group-responsive-vertical')) ||
+                (Array.isArray(this.class) && this.class.some(c => typeof c === 'string' && c.includes('btn-group-responsive-vertical')))
+            );
+
+            // Если задан verticalBreakpoint, автоматически добавляем адаптивный класс
+            if (this.verticalBreakpoint && !hasAdaptiveVertical) {
+                classes.push(`btn-group-responsive-vertical-${this.verticalBreakpoint}`);
+            }
+
+            // Добавляем btn-group-vertical только если vertical=true И нет адаптивного класса
+            if (this.vertical && !hasAdaptiveVertical && !this.verticalBreakpoint) {
+                classes.push('btn-group-vertical');
+            }
+
             if (this.instanceHash) classes.push(this.instanceHash);
 
             // Классы видимости для адаптивного схлопывания
@@ -196,6 +222,11 @@ window.cmpButtonGroup = {
         // Variant для dropdown кнопки
         computedDropdownVariant() {
             return this.dropdownVariant || this.variant;
+        },
+
+        // Size для dropdown кнопки
+        computedDropdownSize() {
+            return this.dropdownSize || this.size;
         }
     },
 
@@ -291,8 +322,9 @@ window.cmpButtonGroup = {
                 const newActive = !state.active;
                 state.active = newActive;
 
-                this.$emit('button-toggle', { button: state, index, active: newActive, type: state.type });
+                // Консистентный порядок эмиссии: button-change → button-toggle
                 this.$emit('button-change', new Event('change'), { button: state, index, active: newActive, type: state.type });
+                this.$emit('button-toggle', { button: state, index, active: newActive, type: state.type });
             } else if (state.type === 'radio') {
                 // Для radio: если уже активна, ничего не делаем (radio нельзя деактивировать кликом)
                 // Если неактивна, активируем её и деактивируем все остальные radio в группе

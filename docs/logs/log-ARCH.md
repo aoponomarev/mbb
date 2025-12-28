@@ -5,6 +5,9 @@
 <!-- ПРАВИЛА ФОРМАТИРОВАНИЯ ЗАПИСЕЙ
 **КРИТИЧЕСКИ ВАЖНО**: При упоминании HTML-тегов в записях **ЗАПРЕЩЕНО** использовать обычные угловые скобки `<script>`, `<div>`, `<style>` и т.п. — они блокируют Markdown-превью. **ОБЯЗАТЕЛЬНО** использовать математические угловые скобки: ⟨script⟩, ⟨div⟩, ⟨style⟩ (U+27E8/U+27E9). Для скрытых комментариев используйте HTML-комментарии -->
 
+## Исправления button-group: порядок событий и добавление prop dropdownSize
+28.12.2025 ◆ Исправлен порядок эмиссии событий для checkbox и добавлен prop dropdownSize ▶ В button-group.js исправлен порядок эмиссии событий в handleMenuClick для checkbox: теперь button-change → button-toggle (консистентно с handleButtonChange и radio). Добавлен prop dropdownSize с валидатором (sm, lg) и computed свойство computedDropdownSize для независимого управления размером dropdown кнопки. Обновлён button-group-template.js: заменено :button-size="size" на :button-size="computedDropdownSize" ◉ Обеспечить консистентный порядок событий для всех типов кнопок и независимое управление размером dropdown кнопки @components @button-group @fix @events @props @consistency
+
 ## Исправления логики button-group: radio поведение и порядок эмиссии событий
 28.12.2025 ◆ Исправлены ошибки в логике button-group для корректной работы radio и консистентности событий ▶ В button-group.js исправлена логика handleMenuClick для radio кнопок: убрано переключение состояния (const newActive = !state.active), добавлена проверка !state.active перед активацией (radio нельзя деактивировать кликом, только выбором другого radio). Исправлен порядок эмиссии событий в handleMenuClick: теперь button-change → button-toggle (как в handleButtonChange), вместо button-toggle → button-change ◉ Обеспечить нативное поведение radio кнопок (нельзя деактивировать кликом) и консистентный порядок эмиссии событий для всех путей взаимодействия @components @button-group @fix @radio @events @consistency
 

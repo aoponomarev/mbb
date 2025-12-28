@@ -440,6 +440,21 @@
                             <p class="mt-2 text-muted small">Группа всегда отображается как группа кнопок, независимо от размера экрана</p>
                         </div>
 
+                        <!-- Адаптивная вертикальная ориентация (вертикально на мобильном, горизонтально на десктопе) -->
+                        <div class="mb-3">
+                            <h4 class="h6 mb-2">Адаптивная вертикальная ориентация (sm breakpoint)</h4>
+                            <cmp-button-group
+                                vertical-breakpoint="sm"
+                                :buttons="[
+                                    { type: 'button', label: 'Короткая', variant: 'primary' },
+                                    { type: 'button', label: 'Средняя по длине', variant: 'secondary' },
+                                    { type: 'button', label: 'Очень длинная кнопка', variant: 'success' }
+                                ]"
+                                @button-click="handleButtonGroupClick">
+                            </cmp-button-group>
+                            <p class="mt-2 text-muted small">Группа отображается вертикально на экранах &lt;576px и горизонтально на экранах ≥576px</p>
+                        </div>
+
                         <!-- Адаптивность с checkbox (sm) -->
                         <div class="mb-3">
                             <h4 class="h6 mb-2">Адаптивность с checkbox (sm breakpoint)</h4>
