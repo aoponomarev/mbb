@@ -144,8 +144,8 @@ return window.classManager.processClassesToString(
 
 **Порядок обработки:**
 1. Базовые классы компонента добавляются в массив
-2. Классы из `classesAdd` добавляются к базовым
-3. Классы из `classesRemove` удаляются из результата
+2. Классы из `classesRemove` удаляются из базовых классов
+3. Классы из `classesAdd` добавляются к результату
 
 ### Порядок объединения классов
 
@@ -154,8 +154,10 @@ return window.classManager.processClassesToString(
 2. **Классы адаптивности** (например, `'dropdown-responsive'`, `'btn-responsive'`)
 3. **Детерминированный хэш экземпляра** (`instanceHash`)
 4. **Условные классы** для адаптивности (например, `'has-icon'`, `'has-text-short'`) — добавляются автоматически на основе пропсов
-5. **Классы из `classesAdd`** — добавляются к базовым классам
-6. **Классы из `classesRemove`** — удаляются из результата
+5. **Классы из `classesRemove`** — удаляются из базовых классов
+6. **Классы из `classesAdd`** — добавляются к результату
+
+**Важно:** Порядок обработки (сначала удаление, потом добавление) позволяет сначала убрать базовые классы, а затем добавить новые, что обеспечивает предсказуемое поведение.
 
 ### Примеры использования
 
@@ -368,6 +370,103 @@ methods: {
 }
 ```
 
+### Важные замечания по реализации механизма classesAdd/classesRemove
+
+**Проблема 1: Жестко заданные классы в шаблонах**
+**Проблема:** Жестко заданные классы в шаблонах (например, `class="p-0"` на кнопке) конфликтуют с механизмом `classesAdd`/`classesRemove` и не могут быть переопределены.
+
+**Решение:** Все классы должны управляться через computed свойства и механизм `classesAdd`/`classesRemove`. Удалите все жестко заданные классы из шаблонов, кроме базовых Bootstrap классов.
+
+```javascript
+// ❌ НЕПРАВИЛЬНО - жестко заданный класс в шаблоне
+const TEMPLATE = `<button class="p-0" :class="buttonClasses">...</button>`;
+
+// ✅ ПРАВИЛЬНО - классы управляются через computed
+const TEMPLATE = `<button :class="buttonClasses">...</button>`;
+```
+
+**Проблема 2: Старый проп `:class` вместо `:classes-add`**
+**Проблема:** Использование старого пропа `:class` в шаблонах для передачи классов дочерним компонентам конфликтует с новым механизмом `classesAdd`/`classesRemove`.
+
+**Решение:** Замените все `:class` на `:classes-add` и `:classes-remove` для дочерних компонентов.
+
+```javascript
+// ❌ НЕПРАВИЛЬНО - старый проп :class
+<cmp-button :class="['flex-grow-0', button.class]"></cmp-button>
+
+// ✅ ПРАВИЛЬНО - новый механизм
+<cmp-button :classes-add="{ root: button.class ? \`flex-grow-0 \${button.class}\` : 'flex-grow-0' }"></cmp-button>
+```
+
+**Проблема 3: Объекты с разной структурой в computed свойствах**
+**Проблема:** Computed свойства, которые передают объекты с классами дочерним компонентам, возвращают объекты с разной структурой (то `{}`, то `{icon: "p-0"}`), что нарушает реактивность Vue.
+
+**Решение:** Всегда возвращайте объекты с фиксированной структурой (все ключи присутствуют, даже если значение `undefined`).
+
+```javascript
+// ❌ НЕПРАВИЛЬНО - объект с разной структурой
+buttonClassesForDropdown() {
+    const result = {};
+    if (this.classesAdd?.button) result.root = this.classesAdd.button;
+    if (this.classesAdd?.buttonIcon) result.icon = this.classesAdd.buttonIcon;
+    return result; // Может быть {} или {root: "...", icon: "..."}
+}
+
+// ✅ ПРАВИЛЬНО - фиксированная структура
+buttonClassesForDropdown() {
+    return {
+        root: this.classesAdd?.button || undefined,
+        container: this.classesAdd?.buttonContainer || undefined,
+        icon: this.classesAdd?.buttonIcon || undefined,
+        label: this.classesAdd?.buttonLabel || undefined,
+        suffix: this.classesAdd?.buttonSuffix || undefined
+    };
+}
+```
+
+**Проблема 4: Порядок обработки классов**
+**Проблема:** Если сначала добавлять классы, а потом удалять, базовые классы могут конфликтовать с новыми.
+
+**Решение:** Сначала удалять классы из `classesRemove`, затем добавлять классы из `classesAdd`.
+
+```javascript
+// ✅ ПРАВИЛЬНО - сначала удаление, потом добавление
+function processClasses(baseClasses, classesAdd, classesRemove) {
+    let classes = [...baseClasses];
+
+    // Сначала удаляем
+    if (classesRemove) {
+        const removeClasses = Array.isArray(classesRemove)
+            ? classesRemove
+            : classesRemove.split(' ').filter(c => c);
+        classes = classes.filter(c => !removeClasses.includes(c));
+    }
+
+    // Затем добавляем
+    if (classesAdd) {
+        const addClasses = Array.isArray(classesAdd)
+            ? classesAdd
+            : classesAdd.split(' ').filter(c => c);
+        classes.push(...addClasses);
+    }
+
+    return [...new Set(classes.filter(c => c))];
+}
+```
+
+**Проблема 5: Отсутствие классов выравнивания в нативных элементах**
+**Проблема:** Нативные HTML элементы (например, `<label>` для checkbox/radio) не имеют классов выравнивания, которые есть в Vue-компонентах.
+
+**Решение:** Добавьте классы выравнивания (`d-flex align-items-center`) к нативным элементам для консистентности.
+
+```javascript
+// ✅ ПРАВИЛЬНО - классы выравнивания для label
+<label class="btn d-flex align-items-center" :class="[...]">
+    <span v-if="button.icon" :class="button.icon"></span>
+    {{ button.label }}
+</label>
+```
+
 ### CSS селекторы с динамическими классами
 
 **Проблема:** При использовании `instanceHash` в CSS селекторах через `querySelector` или `querySelectorAll`, специальные символы в именах классов требуют экранирования.
@@ -388,6 +487,24 @@ const element = document.querySelector(`.${escapeCSSSelector(this.instanceHash)}
 // В шаблоне: <button :data-instance-hash="instanceHash">
 const element = document.querySelector(`[data-instance-hash="${this.instanceHash}"]`);
 ```
+
+### Ревизия компонентов на правильное использование механизма
+
+**Проверенные компоненты:**
+- ✅ `cmp-button` — использует `classesAdd`/`classesRemove` для `root`, `container`, `icon`, `label`, `suffix`
+- ✅ `cmp-dropdown` — использует `classesAdd`/`classesRemove` для `root`, `button`, `menu`; передает классы в `cmp-button` через `buttonClassesForDropdown` с фиксированной структурой
+- ✅ `cmp-combobox` — использует `classesAdd`/`classesRemove` для `root`, `menu`
+- ✅ `cmp-dropdown-menu-item` — использует `classesAdd`/`classesRemove` для `root`, `icon`, `subtitle`, `suffix`
+- ✅ `cmp-button-group` — использует `classesAdd`/`classesRemove` для `root`, `dropdown`, `dropdownButton`, `dropdownMenu`; передает классы в `cmp-dropdown` через `dropdownClassesForGroup` с фиксированной структурой
+
+**Проверенные шаблоны:**
+- ✅ Все шаблоны используют `:classes-add` и `:classes-remove` вместо старого пропа `:class` для дочерних компонентов
+- ✅ Жестко заданные классы удалены из шаблонов (кроме базовых Bootstrap классов)
+- ✅ Нативные элементы (checkbox/radio label) имеют классы выравнивания (`d-flex align-items-center`)
+
+**Проверенные computed свойства:**
+- ✅ Все computed свойства, возвращающие объекты для передачи в дочерние компоненты, имеют фиксированную структуру (все ключи присутствуют, даже если значение `undefined`)
+- ✅ Порядок обработки классов: сначала удаление (`classesRemove`), затем добавление (`classesAdd`)
 
 > § <br> КОМПОНЕНТ DROPDOWN
 

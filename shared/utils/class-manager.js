@@ -30,20 +30,20 @@ function processClasses(baseClasses, classesAdd, classesRemove) {
     // Начинаем с базовых классов
     let classes = Array.isArray(baseClasses) ? [...baseClasses] : [baseClasses].filter(c => c);
 
-    // Добавляем классы
-    if (classesAdd) {
-        const addClasses = Array.isArray(classesAdd)
-            ? classesAdd
-            : classesAdd.split(' ').filter(c => c);
-        classes.push(...addClasses);
-    }
-
-    // Удаляем классы
+    // ВАЖНО: Сначала удаляем классы (чтобы убрать базовые классы перед добавлением новых)
     if (classesRemove) {
         const removeClasses = Array.isArray(classesRemove)
             ? classesRemove
             : classesRemove.split(' ').filter(c => c);
         classes = classes.filter(c => !removeClasses.includes(c));
+    }
+
+    // Затем добавляем классы
+    if (classesAdd) {
+        const addClasses = Array.isArray(classesAdd)
+            ? classesAdd
+            : classesAdd.split(' ').filter(c => c);
+        classes.push(...addClasses);
     }
 
     // Удаляем дубликаты и пустые значения

@@ -54,7 +54,7 @@
                 :tooltip-text="button.tooltipText"
                 :tooltip-suffix="button.tooltipSuffix"
                 :button-attributes="omit(button, ['type', 'label', 'labelShort', 'icon', 'variant', 'size', 'disabled', 'loading', 'active', 'responsive', 'suffix', 'tooltipIcon', 'tooltipText', 'tooltipSuffix', 'tooltipIconBootstrap', 'tooltipTextBootstrap', 'tooltipSuffixBootstrap', 'class'])"
-                :class="['flex-grow-0', button.class]"
+                :classes-add="{ root: button.class ? \`flex-grow-0 \${button.class}\` : 'flex-grow-0' }"
                 @click="handleButtonClick($event, button, index)"
                 @click-icon="handleButtonClickIcon($event, button, index)"
                 @click-text="handleButtonClickText($event, button, index)"
@@ -73,7 +73,7 @@
                     @change="handleButtonChange($event, button, index)">
                 <label
                     :for="getButtonId(index)"
-                    class="btn"
+                    class="btn d-flex align-items-center"
                     :class="[
                         \`btn-\${button.variant || variant || 'outline-secondary'}\`,
                         button.size || size ? \`btn-\${button.size || size}\` : '',
@@ -101,7 +101,7 @@
                     @change="handleButtonChange($event, button, index)">
                 <label
                     :for="getButtonId(index)"
-                    class="btn"
+                    class="btn d-flex align-items-center"
                     :class="[
                         \`btn-\${button.variant || variant || 'outline-secondary'}\`,
                         button.size || size ? \`btn-\${button.size || size}\` : '',

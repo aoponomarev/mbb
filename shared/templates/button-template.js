@@ -37,8 +37,7 @@
         :class="buttonClasses"
         :disabled="disabled || loading"
         @click="handleClick"
-        v-bind="buttonAttrs"
-        class="p-0">
+        v-bind="buttonAttrs">
     <span :class="containerClasses">
         <!-- Спиннер загрузки -->
         <span v-if="loading" class="spinner-border spinner-border-sm me-1" role="status" aria-hidden="true"></span>

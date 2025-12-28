@@ -130,9 +130,25 @@ window.cmpDropdown = {
         };
     },
 
+    watch: {
+        // Отслеживаем изменения classesAdd для отладки
+        classesAdd: {
+            handler(newVal, oldVal) {
+                // #region agent log
+                fetch('http://127.0.0.1:7243/ingest/6397d191-f6f2-43f4-b4da-44a3482bedec',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'dropdown.js:watch:classesAdd',message:'classesAdd changed',data:{newVal,oldVal,buttonClassesForDropdown:this.buttonClassesForDropdown},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'D'})}).catch(()=>{});
+                // #endregion
+            },
+            deep: true,
+            immediate: true
+        }
+    },
+
     computed: {
         // CSS классы для корневого элемента dropdown
         dropdownClasses() {
+            // #region agent log
+            fetch('http://127.0.0.1:7243/ingest/6397d191-f6f2-43f4-b4da-44a3482bedec',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'dropdown.js:dropdownClasses',message:'dropdownClasses ENTRY',data:{classesAdd:this.classesAdd,classesAddRoot:this.classesAdd?.root,classesRemove:this.classesRemove,classesRemoveRoot:this.classesRemove?.root},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'D'})}).catch(()=>{});
+            // #endregion
             const baseClasses = ['dropdown', 'dropdown-responsive', this.instanceHash];
 
             // Условные классы для адаптивности
@@ -145,11 +161,15 @@ window.cmpDropdown = {
                 return baseClasses.join(' ');
             }
 
-            return window.classManager.processClassesToString(
+            const result = window.classManager.processClassesToString(
                 baseClasses,
                 this.classesAdd?.root,
                 this.classesRemove?.root
             );
+            // #region agent log
+            fetch('http://127.0.0.1:7243/ingest/6397d191-f6f2-43f4-b4da-44a3482bedec',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'dropdown.js:dropdownClasses',message:'dropdownClasses EXIT',data:{result,baseClasses},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'D'})}).catch(()=>{});
+            // #endregion
+            return result;
         },
 
         // CSS классы для выпадающего меню
@@ -187,20 +207,33 @@ window.cmpDropdown = {
         // Классы для кнопки триггера (для передачи в cmp-button через classesAdd/classesRemove)
         // Передаем classesAdd.button как root, classesAdd.buttonIcon как icon и т.д.
         buttonClassesForDropdown() {
-            const result = {};
-            if (this.classesAdd?.button) result.root = this.classesAdd.button;
-            if (this.classesAdd?.buttonIcon) result.icon = this.classesAdd.buttonIcon;
-            if (this.classesAdd?.buttonLabel) result.label = this.classesAdd.buttonLabel;
-            if (this.classesAdd?.buttonSuffix) result.suffix = this.classesAdd.buttonSuffix;
+            // #region agent log
+            fetch('http://127.0.0.1:7243/ingest/6397d191-f6f2-43f4-b4da-44a3482bedec',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'dropdown.js:buttonClassesForDropdown',message:'buttonClassesForDropdown ENTRY',data:{classesAdd:this.classesAdd,classesAddButton:this.classesAdd?.button,classesAddButtonIcon:this.classesAdd?.buttonIcon,classesAddButtonContainer:this.classesAdd?.buttonContainer},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'A,B'})}).catch(()=>{});
+            // #endregion
+            // ВАЖНО: Возвращаем объект с undefined вместо пропуска свойств
+            // Это обеспечивает стабильную структуру объекта для Vue реактивности
+            const result = {
+                root: this.classesAdd?.button || undefined,
+                container: this.classesAdd?.buttonContainer || undefined,
+                icon: this.classesAdd?.buttonIcon || undefined,
+                label: this.classesAdd?.buttonLabel || undefined,
+                suffix: this.classesAdd?.buttonSuffix || undefined
+            };
+            // #region agent log
+            fetch('http://127.0.0.1:7243/ingest/6397d191-f6f2-43f4-b4da-44a3482bedec',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'dropdown.js:buttonClassesForDropdown',message:'buttonClassesForDropdown EXIT',data:{result},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'A,B'})}).catch(()=>{});
+            // #endregion
             return result;
         },
         buttonClassesRemoveForDropdown() {
-            const result = {};
-            if (this.classesRemove?.button) result.root = this.classesRemove.button;
-            if (this.classesRemove?.buttonIcon) result.icon = this.classesRemove.buttonIcon;
-            if (this.classesRemove?.buttonLabel) result.label = this.classesRemove.buttonLabel;
-            if (this.classesRemove?.buttonSuffix) result.suffix = this.classesRemove.buttonSuffix;
-            return result;
+            // ВАЖНО: Возвращаем объект с undefined вместо пропуска свойств
+            // Это обеспечивает стабильную структуру объекта для Vue реактивности
+            return {
+                root: this.classesRemove?.button || undefined,
+                container: this.classesRemove?.buttonContainer || undefined,
+                icon: this.classesRemove?.buttonIcon || undefined,
+                label: this.classesRemove?.buttonLabel || undefined,
+                suffix: this.classesRemove?.buttonSuffix || undefined
+            };
         },
 
         // Детерминированный хэш экземпляра на основе родительского контекста и props
@@ -320,6 +353,9 @@ window.cmpDropdown = {
     },
 
     mounted() {
+        // #region agent log
+        fetch('http://127.0.0.1:7243/ingest/6397d191-f6f2-43f4-b4da-44a3482bedec',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'dropdown.js:mounted',message:'dropdown mounted',data:{classesAdd:this.classesAdd,classesRemove:this.classesRemove,buttonClassesForDropdown:this.buttonClassesForDropdown},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'D'})}).catch(()=>{});
+        // #endregion
         // Инициализация Bootstrap Dropdown через JavaScript API
         // КРИТИЧЕСКИ ВАЖНО: Сохраняем совместимость с Bootstrap API
         this.$nextTick(() => {

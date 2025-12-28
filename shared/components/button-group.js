@@ -144,6 +144,9 @@ window.cmpButtonGroup = {
     computed: {
         // CSS классы для группы кнопок
         groupClasses() {
+            // #region agent log
+            fetch('http://127.0.0.1:7243/ingest/6397d191-f6f2-43f4-b4da-44a3482bedec',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'button-group.js:groupClasses',message:'groupClasses ENTRY',data:{classesAdd:this.classesAdd,classesRemove:this.classesRemove,size:this.size,vertical:this.vertical,verticalBreakpoint:this.verticalBreakpoint,collapseBreakpoint:this.collapseBreakpoint},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'G'})}).catch(()=>{});
+            // #endregion
             const baseClasses = ['btn-group'];
             if (this.size) baseClasses.push(`btn-group-${this.size}`);
 
@@ -177,11 +180,15 @@ window.cmpButtonGroup = {
                 return baseClasses.join(' ');
             }
 
-            return window.classManager.processClassesToString(
+            const result = window.classManager.processClassesToString(
                 baseClasses,
                 this.classesAdd?.root,
                 this.classesRemove?.root
             );
+            // #region agent log
+            fetch('http://127.0.0.1:7243/ingest/6397d191-f6f2-43f4-b4da-44a3482bedec',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'button-group.js:groupClasses',message:'groupClasses EXIT',data:{result,baseClasses},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'G'})}).catch(()=>{});
+            // #endregion
+            return result;
         },
 
         // Атрибуты для группы
@@ -194,18 +201,20 @@ window.cmpButtonGroup = {
 
         // Классы для dropdown (для передачи в cmp-dropdown)
         dropdownClassesForGroup() {
-            const result = {};
-            if (this.classesAdd?.dropdown) result.root = this.classesAdd.dropdown;
-            if (this.classesAdd?.dropdownButton) result.button = this.classesAdd.dropdownButton;
-            if (this.classesAdd?.dropdownMenu) result.menu = this.classesAdd.dropdownMenu;
-            return result;
+            // ВАЖНО: Возвращаем объект с undefined вместо пропуска свойств
+            // Это обеспечивает стабильную структуру объекта для Vue реактивности
+            return {
+                root: this.classesAdd?.dropdown || undefined,
+                button: this.classesAdd?.dropdownButton || undefined,
+                menu: this.classesAdd?.dropdownMenu || undefined
+            };
         },
         dropdownClassesRemoveForGroup() {
-            const result = {};
-            if (this.classesRemove?.dropdown) result.root = this.classesRemove.dropdown;
-            if (this.classesRemove?.dropdownButton) result.button = this.classesRemove.dropdownButton;
-            if (this.classesRemove?.dropdownMenu) result.menu = this.classesRemove.dropdownMenu;
-            return result;
+            return {
+                root: this.classesRemove?.dropdown || undefined,
+                button: this.classesRemove?.dropdownButton || undefined,
+                menu: this.classesRemove?.dropdownMenu || undefined
+            };
         },
 
         // Классы для dropdown контейнера
