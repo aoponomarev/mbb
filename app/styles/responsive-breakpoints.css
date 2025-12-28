@@ -50,6 +50,11 @@
   margin-left: 0.5rem; /* 8px - эквивалент gap-2 */
 }
 
+/* Отступ справа от укороченного текста (только если есть соседний элемент справа) */
+.btn-responsive .label-short:not(:last-child) {
+  margin-right: 0.5rem; /* 8px - эквивалент gap-2 */
+}
+
 .btn-responsive .label {
   visibility: hidden;
   font-size: 0;
@@ -95,6 +100,8 @@
   max-width: none;
   overflow: visible;
   display: inline;
+  /* Убираем margin-right, так как .label (скрытый) все еще в DOM и делает .label-short не :last-child */
+  margin-right: 0 !important;
 }
 
 .btn-responsive.has-label-short:not(.has-icon) .label {
