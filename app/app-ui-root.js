@@ -40,7 +40,7 @@
             return;
         }
 
-        if (!window.cmpDropdownMenuItem || !window.cmpButton || !window.cmpDropdown || !window.cmpCombobox) {
+        if (!window.cmpDropdownMenuItem || !window.cmpButton || !window.cmpDropdown || !window.cmpCombobox || !window.cmpButtonGroup) {
             console.error('app-ui-root: не все компоненты загружены');
             return;
         }
@@ -52,7 +52,8 @@
                 'dropdown-menu-item': window.cmpDropdownMenuItem,
                 'cmp-button': window.cmpButton,
                 'cmp-dropdown': window.cmpDropdown,
-                'cmp-combobox': window.cmpCombobox
+                'cmp-combobox': window.cmpCombobox,
+                'cmp-button-group': window.cmpButtonGroup
             },
             data() {
                 return {
@@ -121,6 +122,10 @@
                         const value = (item.value || '').toLowerCase();
                         return label.includes(lowerQuery) || value.includes(lowerQuery);
                     });
+                },
+                handleButtonGroupClick(event, data) {
+                    console.log('Button click:', data);
+                    // Здесь можно добавить логику обработки клика по кнопке в группе
                 }
             }
         }).mount('#app');

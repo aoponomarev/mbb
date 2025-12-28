@@ -230,6 +230,13 @@
                 type: 'local',
                 deps: [],
                 category: 'templates'
+            },
+            {
+                id: 'button-group-template',
+                src: 'shared/templates/button-group-template.js',
+                type: 'local',
+                deps: [],
+                category: 'templates'
             }
         ],
 
@@ -239,7 +246,7 @@
                 id: 'vue',
                 src: 'https://unpkg.com/vue@3/dist/vue.global.prod.js',
                 type: 'external',
-                deps: ['button-template', 'dropdown-menu-item-template', 'dropdown-template', 'combobox-template'],
+                deps: ['button-template', 'dropdown-menu-item-template', 'dropdown-template', 'combobox-template', 'button-group-template'],
                 category: 'libraries'
             }
         ],
@@ -273,6 +280,13 @@
                 type: 'local',
                 deps: ['vue', 'dropdown', 'button'],
                 category: 'components'
+            },
+            {
+                id: 'button-group',
+                src: 'shared/components/button-group.js',
+                type: 'local',
+                deps: ['vue', 'button', 'dropdown', 'dropdown-menu-item', 'hash-generator', 'auto-markup'],
+                category: 'components'
             }
         ],
 
@@ -282,7 +296,7 @@
                 id: 'app-ui-root',
                 src: 'app/app-ui-root.js',
                 type: 'local',
-                deps: ['dropdown-menu-item', 'button', 'dropdown', 'combobox'],
+                deps: ['dropdown-menu-item', 'button', 'dropdown', 'combobox', 'button-group'],
                 category: 'app'
             }
         ]
