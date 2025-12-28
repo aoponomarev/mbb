@@ -24,12 +24,30 @@
 
 /* Базовые стили (mobile-first) */
 .btn-responsive .icon {
-  display: inline-block;
   /* Квадратная обертка иконки по высоте строки */
   /* Используется height: 1em и width: 1em вместо aspect-ratio для предотвращения растягивания кнопки */
   height: 1em; /* Высота строки текста */
   width: 1em; /* Квадрат по высоте строки */
   flex-shrink: 0; /* Предотвращает сжатие иконки */
+}
+
+/* ============================================================================
+   ОТСТУПЫ МЕЖДУ ЭЛЕМЕНТАМИ (gaps)
+   ============================================================================
+
+   ВАЖНО: НЕ используется flexbox gap, так как он применяется между ВСЕМИ
+   дочерними элементами, даже скрытыми через visibility:hidden или width:0.
+   Это вызывает смещение иконки в кнопках, где текст скрыт на мобильных.
+
+   РЕШЕНИЕ: Отступы управляются через margin-right/margin-left для конкретных
+   элементов через селекторы :not(:last-child) и :not(:first-child).
+
+   Подробнее: docs/doc-components.md (раздел "Работа с отступами в составных компонентах")
+   ============================================================================ */
+
+/* Отступ слева для суффикса, чтобы отделить его от предыдущего элемента (текста или иконки) */
+.btn-responsive .suffix-container:not(:first-child) {
+  margin-left: 0.5rem; /* 8px - эквивалент gap-2 */
 }
 
 .btn-responsive .label {
@@ -94,6 +112,26 @@
     display: none;
   }
 
+  /* ========================================================================
+     ОТСТУПЫ МЕЖДУ ЭЛЕМЕНТАМИ НА DESKTOP (gaps)
+     ======================================================================== */
+
+  /* Отступ справа от иконки (только если есть соседний элемент справа) */
+  .btn-responsive .icon:not(:last-child) {
+    margin-right: 0.5rem; /* 8px - эквивалент gap-2 */
+  }
+
+  /* Переопределение для кнопок только с иконкой (без текста и суффикса) */
+  .btn-responsive.icon-only .icon {
+    margin-right: 0 !important;
+  }
+
+  /* Отступ справа от текста (только если есть соседний элемент справа) */
+  .btn-responsive .label:not(:last-child),
+  .btn-responsive .label-short:not(:last-child) {
+    margin-right: 0.5rem; /* 8px - эквивалент gap-2 */
+  }
+
   .btn-responsive .label {
     visibility: visible;
     font-size: inherit;
@@ -110,6 +148,11 @@
     max-width: none;
     overflow: visible;
     display: inline;
+  }
+
+  /* На desktop показываем иконку, если она есть */
+  .btn-responsive.has-icon .icon {
+    display: flex; /* Возвращаем flex вместо none для кнопок с иконкой */
   }
 
   .btn-responsive.has-label-short:not(.has-icon) .label-short {
@@ -178,6 +221,14 @@
 .dropdown-responsive.hide-suffix .suffix-container,
 .btn-responsive.hide-suffix .suffix-container {
   display: none !important;
+}
+
+/* Переопределение отступов для особых случаев
+   ============================================================================ */
+
+/* Кнопки только с иконкой (без текста и суффикса) - убираем margin-right */
+.btn-responsive.icon-only .icon {
+  margin-right: 0 !important;
 }
 
 /* Базовые стили (mobile-first) */

@@ -210,8 +210,7 @@ window.cmpButton = {
         // CSS классы для обертки иконки (icon)
         iconClasses() {
             // Flexbox для центрирования иконки внутри квадратной обертки
-            // mx-1 - минимальные горизонтальные отступы слева и справа (Bootstrap класс)
-            const baseClasses = ['icon', 'd-flex', 'align-items-center', 'justify-content-center', 'mx-1'];
+            const baseClasses = ['icon', 'd-flex', 'align-items-center', 'justify-content-center'];
             if (this.iconOpacity === 0.5) baseClasses.push('opacity-50');
 
             if (!window.classManager) {
@@ -221,18 +220,16 @@ window.cmpButton = {
 
             const classesAddIcon = this.classesAdd?.icon;
             const classesRemoveIcon = this.classesRemove?.icon;
-            const result = window.classManager.processClassesToString(
+            return window.classManager.processClassesToString(
                 baseClasses,
                 classesAddIcon,
                 classesRemoveIcon
             );
-            return result;
         },
 
         // CSS классы для обертки текста (label)
         labelClasses() {
-            // mx-1 - минимальные горизонтальные отступы слева и справа (Bootstrap класс)
-            const baseClasses = ['text-nowrap', 'mx-1'];
+            const baseClasses = ['text-nowrap'];
 
             if (!window.classManager) {
                 console.error('classManager not found in labelClasses');
@@ -249,8 +246,7 @@ window.cmpButton = {
 
         // CSS классы для обертки суффиксов (suffix)
         suffixClasses() {
-            // mx-1 - минимальные горизонтальные отступы слева и справа (Bootstrap класс)
-            const baseClasses = ['d-flex', 'align-items-center', 'mx-1', 'suffix-container'];
+            const baseClasses = ['d-flex', 'align-items-center', 'suffix-container'];
 
             if (!window.classManager) {
                 console.error('classManager not found in suffixClasses');
@@ -275,9 +271,12 @@ window.cmpButton = {
 
         // CSS классы для внутреннего контейнера
         // ВАЖНО: Вертикальный padding (py-*) управляется через CSS в зависимости от размера кнопки
-        // Горизонтальный padding (px-*) управляется через classesAdd.container при необходимости
+        // Горизонтальный padding (px-2) задан по умолчанию, может быть переопределен через classesAdd.container
+        // ВАЖНО: gap НЕ используется, так как flexbox gap применяется между ВСЕМИ дочерними элементами,
+        // даже если они скрыты через visibility:hidden или имеют width:0. Это вызывает смещение иконки.
+        // Отступы между элементами управляются через CSS для дочерних элементов.
         containerClasses() {
-            const baseClasses = ['d-flex', 'align-items-center'];
+            const baseClasses = ['d-flex', 'align-items-center', 'justify-content-center', 'px-2'];
 
             if (!window.classManager) {
                 console.error('classManager not found in containerClasses');
