@@ -265,6 +265,296 @@
                         </style>
                     </div>
 
+                    <h2 class="mb-4">Примеры компонента button-group</h2>
+
+                    <!-- Базовые примеры -->
+                    <div class="mb-4">
+                        <h3 class="h5 mb-3">Базовые примеры</h3>
+
+                        <!-- Простая группа кнопок -->
+                        <div class="mb-3">
+                            <h4 class="h6 mb-2">Простая группа кнопок</h4>
+                            <cmp-button-group
+                                :buttons="[
+                                    { type: 'button', label: 'Сохранить', variant: 'primary' },
+                                    { type: 'button', label: 'Отмена', variant: 'secondary' },
+                                    { type: 'button', label: 'Удалить', variant: 'danger' }
+                                ]"
+                                @button-click="handleButtonGroupClick">
+                            </cmp-button-group>
+                        </div>
+
+                        <!-- Группа с checkbox -->
+                        <div class="mb-3">
+                            <h4 class="h6 mb-2">Группа с checkbox</h4>
+                            <cmp-button-group
+                                :buttons="[
+                                    { type: 'checkbox', label: 'Фильтр 1', variant: 'outline-primary' },
+                                    { type: 'checkbox', label: 'Фильтр 2', variant: 'outline-primary', active: true },
+                                    { type: 'checkbox', label: 'Фильтр 3', variant: 'outline-primary' }
+                                ]"
+                                @button-change="(event, data) => console.log('Checkbox change:', data)">
+                            </cmp-button-group>
+                        </div>
+
+                        <!-- Группа с radio -->
+                        <div class="mb-3">
+                            <h4 class="h6 mb-2">Группа с radio</h4>
+                            <cmp-button-group
+                                :buttons="[
+                                    { type: 'radio', label: 'Вариант 1', variant: 'outline-success' },
+                                    { type: 'radio', label: 'Вариант 2', variant: 'outline-success', active: true },
+                                    { type: 'radio', label: 'Вариант 3', variant: 'outline-success' }
+                                ]"
+                                @button-change="(event, data) => console.log('Radio change:', data)">
+                            </cmp-button-group>
+                        </div>
+                    </div>
+
+                    <!-- Адаптивное схлопывание -->
+                    <div class="mb-4">
+                        <h3 class="h5 mb-3">Адаптивное схлопывание в dropdown</h3>
+                        <p class="text-muted mb-3">Группы кнопок автоматически превращаются в dropdown при достижении указанного breakpoint. Измените ширину окна браузера, чтобы увидеть переключение.</p>
+
+                        <!-- Breakpoint: sm (576px) -->
+                        <div class="mb-3">
+                            <h4 class="h6 mb-2">Breakpoint: sm (≥576px видна группа, &lt;576px dropdown)</h4>
+                            <cmp-button-group
+                                collapse-breakpoint="sm"
+                                dropdown-label="Действия"
+                                dropdown-icon="fas fa-bars"
+                                :buttons="[
+                                    { type: 'button', label: 'Сохранить', variant: 'primary', icon: 'fas fa-save' },
+                                    { type: 'button', label: 'Редактировать', variant: 'secondary', icon: 'fas fa-edit' },
+                                    { type: 'button', label: 'Удалить', variant: 'danger', icon: 'fas fa-trash' }
+                                ]"
+                                @button-click="handleButtonGroupClick">
+                            </cmp-button-group>
+                        </div>
+
+                        <!-- Breakpoint: md (768px) -->
+                        <div class="mb-3">
+                            <h4 class="h6 mb-2">Breakpoint: md (≥768px видна группа, &lt;768px dropdown)</h4>
+                            <cmp-button-group
+                                collapse-breakpoint="md"
+                                dropdown-label="Опции"
+                                dropdown-icon="fas fa-ellipsis-v"
+                                dropdown-variant="info"
+                                :buttons="[
+                                    { type: 'button', label: 'Экспорт', variant: 'success', icon: 'fas fa-download' },
+                                    { type: 'button', label: 'Импорт', variant: 'warning', icon: 'fas fa-upload' },
+                                    { type: 'checkbox', label: 'Показать скрытые', variant: 'outline-secondary' }
+                                ]"
+                                @button-click="handleButtonGroupClick"
+                                @button-change="(event, data) => console.log('Change:', data)">
+                            </cmp-button-group>
+                        </div>
+
+                        <!-- Breakpoint: lg (992px) -->
+                        <div class="mb-3">
+                            <h4 class="h6 mb-2">Breakpoint: lg (≥992px видна группа, &lt;992px dropdown)</h4>
+                            <cmp-button-group
+                                collapse-breakpoint="lg"
+                                dropdown-label="Меню"
+                                :buttons="[
+                                    { type: 'button', label: 'Действие 1', variant: 'primary' },
+                                    { type: 'button', label: 'Действие 2', variant: 'secondary' },
+                                    { type: 'button', label: 'Действие 3', variant: 'success' },
+                                    { type: 'button', label: 'Действие 4', variant: 'info' }
+                                ]"
+                                @button-click="handleButtonGroupClick">
+                            </cmp-button-group>
+                        </div>
+
+                        <!-- Breakpoint: xl (1200px) -->
+                        <div class="mb-3">
+                            <h4 class="h6 mb-2">Breakpoint: xl (≥1200px видна группа, &lt;1200px dropdown)</h4>
+                            <cmp-button-group
+                                collapse-breakpoint="xl"
+                                dropdown-label="Инструменты"
+                                dropdown-icon="fas fa-tools"
+                                size="sm"
+                                :buttons="[
+                                    { type: 'button', label: 'Инструмент 1', variant: 'outline-primary', size: 'sm' },
+                                    { type: 'button', label: 'Инструмент 2', variant: 'outline-primary', size: 'sm' },
+                                    { type: 'button', label: 'Инструмент 3', variant: 'outline-primary', size: 'sm' }
+                                ]"
+                                @button-click="handleButtonGroupClick">
+                            </cmp-button-group>
+                        </div>
+
+                        <!-- Смешанный состав с адаптивностью -->
+                        <div class="mb-3">
+                            <h4 class="h6 mb-2">Смешанный состав с адаптивностью (md breakpoint)</h4>
+                            <cmp-button-group
+                                collapse-breakpoint="md"
+                                dropdown-label="Действия"
+                                variant="secondary"
+                                :buttons="[
+                                    { type: 'button', label: 'Действие', variant: 'primary' },
+                                    { type: 'checkbox', label: 'Фильтр', variant: 'outline-secondary' },
+                                    { type: 'radio', label: 'Опция 1', variant: 'outline-info' },
+                                    { type: 'radio', label: 'Опция 2', variant: 'outline-info', active: true }
+                                ]"
+                                @button-click="handleButtonGroupClick"
+                                @button-change="(event, data) => console.log('Change:', data)">
+                            </cmp-button-group>
+                        </div>
+                    </div>
+
+                    <!-- Наследование стилей -->
+                    <div class="mb-4">
+                        <h3 class="h5 mb-3">Наследование variant и size</h3>
+
+                        <div class="mb-3">
+                            <h4 class="h6 mb-2">Наследование от группы</h4>
+                            <cmp-button-group
+                                variant="success"
+                                size="lg"
+                                :buttons="[
+                                    { type: 'button', label: 'Кнопка 1' },
+                                    { type: 'button', label: 'Кнопка 2', variant: 'danger' },
+                                    { type: 'checkbox', label: 'Чекбокс' }
+                                ]">
+                            </cmp-button-group>
+                            <p class="mt-2 text-muted small">Все кнопки наследуют success lg, кроме "Кнопка 2" (danger lg)</p>
+                        </div>
+                    </div>
+
+                    <!-- Примеры адаптивности -->
+                    <div class="mb-4">
+                        <h3 class="h5 mb-3">Примеры компонента группы кнопок с разными вариантами адаптивности</h3>
+                        <p class="text-muted mb-3">Различные варианты настройки адаптивного поведения группы кнопок. Измените ширину окна браузера, чтобы увидеть переключение между группой и dropdown.</p>
+
+                        <!-- Без адаптивности (всегда группа) -->
+                        <div class="mb-3">
+                            <h4 class="h6 mb-2">Без адаптивности (всегда группа кнопок)</h4>
+                            <cmp-button-group
+                                :buttons="[
+                                    { type: 'button', label: 'Действие 1', variant: 'primary' },
+                                    { type: 'button', label: 'Действие 2', variant: 'secondary' },
+                                    { type: 'button', label: 'Действие 3', variant: 'success' }
+                                ]"
+                                @button-click="handleButtonGroupClick">
+                            </cmp-button-group>
+                            <p class="mt-2 text-muted small">Группа всегда отображается как группа кнопок, независимо от размера экрана</p>
+                        </div>
+
+                        <!-- Адаптивность с checkbox (sm) -->
+                        <div class="mb-3">
+                            <h4 class="h6 mb-2">Адаптивность с checkbox (sm breakpoint)</h4>
+                            <cmp-button-group
+                                collapse-breakpoint="sm"
+                                dropdown-label="Фильтры"
+                                dropdown-icon="fas fa-filter"
+                                dropdown-variant="outline-primary"
+                                :buttons="[
+                                    { type: 'checkbox', label: 'Фильтр 1', variant: 'outline-primary' },
+                                    { type: 'checkbox', label: 'Фильтр 2', variant: 'outline-primary', active: true },
+                                    { type: 'checkbox', label: 'Фильтр 3', variant: 'outline-primary' }
+                                ]"
+                                @button-change="(event, data) => console.log('Checkbox change:', data)">
+                            </cmp-button-group>
+                            <p class="mt-2 text-muted small">Группа checkbox превращается в dropdown на экранах &lt;576px</p>
+                        </div>
+
+                        <!-- Адаптивность с radio (md) -->
+                        <div class="mb-3">
+                            <h4 class="h6 mb-2">Адаптивность с radio (md breakpoint)</h4>
+                            <cmp-button-group
+                                collapse-breakpoint="md"
+                                dropdown-label="Выбор"
+                                dropdown-icon="fas fa-check-circle"
+                                dropdown-variant="outline-success"
+                                :buttons="[
+                                    { type: 'radio', label: 'Вариант 1', variant: 'outline-success' },
+                                    { type: 'radio', label: 'Вариант 2', variant: 'outline-success', active: true },
+                                    { type: 'radio', label: 'Вариант 3', variant: 'outline-success' }
+                                ]"
+                                @button-change="(event, data) => console.log('Radio change:', data)">
+                            </cmp-button-group>
+                            <p class="mt-2 text-muted small">Группа radio превращается в dropdown на экранах &lt;768px</p>
+                        </div>
+
+                        <!-- Адаптивность с наследованием стилей (lg) -->
+                        <div class="mb-3">
+                            <h4 class="h6 mb-2">Адаптивность с наследованием стилей (lg breakpoint)</h4>
+                            <cmp-button-group
+                                collapse-breakpoint="lg"
+                                dropdown-label="Инструменты"
+                                variant="info"
+                                size="sm"
+                                :buttons="[
+                                    { type: 'button', label: 'Инструмент 1', icon: 'fas fa-wrench' },
+                                    { type: 'button', label: 'Инструмент 2', icon: 'fas fa-screwdriver' },
+                                    { type: 'button', label: 'Инструмент 3', variant: 'warning', icon: 'fas fa-hammer' }
+                                ]"
+                                @button-click="handleButtonGroupClick">
+                            </cmp-button-group>
+                            <p class="mt-2 text-muted small">Все кнопки наследуют info sm, кроме "Инструмент 3" (warning sm). Группа превращается в dropdown на экранах &lt;992px</p>
+                        </div>
+
+                        <!-- Адаптивность с разными размерами dropdown (xl) -->
+                        <div class="mb-3">
+                            <h4 class="h6 mb-2">Адаптивность с разными размерами dropdown (xl breakpoint)</h4>
+                            <cmp-button-group
+                                collapse-breakpoint="xl"
+                                dropdown-label="Большое меню"
+                                dropdown-icon="fas fa-bars"
+                                dropdown-variant="primary"
+                                dropdown-size="lg"
+                                :buttons="[
+                                    { type: 'button', label: 'Пункт 1', variant: 'primary', size: 'lg' },
+                                    { type: 'button', label: 'Пункт 2', variant: 'primary', size: 'lg' },
+                                    { type: 'button', label: 'Пункт 3', variant: 'primary', size: 'lg' }
+                                ]"
+                                @button-click="handleButtonGroupClick">
+                            </cmp-button-group>
+                            <p class="mt-2 text-muted small">Группа превращается в большой dropdown на экранах &lt;1200px</p>
+                        </div>
+
+                        <!-- Адаптивность со смешанными типами (sm) -->
+                        <div class="mb-3">
+                            <h4 class="h6 mb-2">Адаптивность со смешанными типами (sm breakpoint)</h4>
+                            <cmp-button-group
+                                collapse-breakpoint="sm"
+                                dropdown-label="Действия"
+                                dropdown-icon="fas fa-ellipsis-h"
+                                variant="secondary"
+                                :buttons="[
+                                    { type: 'button', label: 'Сохранить', variant: 'primary', icon: 'fas fa-save' },
+                                    { type: 'checkbox', label: 'Автосохранение', variant: 'outline-secondary' },
+                                    { type: 'radio', label: 'Режим 1', variant: 'outline-info' },
+                                    { type: 'radio', label: 'Режим 2', variant: 'outline-info', active: true }
+                                ]"
+                                @button-click="handleButtonGroupClick"
+                                @button-change="(event, data) => console.log('Change:', data)">
+                            </cmp-button-group>
+                            <p class="mt-2 text-muted small">Смешанная группа с button, checkbox и radio. Группа превращается в dropdown на экранах &lt;576px</p>
+                        </div>
+
+                        <!-- Адаптивность с кастомным dropdown (md) -->
+                        <div class="mb-3">
+                            <h4 class="h6 mb-2">Адаптивность с кастомным dropdown (md breakpoint)</h4>
+                            <cmp-button-group
+                                collapse-breakpoint="md"
+                                dropdown-label="Опции"
+                                dropdown-icon="fas fa-cog"
+                                dropdown-variant="outline-dark"
+                                dropdown-size="sm"
+                                size="sm"
+                                :buttons="[
+                                    { type: 'button', label: 'Настройка 1', variant: 'outline-dark', size: 'sm', icon: 'fas fa-sliders-h' },
+                                    { type: 'button', label: 'Настройка 2', variant: 'outline-dark', size: 'sm', icon: 'fas fa-adjust' },
+                                    { type: 'checkbox', label: 'Включить', variant: 'outline-dark' }
+                                ]"
+                                @button-click="handleButtonGroupClick"
+                                @button-change="(event, data) => console.log('Change:', data)">
+                            </cmp-button-group>
+                            <p class="mt-2 text-muted small">Компактная группа с кастомными настройками dropdown. Группа превращается в dropdown на экранах &lt;768px</p>
+                        </div>
+                    </div>
+
                     <h2 class="mb-4">Примеры компонента combobox</h2>
 
                     <!-- Базовый комбобокс -->

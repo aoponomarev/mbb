@@ -36,9 +36,12 @@
     <!-- Режим 1: Группа кнопок (видна >= breakpoint) -->
     <div :class="groupClasses" v-bind="groupAttrs" ref="groupContainer">
         <template v-for="(button, index) in buttonStates" :key="index">
+            <!-- Слот для переопределения кнопки -->
+            <slot v-if="$slots[\`button-\${index}\`]" :name="\`button-\${index}\`" :button="button" :index="index"></slot>
+
             <!-- Action кнопка через cmp-button -->
             <cmp-button
-                v-if="button.type === 'button'"
+                v-else-if="button.type === 'button'"
                 :variant="button.variant || variant || 'secondary'"
                 :size="button.size || size"
                 :label="button.label"
@@ -59,20 +62,20 @@
             </cmp-button>
 
             <!-- Checkbox -->
-            <template v-else-if="button.type === 'checkbox'">
+            <template v-else-if="button.type === 'checkbox' && !$slots[\`button-\${index}\`]">
                 <input
                     :id="getButtonId(index)"
                     class="btn-check"
                     type="checkbox"
                     :checked="buttonStates[index]?.active || false"
                     :disabled="button.disabled || false"
-                    v-bind="omit(button, ['type', 'label', 'labelShort', 'icon', 'variant', 'size', 'active', 'disabled', 'responsive', 'suffix', 'tooltipIcon', 'tooltipText', 'tooltipSuffix', 'tooltipIconBootstrap', 'tooltipTextBootstrap', 'tooltipSuffixBootstrap', 'class'])"
+                    v-bind="omit(button, ['type', 'label', 'labelShort', 'icon', 'variant', 'size', 'active', 'disabled', 'responsive', 'suffix', 'tooltipIcon', 'tooltipText', 'tooltipSuffix', 'tooltipIconBootstrap', 'tooltipTextBootstrap', 'tooltipSuffixBootstrap', 'class', 'checked'])"
                     @change="handleButtonChange($event, button, index)">
                 <label
                     :for="getButtonId(index)"
                     class="btn"
                     :class="[
-                        button.variant || variant || 'outline-secondary',
+                        \`btn-\${button.variant || variant || 'outline-secondary'}\`,
                         button.size || size ? \`btn-\${button.size || size}\` : '',
                         buttonStates[index]?.active ? 'active' : '',
                         button.disabled ? 'disabled' : '',
@@ -86,7 +89,7 @@
             </template>
 
             <!-- Radio -->
-            <template v-else-if="button.type === 'radio'">
+            <template v-else-if="button.type === 'radio' && !$slots[\`button-\${index}\`]">
                 <input
                     :id="getButtonId(index)"
                     class="btn-check"
@@ -94,13 +97,13 @@
                     :name="getRadioName()"
                     :checked="buttonStates[index]?.active || false"
                     :disabled="button.disabled || false"
-                    v-bind="omit(button, ['type', 'label', 'labelShort', 'icon', 'variant', 'size', 'active', 'disabled', 'responsive', 'suffix', 'tooltipIcon', 'tooltipText', 'tooltipSuffix', 'tooltipIconBootstrap', 'tooltipTextBootstrap', 'tooltipSuffixBootstrap', 'class', 'name'])"
+                    v-bind="omit(button, ['type', 'label', 'labelShort', 'icon', 'variant', 'size', 'active', 'disabled', 'responsive', 'suffix', 'tooltipIcon', 'tooltipText', 'tooltipSuffix', 'tooltipIconBootstrap', 'tooltipTextBootstrap', 'tooltipSuffixBootstrap', 'class', 'checked', 'name'])"
                     @change="handleButtonChange($event, button, index)">
                 <label
                     :for="getButtonId(index)"
                     class="btn"
                     :class="[
-                        button.variant || variant || 'outline-secondary',
+                        \`btn-\${button.variant || variant || 'outline-secondary'}\`,
                         button.size || size ? \`btn-\${button.size || size}\` : '',
                         buttonStates[index]?.active ? 'active' : '',
                         button.disabled ? 'disabled' : '',
@@ -114,11 +117,8 @@
             </template>
         </template>
 
-        <!-- Слоты для кастомных кнопок -->
+        <!-- Слот для дополнительного контента -->
         <slot name="default"></slot>
-        <template v-for="(button, index) in buttonStates" :key="\`slot-\${index}\`">
-            <slot :name="\`button-\${index}\`" :button="button" :index="index"></slot>
-        </template>
     </div>
 
     <!-- Режим 2: Dropdown (виден < breakpoint) -->

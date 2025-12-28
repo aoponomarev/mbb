@@ -276,6 +276,7 @@ window.cmpButtonGroup = {
                 });
             }
 
+            // Консистентный порядок эмиссии: button-change → button-toggle
             this.$emit('button-change', event, { button: state, index, active: newActive, type: state.type });
             this.$emit('button-toggle', { button: state, index, active: newActive, type: state.type });
         },
@@ -285,24 +286,31 @@ window.cmpButtonGroup = {
             const { _originalButton: button, _originalIndex: index } = menuItem;
             const state = this.buttonStates[index] || button;
 
-            if (state.type === 'checkbox' || state.type === 'radio') {
-                // Эмулируем переключение checkbox/radio
+            if (state.type === 'checkbox') {
+                // Эмулируем переключение checkbox
                 const newActive = !state.active;
-
-                // Обновляем внутреннее состояние
                 state.active = newActive;
 
-                // Для radio: сбрасываем все остальные radio в группе
-                if (state.type === 'radio' && newActive) {
+                this.$emit('button-toggle', { button: state, index, active: newActive, type: state.type });
+                this.$emit('button-change', new Event('change'), { button: state, index, active: newActive, type: state.type });
+            } else if (state.type === 'radio') {
+                // Для radio: если уже активна, ничего не делаем (radio нельзя деактивировать кликом)
+                // Если неактивна, активируем её и деактивируем все остальные radio в группе
+                if (!state.active) {
+                    state.active = true;
+
+                    // Сбрасываем все остальные radio в группе
                     this.buttonStates.forEach((s, i) => {
                         if (i !== index && s.type === 'radio') {
                             s.active = false;
                         }
                     });
-                }
 
-                this.$emit('button-toggle', { button: state, index, active: newActive, type: state.type });
-                this.$emit('button-change', new Event('change'), { button: state, index, active: newActive, type: state.type });
+                    // Консистентный порядок эмиссии: button-change → button-toggle
+                    this.$emit('button-change', new Event('change'), { button: state, index, active: true, type: state.type });
+                    this.$emit('button-toggle', { button: state, index, active: true, type: state.type });
+                }
+                // Если radio уже активна, ничего не делаем (стандартное поведение radio)
             } else {
                 // Эмулируем клик по кнопке
                 this.$emit('button-click', new Event('click'), { button: state, index, type: state.type });
