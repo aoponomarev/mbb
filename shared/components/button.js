@@ -215,7 +215,8 @@ window.cmpButton = {
             // #region agent log
             fetch('http://127.0.0.1:7243/ingest/6397d191-f6f2-43f4-b4da-44a3482bedec',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'button.js:iconClasses',message:'iconClasses ENTRY',data:{classesAdd:this.classesAdd,classesAddIcon:this.classesAdd?.icon,classesAddIconType:typeof this.classesAdd?.icon,classesAddIconValue:this.classesAdd?.icon,classesRemove:this.classesRemove,classesRemoveIcon:this.classesRemove?.icon,instanceHash:this.instanceHash},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'A,B'})}).catch(()=>{});
             // #endregion
-            const baseClasses = ['icon', 'd-inline-block', 'text-center'];
+            // Flexbox для центрирования иконки внутри квадратной обертки
+            const baseClasses = ['icon', 'd-flex', 'align-items-center', 'justify-content-center'];
             if (this.iconOpacity === 0.5) baseClasses.push('opacity-50');
 
             if (!window.classManager) {
@@ -295,9 +296,9 @@ window.cmpButton = {
 
         // CSS классы для внутреннего контейнера
         // ВАЖНО: Вертикальный padding (py-*) управляется через CSS в зависимости от размера кнопки
-        // Горизонтальный padding (px-*) остается нативным Bootstrap
+        // Горизонтальный padding (px-*) управляется через classesAdd.container при необходимости
         containerClasses() {
-            const baseClasses = ['d-flex', 'align-items-center', 'px-3', 'px-md-3'];
+            const baseClasses = ['d-flex', 'align-items-center'];
 
             if (!window.classManager) {
                 console.error('classManager not found in containerClasses');

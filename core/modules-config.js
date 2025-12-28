@@ -67,6 +67,13 @@
                 type: 'local',
                 deps: [],
                 category: 'utilities'
+            },
+            {
+                id: 'layout-sync',
+                src: 'shared/utils/layout-sync.js',
+                type: 'local',
+                deps: [],
+                category: 'utilities'
             }
         ],
 

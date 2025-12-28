@@ -58,7 +58,8 @@
             menuClassesComputed,
             { 'show': isOpen }
         ]"
-        :style="menuStyle">
+        :style="menuStyle"
+        ref="menuElement">
         <!-- Поисковое поле -->
         <li v-if="searchable" class="px-3 py-2 border-bottom">
             <input

@@ -5,6 +5,9 @@
 <!-- ПРАВИЛА ФОРМАТИРОВАНИЯ ЗАПИСЕЙ
 **КРИТИЧЕСКИ ВАЖНО**: При упоминании HTML-тегов в записях **ЗАПРЕЩЕНО** использовать обычные угловые скобки `<script>`, `<div>`, `<style>` и т.п. — они блокируют Markdown-превью. **ОБЯЗАТЕЛЬНО** использовать математические угловые скобки: ⟨script⟩, ⟨div⟩, ⟨style⟩ (U+27E8/U+27E9). Для скрытых комментариев используйте HTML-комментарии -->
 
+## Удаление фиксированных padding классов из body для динамической синхронизации
+28.12.2025 ◆ Убраны фиксированные классы padding из body для поддержки динамической синхронизации с высотой header/footer ▶ В index.html удалены классы pt-5 pb-5 из ⟨body⟩ элемента, padding теперь устанавливается динамически через утилиту layout-sync на основе реальной высоты header и footer ◉ Обеспечить автоматическую синхронизацию padding body с динамической высотой header и footer @layout @header @footer @responsive @automation
+
 ## Исправления шаблонов для корректной работы механизма classesAdd/classesRemove
 28.12.2025 ◆ Исправлены шаблоны и разметка для устранения конфликтов с механизмом управления классами ▶ В button-template.js удалён жестко заданный class="p-0" с ⟨button⟩ элемента. В button-group-template.js заменён старый проп :class="['flex-grow-0', button.class]" на :classes-add="{ root: button.class ? \`flex-grow-0 \${button.class}\` : 'flex-grow-0' }" для cmp-button, добавлены классы d-flex align-items-center к ⟨label⟩ элементам для checkbox и radio для обеспечения вертикального выравнивания содержимого. В index.html обновлены cmp-dropdown в header: добавлен buttonContainer: 'p-0' в classesAdd и buttonContainer: 'px-3 px-md-3' в classesRemove для управления паддингами контейнера кнопки ◉ Устранить конфликты между жестко заданными классами и механизмом classesAdd/classesRemove, обеспечить правильное выравнивание элементов в группах кнопок @templates @fix @classes @alignment @button-group @header
 

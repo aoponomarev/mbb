@@ -209,7 +209,7 @@
     <!-- TODO: Добавить подключение стилей через модульную систему -->
 
 </head>
-<body class="min-vh-100 pt-5 pb-5 d-flex flex-column">
+<body class="min-vh-100 d-flex flex-column">
     <div id="app" class="flex-grow-1 d-flex flex-column">
         <!-- Header приложения (фиксирован к верху) -->
         <header class="fixed-top bg-primary bg-opacity-75 text-white clearfix">
@@ -217,9 +217,8 @@
             <cmp-dropdown
                 button-text=""
                 button-icon="fas fa-bars"
-                button-variant="link"
-                :classes-add="{ root: 'float-start', button: 'hide-suffix p-5', buttonContainer: 'p-0' }"
-                :classes-remove="{ buttonContainer: 'px-3 px-md-3' }">
+                :menu-offset="-8"
+                :classes-add="{ root: 'float-start', button: 'hide-suffix p-3 rounded-0 border-0 shadow-none text-decoration-none', buttonContainer: 'p-0' }">
                 <template #items>
                     <li><dropdown-menu-item title="Пункт меню 1" @click="handleClick"></dropdown-menu-item></li>
                     <li><dropdown-menu-item title="Пункт меню 2" @click="handleClick"></dropdown-menu-item></li>
@@ -230,9 +229,8 @@
             <cmp-dropdown
                 button-text=""
                 button-icon="fas fa-cog"
-                button-variant="link"
-                :classes-add="{ root: 'float-end', button: 'hide-suffix p-5', buttonContainer: 'p-0' }"
-                :classes-remove="{ buttonContainer: 'px-3 px-md-3' }">
+                :menu-offset="-8"
+                :classes-add="{ root: 'float-end', button: 'hide-suffix p-3 rounded-0 border-0 shadow-none text-decoration-none', buttonContainer: 'p-0' }">
                 <template #items>
                     <li><dropdown-menu-item title="Настройка 1" @click="handleClick"></dropdown-menu-item></li>
                     <li><dropdown-menu-item title="Настройка 2" @click="handleClick"></dropdown-menu-item></li>
@@ -810,6 +808,31 @@
                                 @click="handleClick">
                             </cmp-button>
                         </div>
+                    </div>
+
+                    <!-- Размеры с иконками (квадратные обертки иконок) -->
+                    <div class="mb-4">
+                        <h3 class="h5 mb-3">Размеры с иконками (квадратные обертки иконок)</h3>
+                        <div class="d-flex flex-wrap align-items-center gap-2 mb-3">
+                            <cmp-button
+                                label="Small"
+                                icon="fas fa-save"
+                                size="sm"
+                                @click="handleClick">
+                            </cmp-button>
+                            <cmp-button
+                                label="Default"
+                                icon="fas fa-save"
+                                @click="handleClick">
+                            </cmp-button>
+                            <cmp-button
+                                label="Large"
+                                icon="fas fa-save"
+                                size="lg"
+                                @click="handleClick">
+                            </cmp-button>
+                        </div>
+                        <p class="text-muted small">Обратите внимание: обертки иконок квадратные и масштабируются вместе с размером кнопки (width: 1.6em, aspect-ratio: 1/1, flexbox центрирование)</p>
                     </div>
 
                     <!-- С суффиксами -->

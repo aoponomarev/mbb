@@ -112,6 +112,13 @@ window.cmpDropdown = {
             type: Object,
             default: () => ({})
         },
+        menuOffset: {
+            type: [Number, Array],
+            default: null
+            // Число: [0, -16] (x, y в пикселях)
+            // Массив: [0, -16] (x, y в пикселях)
+            // null: использовать дефолтный offset Bootstrap
+        },
 
         // === ID для Bootstrap (опционально) ===
         dropdownId: {
@@ -134,9 +141,7 @@ window.cmpDropdown = {
         // Отслеживаем изменения classesAdd для отладки
         classesAdd: {
             handler(newVal, oldVal) {
-                // #region agent log
-                fetch('http://127.0.0.1:7243/ingest/6397d191-f6f2-43f4-b4da-44a3482bedec',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'dropdown.js:watch:classesAdd',message:'classesAdd changed',data:{newVal,oldVal,buttonClassesForDropdown:this.buttonClassesForDropdown},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'D'})}).catch(()=>{});
-                // #endregion
+                // Логирование удалено после отладки
             },
             deep: true,
             immediate: true
@@ -353,9 +358,6 @@ window.cmpDropdown = {
     },
 
     mounted() {
-        // #region agent log
-        fetch('http://127.0.0.1:7243/ingest/6397d191-f6f2-43f4-b4da-44a3482bedec',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'dropdown.js:mounted',message:'dropdown mounted',data:{classesAdd:this.classesAdd,classesRemove:this.classesRemove,buttonClassesForDropdown:this.buttonClassesForDropdown},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'D'})}).catch(()=>{});
-        // #endregion
         // Инициализация Bootstrap Dropdown через JavaScript API
         // КРИТИЧЕСКИ ВАЖНО: Сохраняем совместимость с Bootstrap API
         this.$nextTick(() => {
@@ -371,9 +373,20 @@ window.cmpDropdown = {
                 }
 
                 if (toggleElement) {
-                    this.dropdownInstance = new window.bootstrap.Dropdown(toggleElement, {
-                        // Опции Bootstrap Dropdown можно передать через props при необходимости
-                    });
+                    // Подготовка опций для Bootstrap Dropdown
+                    const dropdownOptions = {};
+
+                    // Если указан menuOffset, используем его для Popper.js offset
+                    if (this.menuOffset !== null) {
+                        // Преобразуем в формат Popper.js: [x, y] или число (только y)
+                        if (Array.isArray(this.menuOffset)) {
+                            dropdownOptions.offset = this.menuOffset;
+                        } else if (typeof this.menuOffset === 'number') {
+                            dropdownOptions.offset = [0, this.menuOffset];
+                        }
+                    }
+
+                    this.dropdownInstance = new window.bootstrap.Dropdown(toggleElement, dropdownOptions);
 
                     // Подписка на события Bootstrap для синхронизации состояния
                     this.$refs.dropdownContainer.addEventListener('show.bs.dropdown', () => {
@@ -416,4 +429,5 @@ window.cmpDropdown = {
         }
     }
 };
+
 
