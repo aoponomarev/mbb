@@ -157,6 +157,9 @@ window.cmpDropdown = {
                 this.classesAdd?.root,
                 this.classesRemove?.root
             );
+            // #region agent log
+            fetch('http://127.0.0.1:7243/ingest/6397d191-f6f2-43f4-b4da-44a3482bedec',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'dropdown.js:dropdownClasses',message:'dropdownClasses EXIT',data:{result,baseClasses},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'D'})}).catch(()=>{});
+            // #endregion
             return result;
         },
 
@@ -195,6 +198,9 @@ window.cmpDropdown = {
         // Классы для кнопки триггера (для передачи в cmp-button через classesAdd/classesRemove)
         // Передаем classesAdd.button как root, classesAdd.buttonIcon как icon и т.д.
         buttonClassesForDropdown() {
+            // #region agent log
+            fetch('http://127.0.0.1:7243/ingest/6397d191-f6f2-43f4-b4da-44a3482bedec',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'dropdown.js:buttonClassesForDropdown',message:'buttonClassesForDropdown ENTRY',data:{classesAdd:this.classesAdd,classesAddButton:this.classesAdd?.button,classesAddButtonIcon:this.classesAdd?.buttonIcon,classesAddButtonContainer:this.classesAdd?.buttonContainer},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'A,B'})}).catch(()=>{});
+            // #endregion
             // ВАЖНО: Возвращаем объект с undefined вместо пропуска свойств
             // Это обеспечивает стабильную структуру объекта для Vue реактивности
             const result = {
@@ -204,6 +210,9 @@ window.cmpDropdown = {
                 label: this.classesAdd?.buttonLabel || undefined,
                 suffix: this.classesAdd?.buttonSuffix || undefined
             };
+            // #region agent log
+            fetch('http://127.0.0.1:7243/ingest/6397d191-f6f2-43f4-b4da-44a3482bedec',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'dropdown.js:buttonClassesForDropdown',message:'buttonClassesForDropdown EXIT',data:{result},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'A,B'})}).catch(()=>{});
+            // #endregion
             return result;
         },
         buttonClassesRemoveForDropdown() {

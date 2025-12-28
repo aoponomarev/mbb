@@ -46,9 +46,6 @@
         <span v-else-if="icon"
               :class="iconClasses"
               :style="{
-                  aspectRatio: '1 / 1',
-                  width: '1.6em',
-                  marginRight: '0em',
                   ...(iconOpacity !== 0.5 && iconOpacity !== 1 ? { opacity: iconOpacity } : {})
               }"
               :title="tooltipIcon"

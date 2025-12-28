@@ -201,16 +201,17 @@ window.cmpButton = {
                 this.classesAdd?.root,
                 this.classesRemove?.root
             );
+            // #region agent log
+            fetch('http://127.0.0.1:7243/ingest/6397d191-f6f2-43f4-b4da-44a3482bedec',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'button.js:buttonClasses',message:'buttonClasses EXIT',data:{result,baseClasses},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'A,B,C'})}).catch(()=>{});
+            // #endregion
             return result;
         },
 
         // CSS классы для обертки иконки (icon)
         iconClasses() {
-            // #region agent log
-            fetch('http://127.0.0.1:7243/ingest/6397d191-f6f2-43f4-b4da-44a3482bedec',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'button.js:iconClasses',message:'iconClasses ENTRY',data:{classesAdd:this.classesAdd,classesAddIcon:this.classesAdd?.icon,classesAddIconType:typeof this.classesAdd?.icon,classesAddIconValue:this.classesAdd?.icon,classesRemove:this.classesRemove,classesRemoveIcon:this.classesRemove?.icon,instanceHash:this.instanceHash},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'A,B'})}).catch(()=>{});
-            // #endregion
             // Flexbox для центрирования иконки внутри квадратной обертки
-            const baseClasses = ['icon', 'd-flex', 'align-items-center', 'justify-content-center'];
+            // mx-1 - минимальные горизонтальные отступы слева и справа (Bootstrap класс)
+            const baseClasses = ['icon', 'd-flex', 'align-items-center', 'justify-content-center', 'mx-1'];
             if (this.iconOpacity === 0.5) baseClasses.push('opacity-50');
 
             if (!window.classManager) {
@@ -230,7 +231,8 @@ window.cmpButton = {
 
         // CSS классы для обертки текста (label)
         labelClasses() {
-            const baseClasses = ['text-nowrap'];
+            // mx-1 - минимальные горизонтальные отступы слева и справа (Bootstrap класс)
+            const baseClasses = ['text-nowrap', 'mx-1'];
 
             if (!window.classManager) {
                 console.error('classManager not found in labelClasses');
@@ -247,7 +249,8 @@ window.cmpButton = {
 
         // CSS классы для обертки суффиксов (suffix)
         suffixClasses() {
-            const baseClasses = ['d-flex', 'align-items-center', 'ms-1', 'suffix-container'];
+            // mx-1 - минимальные горизонтальные отступы слева и справа (Bootstrap класс)
+            const baseClasses = ['d-flex', 'align-items-center', 'mx-1', 'suffix-container'];
 
             if (!window.classManager) {
                 console.error('classManager not found in suffixClasses');
