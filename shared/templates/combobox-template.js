@@ -36,7 +36,7 @@
     'use strict';
 
     const TEMPLATE = `<!-- Режим простого текстового поля -->
-<div v-if="mode === 'input'" class="position-relative">
+<div v-if="mode === 'input'" :class="inputModeClasses">
     <input type="text"
            :class="[inputClasses, { 'pe-5': clearable && modelValue }]"
            :placeholder="placeholder"
@@ -100,10 +100,9 @@
     </button>
 
     <!-- Выпадающее меню -->
-    <ul class="dropdown-menu dropdown-menu-end"
-        :class="[
-            { 'show': isOpen },
-            menuClasses
+    <ul :class="[
+            menuClassesComputed,
+            { 'show': isOpen }
         ]"
         :style="menuStyle">
         <!-- Прокручиваемая область для виртуального скроллинга -->

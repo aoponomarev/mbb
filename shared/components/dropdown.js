@@ -93,7 +93,17 @@ window.cmpDropdown = {
             default: () => []
         },
 
-        // === Дополнительные классы ===
+        // === Управление классами ===
+        classesAdd: {
+            type: Object,
+            default: () => ({})
+            // Пример: { root: 'float-start', button: 'custom-button', menu: 'custom-menu' }
+        },
+        classesRemove: {
+            type: Object,
+            default: () => ({})
+            // Пример: { root: 'some-class', button: 'another-class', menu: 'yet-another-class' }
+        },
         menuClasses: {
             type: String,
             default: ''
@@ -123,13 +133,45 @@ window.cmpDropdown = {
     computed: {
         // CSS классы для корневого элемента dropdown
         dropdownClasses() {
-            const classes = ['dropdown', 'dropdown-responsive', this.instanceHash];
+            const baseClasses = ['dropdown', 'dropdown-responsive', this.instanceHash];
 
             // Условные классы для адаптивности
-            if (this.buttonIcon) classes.push('has-icon');
-            if (this.buttonTextShort) classes.push('has-text-short');
+            if (this.buttonIcon) baseClasses.push('has-icon');
+            if (this.buttonTextShort) baseClasses.push('has-text-short');
 
-            return classes.join(' ');
+            // Управление классами через classesAdd и classesRemove
+            if (!window.classManager) {
+                console.error('classManager not found in dropdownClasses');
+                return baseClasses.join(' ');
+            }
+
+            return window.classManager.processClassesToString(
+                baseClasses,
+                this.classesAdd?.root,
+                this.classesRemove?.root
+            );
+        },
+
+        // CSS классы для выпадающего меню
+        menuClassesComputed() {
+            const baseClasses = ['dropdown-menu'];
+
+            // Добавляем классы из prop menuClasses (для обратной совместимости)
+            if (this.menuClasses) {
+                const extraClasses = this.menuClasses.split(' ').filter(c => c);
+                baseClasses.push(...extraClasses);
+            }
+
+            // Управление классами через classesAdd и classesRemove
+            if (!window.classManager) {
+                return baseClasses.join(' ');
+            }
+
+            return window.classManager.processClassesToString(
+                baseClasses,
+                this.classesAdd?.menu,
+                this.classesRemove?.menu
+            );
         },
 
         // Атрибуты для кнопки триггера (для передачи в cmp-button)
@@ -140,6 +182,25 @@ window.cmpDropdown = {
                 'id': this.dropdownId,
                 'class': 'dropdown-toggle'
             };
+        },
+
+        // Классы для кнопки триггера (для передачи в cmp-button через classesAdd/classesRemove)
+        // Передаем classesAdd.button как root, classesAdd.buttonIcon как icon и т.д.
+        buttonClassesForDropdown() {
+            const result = {};
+            if (this.classesAdd?.button) result.root = this.classesAdd.button;
+            if (this.classesAdd?.buttonIcon) result.icon = this.classesAdd.buttonIcon;
+            if (this.classesAdd?.buttonLabel) result.label = this.classesAdd.buttonLabel;
+            if (this.classesAdd?.buttonSuffix) result.suffix = this.classesAdd.buttonSuffix;
+            return result;
+        },
+        buttonClassesRemoveForDropdown() {
+            const result = {};
+            if (this.classesRemove?.button) result.root = this.classesRemove.button;
+            if (this.classesRemove?.buttonIcon) result.icon = this.classesRemove.buttonIcon;
+            if (this.classesRemove?.buttonLabel) result.label = this.classesRemove.buttonLabel;
+            if (this.classesRemove?.buttonSuffix) result.suffix = this.classesRemove.buttonSuffix;
+            return result;
         },
 
         // Детерминированный хэш экземпляра на основе родительского контекста и props

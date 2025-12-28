@@ -149,7 +149,17 @@ window.cmpCombobox = {
             default: null
         },
 
-        // === Дополнительные ===
+        // === Управление классами ===
+        classesAdd: {
+            type: Object,
+            default: () => ({})
+            // Пример: { root: 'custom-root', menu: 'custom-menu' }
+        },
+        classesRemove: {
+            type: Object,
+            default: () => ({})
+            // Пример: { root: 'some-class', menu: 'another-class' }
+        },
         menuClasses: {
             type: String,
             default: ''
@@ -209,9 +219,59 @@ window.cmpCombobox = {
 
         // CSS классы для input-group
         inputGroupClasses() {
-            const classes = [];
-            if (this.size) classes.push(`input-group-${this.size}`);
-            return classes.join(' ');
+            const baseClasses = [];
+            if (this.size) baseClasses.push(`input-group-${this.size}`);
+
+            // Управление классами через classesAdd и classesRemove
+            if (!window.classManager) {
+                console.error('classManager not found in inputGroupClasses');
+                return baseClasses.join(' ');
+            }
+
+            return window.classManager.processClassesToString(
+                baseClasses,
+                this.classesAdd?.root,
+                this.classesRemove?.root
+            );
+        },
+
+        // CSS классы для режима input
+        inputModeClasses() {
+            const baseClasses = ['position-relative'];
+
+            // Управление классами через classesAdd и classesRemove
+            if (!window.classManager) {
+                console.error('classManager not found in inputModeClasses');
+                return baseClasses.join(' ');
+            }
+
+            return window.classManager.processClassesToString(
+                baseClasses,
+                this.classesAdd?.root,
+                this.classesRemove?.root
+            );
+        },
+
+        // CSS классы для выпадающего меню
+        menuClassesComputed() {
+            const baseClasses = ['dropdown-menu', 'dropdown-menu-end'];
+
+            // Добавляем классы из prop menuClasses (для обратной совместимости)
+            if (this.menuClasses) {
+                const extraClasses = this.menuClasses.split(' ').filter(c => c);
+                baseClasses.push(...extraClasses);
+            }
+
+            // Управление классами через classesAdd и classesRemove
+            if (!window.classManager) {
+                return baseClasses.join(' ');
+            }
+
+            return window.classManager.processClassesToString(
+                baseClasses,
+                this.classesAdd?.menu,
+                this.classesRemove?.menu
+            );
         },
 
         // CSS классы для input

@@ -112,6 +112,18 @@ window.cmpDropdownMenuItem = {
             validator: (value) => value >= 0 && value <= 1
         },
 
+        // === Управление классами ===
+        classesAdd: {
+            type: Object,
+            default: () => ({})
+            // Пример: { root: 'custom-root', icon: 'custom-icon', subtitle: 'custom-subtitle', suffix: 'custom-suffix' }
+        },
+        classesRemove: {
+            type: Object,
+            default: () => ({})
+            // Пример: { root: 'some-class', icon: 'another-class' }
+        }
+
     },
 
     emits: ['click', 'click-icon', 'click-text', 'click-suffix'],
@@ -124,12 +136,70 @@ window.cmpDropdownMenuItem = {
 
         // CSS классы для корневого элемента
         itemClasses() {
-            const classes = ['dropdown-menu-item-responsive', this.instanceHash];
+            const baseClasses = ['dropdown-menu-item-responsive', this.instanceHash];
             if (this.subtitle) {
                 // По умолчанию подзаголовок скрыт на мобильных
-                classes.push('hide-subtitle-mobile');
+                baseClasses.push('hide-subtitle-mobile');
             }
-            return classes.join(' ');
+
+            // Управление классами через classesAdd и classesRemove
+            if (!window.classManager) {
+                console.error('classManager not found in itemClasses');
+                return baseClasses.join(' ');
+            }
+
+            return window.classManager.processClassesToString(
+                baseClasses,
+                this.classesAdd?.root,
+                this.classesRemove?.root
+            );
+        },
+
+        // CSS классы для иконки
+        iconClasses() {
+            const baseClasses = ['icon', 'd-flex', 'align-items-center', 'me-2', 'pt-1'];
+            if (this.iconOpacity === 0.5) baseClasses.push('opacity-50');
+
+            if (!window.classManager) {
+                return baseClasses.join(' ');
+            }
+
+            return window.classManager.processClassesToString(
+                baseClasses,
+                this.classesAdd?.icon,
+                this.classesRemove?.icon
+            );
+        },
+
+        // CSS классы для подзаголовка
+        subtitleClasses() {
+            const baseClasses = ['subtitle', 'd-block', 'mt-1', 'lh-sm'];
+            if (this.subtitleOpacity === 0.5) baseClasses.push('opacity-50');
+
+            if (!window.classManager) {
+                return baseClasses.join(' ');
+            }
+
+            return window.classManager.processClassesToString(
+                baseClasses,
+                this.classesAdd?.subtitle,
+                this.classesRemove?.subtitle
+            );
+        },
+
+        // CSS классы для суффикса
+        suffixClasses() {
+            const baseClasses = ['d-flex', 'align-items-center', 'ms-2', 'pt-1'];
+
+            if (!window.classManager) {
+                return baseClasses.join(' ');
+            }
+
+            return window.classManager.processClassesToString(
+                baseClasses,
+                this.classesAdd?.suffix,
+                this.classesRemove?.suffix
+            );
         },
 
         // Детерминированный хэш экземпляра на основе родительского контекста и props

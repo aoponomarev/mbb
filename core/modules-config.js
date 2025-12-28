@@ -60,6 +60,13 @@
                 type: 'local',
                 deps: [],
                 category: 'utilities'
+            },
+            {
+                id: 'class-manager',
+                src: 'shared/utils/class-manager.js',
+                type: 'local',
+                deps: [],
+                category: 'utilities'
             }
         ],
 

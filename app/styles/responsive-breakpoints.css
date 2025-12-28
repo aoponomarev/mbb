@@ -152,6 +152,12 @@
    КОМПОНЕНТ DROPDOWN
    ============================================================================ */
 
+/* Скрытие суффиксов (chevron) в кнопке dropdown при использовании класса hide-suffix */
+.dropdown-responsive.hide-suffix .suffix-container,
+.btn-responsive.hide-suffix .suffix-container {
+  display: none !important;
+}
+
 /* Базовые стили (mobile-first) */
 .dropdown-responsive .icon {
   display: inline;

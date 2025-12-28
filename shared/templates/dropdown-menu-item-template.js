@@ -40,9 +40,8 @@
     <div class="d-flex align-items-start px-2 py-2">
         <!-- Левая иконка -->
         <span v-if="icon"
-              class="icon d-flex align-items-center me-2 pt-1"
-              :class="iconOpacity === 0.5 ? 'opacity-50' : ''"
-              :style="iconOpacity !== 0.5 ? { opacity: iconOpacity } : {}"
+              :class="iconClasses"
+              :style="iconOpacity !== 0.5 && iconOpacity !== 1 ? { opacity: iconOpacity } : {}"
               :data-bs-toggle="tooltipIconBootstrap && tooltipIcon ? 'tooltip' : null"
               :data-bs-title="tooltipIconBootstrap && tooltipIcon ? tooltipIcon : null"
               :title="!tooltipIconBootstrap && tooltipIcon ? tooltipIcon : null"
@@ -59,14 +58,13 @@
              @click.stop="handleTextClick">
             <div class="lh-sm text-wrap">{{ title }}</div>
             <small v-if="subtitle"
-                   class="subtitle d-block mt-1 lh-sm"
-                   :class="subtitleOpacity === 0.5 ? 'opacity-50' : ''"
-                   :style="subtitleOpacity !== 0.5 ? { opacity: subtitleOpacity } : {}">{{ subtitle }}</small>
+                   :class="subtitleClasses"
+                   :style="subtitleOpacity !== 0.5 && subtitleOpacity !== 1 ? { opacity: subtitleOpacity } : {}">{{ subtitle }}</small>
         </div>
 
         <!-- Суффикс (badge/icon/indicator/chevron/info) -->
         <span v-if="suffix"
-              class="d-flex align-items-center ms-2 pt-1"
+              :class="suffixClasses"
               :data-bs-toggle="tooltipSuffixBootstrap && suffixTooltip ? 'tooltip' : null"
               :data-bs-title="tooltipSuffixBootstrap && suffixTooltip ? suffixTooltip : null"
               :title="!tooltipSuffixBootstrap && suffixTooltip ? suffixTooltip : null"

@@ -44,7 +44,9 @@
         :icon="buttonIcon"
         :variant="buttonVariant"
         :size="buttonSize"
-        :button-attributes="buttonAttributes">
+        :button-attributes="buttonAttributes"
+        :classes-add="buttonClassesForDropdown"
+        :classes-remove="buttonClassesRemoveForDropdown">
     </cmp-button>
 
     <!-- Кастомная кнопка через слот -->
@@ -52,10 +54,9 @@
 
     <!-- Выпадающее меню -->
     <ul
-        class="dropdown-menu"
         :class="[
-            { 'show': isOpen },
-            menuClasses
+            menuClassesComputed,
+            { 'show': isOpen }
         ]"
         :style="menuStyle">
         <!-- Поисковое поле -->

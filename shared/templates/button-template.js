@@ -45,8 +45,7 @@
 
         <!-- Левая иконка -->
         <span v-else-if="icon"
-              class="icon d-inline-block text-center"
-              :class="iconOpacity === 0.5 ? 'opacity-50' : ''"
+              :class="iconClasses"
               :style="{
                   width: '1.6em',
                   marginRight: '0em',
@@ -59,7 +58,7 @@
 
         <!-- Текстовая область -->
         <span v-if="label || labelShort"
-              class="text-nowrap"
+              :class="labelClasses"
               :title="tooltipText"
               @click.stop="handleTextClick">
             <!-- Укороченный текст (только на мобильных, если нет иконки, но есть labelShort) -->
@@ -77,7 +76,7 @@
 
         <!-- Суффикс (массив элементов) -->
         <span v-if="suffixArray.length > 0 && !loading"
-              class="d-flex align-items-center ms-1">
+              :class="suffixClasses">
             <template v-for="(item, index) in suffixArray" :key="index">
                 <!-- Badge -->
                 <span v-if="item.type === 'badge'"

@@ -212,10 +212,31 @@
 <body class="min-vh-100 pt-5 pb-5 d-flex flex-column">
     <div id="app" class="flex-grow-1 d-flex flex-column">
         <!-- Header приложения (фиксирован к верху) -->
-        <header class="fixed-top bg-primary bg-opacity-75 text-white py-3">
-            <div class="container-fluid">
-                <h1 class="h5 mb-0">Header</h1>
-            </div>
+        <header class="fixed-top bg-primary bg-opacity-75 text-white clearfix">
+            <!-- Кнопка меню (гамбургер) - слева -->
+            <cmp-dropdown
+                button-text=""
+                button-icon="fas fa-bars"
+                button-variant="link"
+                :classes-add="{ root: 'float-start', button: 'hide-suffix' }">
+                <template #items>
+                    <li><dropdown-menu-item title="Пункт меню 1" @click="handleClick"></dropdown-menu-item></li>
+                    <li><dropdown-menu-item title="Пункт меню 2" @click="handleClick"></dropdown-menu-item></li>
+                    <li><dropdown-menu-item title="Пункт меню 3" @click="handleClick"></dropdown-menu-item></li>
+                </template>
+            </cmp-dropdown>
+            <!-- Кнопка настроек (шестеренка) - справа -->
+            <cmp-dropdown
+                button-text=""
+                button-icon="fas fa-cog"
+                button-variant="link"
+                :classes-add="{ root: 'float-end', button: 'hide-suffix' }">
+                <template #items>
+                    <li><dropdown-menu-item title="Настройка 1" @click="handleClick"></dropdown-menu-item></li>
+                    <li><dropdown-menu-item title="Настройка 2" @click="handleClick"></dropdown-menu-item></li>
+                    <li><dropdown-menu-item title="Настройка 3" @click="handleClick"></dropdown-menu-item></li>
+                </template>
+            </cmp-dropdown>
         </header>
 
         <!-- Основной контент с отступами для header и footer (Bootstrap spacing utilities) -->

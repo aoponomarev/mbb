@@ -60,9 +60,16 @@ window.cmpButtonGroup = {
             type: String,
             default: null
         },
-        class: {
-            type: [String, Array],
-            default: ''
+        // === Управление классами ===
+        classesAdd: {
+            type: Object,
+            default: () => ({})
+            // Пример: { root: 'custom-root', dropdown: 'custom-dropdown' }
+        },
+        classesRemove: {
+            type: Object,
+            default: () => ({})
+            // Пример: { root: 'some-class', dropdown: 'another-class' }
         },
 
         // === Адаптивность (схлопывание в dropdown) ===
@@ -137,41 +144,44 @@ window.cmpButtonGroup = {
     computed: {
         // CSS классы для группы кнопок
         groupClasses() {
-            const classes = ['btn-group'];
-            if (this.size) classes.push(`btn-group-${this.size}`);
+            const baseClasses = ['btn-group'];
+            if (this.size) baseClasses.push(`btn-group-${this.size}`);
 
-            // Проверяем, есть ли адаптивный класс для вертикальной ориентации в prop class
-            const hasAdaptiveVertical = this.class && (
-                (typeof this.class === 'string' && this.class.includes('btn-group-responsive-vertical')) ||
-                (Array.isArray(this.class) && this.class.some(c => typeof c === 'string' && c.includes('btn-group-responsive-vertical')))
+            // Проверяем, есть ли адаптивный класс для вертикальной ориентации в classesAdd.root
+            const classesAddRoot = this.classesAdd?.root;
+            const hasAdaptiveVertical = classesAddRoot && (
+                (typeof classesAddRoot === 'string' && classesAddRoot.includes('btn-group-responsive-vertical')) ||
+                (Array.isArray(classesAddRoot) && classesAddRoot.some(c => typeof c === 'string' && c.includes('btn-group-responsive-vertical')))
             );
 
             // Если задан verticalBreakpoint, автоматически добавляем адаптивный класс
             if (this.verticalBreakpoint && !hasAdaptiveVertical) {
-                classes.push(`btn-group-responsive-vertical-${this.verticalBreakpoint}`);
+                baseClasses.push(`btn-group-responsive-vertical-${this.verticalBreakpoint}`);
             }
 
             // Добавляем btn-group-vertical только если vertical=true И нет адаптивного класса
             if (this.vertical && !hasAdaptiveVertical && !this.verticalBreakpoint) {
-                classes.push('btn-group-vertical');
+                baseClasses.push('btn-group-vertical');
             }
 
-            if (this.instanceHash) classes.push(this.instanceHash);
+            if (this.instanceHash) baseClasses.push(this.instanceHash);
 
             // Классы видимости для адаптивного схлопывания
             if (this.collapseBreakpoint) {
-                classes.push(`d-none`, `d-${this.collapseBreakpoint}-inline-flex`);
+                baseClasses.push(`d-none`, `d-${this.collapseBreakpoint}-inline-flex`);
             }
 
-            // Дополнительные классы из prop class
-            if (this.class) {
-                const extraClasses = Array.isArray(this.class)
-                    ? this.class
-                    : this.class.split(' ').filter(c => c);
-                classes.push(...extraClasses);
+            // Управление классами через classesAdd и classesRemove
+            if (!window.classManager) {
+                console.error('classManager not found in groupClasses');
+                return baseClasses.join(' ');
             }
 
-            return classes.join(' ');
+            return window.classManager.processClassesToString(
+                baseClasses,
+                this.classesAdd?.root,
+                this.classesRemove?.root
+            );
         },
 
         // Атрибуты для группы
@@ -180,6 +190,22 @@ window.cmpButtonGroup = {
                 role: this.role,
                 'aria-label': this.ariaLabel || undefined
             };
+        },
+
+        // Классы для dropdown (для передачи в cmp-dropdown)
+        dropdownClassesForGroup() {
+            const result = {};
+            if (this.classesAdd?.dropdown) result.root = this.classesAdd.dropdown;
+            if (this.classesAdd?.dropdownButton) result.button = this.classesAdd.dropdownButton;
+            if (this.classesAdd?.dropdownMenu) result.menu = this.classesAdd.dropdownMenu;
+            return result;
+        },
+        dropdownClassesRemoveForGroup() {
+            const result = {};
+            if (this.classesRemove?.dropdown) result.root = this.classesRemove.dropdown;
+            if (this.classesRemove?.dropdownButton) result.button = this.classesRemove.dropdownButton;
+            if (this.classesRemove?.dropdownMenu) result.menu = this.classesRemove.dropdownMenu;
+            return result;
         },
 
         // Классы для dropdown контейнера

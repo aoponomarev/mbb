@@ -126,6 +126,18 @@ window.cmpButton = {
             validator: (value) => value >= 0 && value <= 1
         },
 
+        // === Управление классами ===
+        classesAdd: {
+            type: Object,
+            default: () => ({})
+            // Пример: { root: 'float-start', icon: 'custom-icon', label: 'custom-label', suffix: 'hide-suffix' }
+        },
+        classesRemove: {
+            type: Object,
+            default: () => ({})
+            // Пример: { root: 'some-class', icon: 'another-class' }
+        }
+
     },
 
     emits: ['click', 'click-icon', 'click-text', 'click-suffix'],
@@ -151,35 +163,93 @@ window.cmpButton = {
             return baseSuffix;
         },
 
-        // CSS классы для кнопки
+        // CSS классы для корневого элемента (root)
         buttonClasses() {
-            const classes = ['btn', 'btn-responsive', this.instanceHash];
+            const baseClasses = ['btn', 'btn-responsive', this.instanceHash];
 
             // Условные классы для адаптивности
-            if (this.icon) classes.push('has-icon');
-            if (this.labelShort) classes.push('has-label-short');
-
+            if (this.icon) baseClasses.push('has-icon');
+            if (this.labelShort) baseClasses.push('has-label-short');
 
             // Если disabled и не loading - используем нейтральные цвета (без цвета из темы)
             if (this.disabled && !this.loading) {
-                classes.push('btn-secondary', 'text-secondary', 'bg-secondary', 'bg-opacity-10', 'border-secondary');
+                baseClasses.push('btn-secondary', 'text-secondary', 'bg-secondary', 'bg-opacity-10', 'border-secondary');
             } else {
                 // Обычный вариант из темы
-                classes.push(`btn-${this.variant}`);
+                baseClasses.push(`btn-${this.variant}`);
             }
 
-            if (this.size) classes.push(`btn-${this.size}`);
-            if (this.disabled) classes.push('disabled');
+            if (this.size) baseClasses.push(`btn-${this.size}`);
+            if (this.disabled) baseClasses.push('disabled');
 
             // Добавить дополнительные классы из buttonAttributes (если есть)
             if (this.buttonAttributes.class) {
                 const extraClasses = Array.isArray(this.buttonAttributes.class)
                     ? this.buttonAttributes.class
-                    : this.buttonAttributes.class.split(' ');
-                classes.push(...extraClasses);
+                    : this.buttonAttributes.class.split(' ').filter(c => c);
+                baseClasses.push(...extraClasses);
             }
 
-            return classes.join(' ');
+            // Управление классами через classesAdd и classesRemove
+            if (!window.classManager) {
+                console.error('classManager not found in buttonClasses');
+                return baseClasses.join(' ');
+            }
+
+            return window.classManager.processClassesToString(
+                baseClasses,
+                this.classesAdd?.root,
+                this.classesRemove?.root
+            );
+        },
+
+        // CSS классы для обертки иконки (icon)
+        iconClasses() {
+            const baseClasses = ['icon', 'd-inline-block', 'text-center'];
+            if (this.iconOpacity === 0.5) baseClasses.push('opacity-50');
+
+            if (!window.classManager) {
+                console.error('classManager not found in iconClasses');
+                return baseClasses.join(' ');
+            }
+
+            return window.classManager.processClassesToString(
+                baseClasses,
+                this.classesAdd?.icon,
+                this.classesRemove?.icon
+            );
+        },
+
+        // CSS классы для обертки текста (label)
+        labelClasses() {
+            const baseClasses = ['text-nowrap'];
+
+            if (!window.classManager) {
+                console.error('classManager not found in labelClasses');
+                return baseClasses.join(' ');
+            }
+
+            return window.classManager.processClassesToString(
+                baseClasses,
+                this.classesAdd?.label,
+                this.classesRemove?.label
+            );
+        },
+
+        // CSS классы для обертки суффиксов (suffix)
+        suffixClasses() {
+            const baseClasses = ['d-flex', 'align-items-center', 'ms-1', 'suffix-container'];
+
+            if (!window.classManager) {
+                console.error('classManager not found in suffixClasses');
+                return baseClasses.join(' ');
+            }
+
+            return window.classManager.processClassesToString(
+                baseClasses,
+                this.classesAdd?.suffix,
+                this.classesRemove?.suffix
+            );
         },
 
         // Атрибуты для передачи на корневой элемент (исключая class, который обрабатывается отдельно)
@@ -215,6 +285,13 @@ window.cmpButton = {
             const uniqueId = `${parentContext}:${instanceId}`;
             return window.hashGenerator.generateMarkupClass(uniqueId);
         }
+    },
+
+    methods: {
+    },
+
+    mounted() {
+        // Компонент смонтирован, Vue автоматически применит классы через :class в шаблоне
     },
 
     methods: {
