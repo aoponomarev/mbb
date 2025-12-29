@@ -251,6 +251,20 @@
                 type: 'local',
                 deps: [],
                 category: 'templates'
+            },
+            {
+                id: 'app-header-template',
+                src: 'app/templates/app-header-template.js',
+                type: 'local',
+                deps: [],
+                category: 'templates'
+            },
+            {
+                id: 'app-footer-template',
+                src: 'app/templates/app-footer-template.js',
+                type: 'local',
+                deps: [],
+                category: 'templates'
             }
         ],
 
@@ -300,6 +314,20 @@
                 src: 'shared/components/button-group.js',
                 type: 'local',
                 deps: ['vue', 'button', 'dropdown', 'dropdown-menu-item', 'hash-generator', 'auto-markup'],
+                category: 'components'
+            },
+            {
+                id: 'app-header',
+                src: 'app/components/app-header.js',
+                type: 'local',
+                deps: ['vue', 'dropdown'],
+                category: 'components'
+            },
+            {
+                id: 'app-footer',
+                src: 'app/components/app-footer.js',
+                type: 'local',
+                deps: ['vue'],
                 category: 'components'
             }
         ],

@@ -40,7 +40,7 @@
             return;
         }
 
-        if (!window.cmpDropdownMenuItem || !window.cmpButton || !window.cmpDropdown || !window.cmpCombobox || !window.cmpButtonGroup) {
+        if (!window.cmpDropdownMenuItem || !window.cmpButton || !window.cmpDropdown || !window.cmpCombobox || !window.cmpButtonGroup || !window.appHeader || !window.appFooter) {
             console.error('app-ui-root: не все компоненты загружены');
             return;
         }
@@ -53,7 +53,9 @@
                 'cmp-button': window.cmpButton,
                 'cmp-dropdown': window.cmpDropdown,
                 'cmp-combobox': window.cmpCombobox,
-                'cmp-button-group': window.cmpButtonGroup
+                'cmp-button-group': window.cmpButtonGroup,
+                'app-header': window.appHeader,
+                'app-footer': window.appFooter
             },
             data() {
                 // Синхронная инициализация темы (читаем напрямую из localStorage для избежания мерцания)

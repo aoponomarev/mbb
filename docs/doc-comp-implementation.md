@@ -247,12 +247,14 @@ margin-right: 0.5rem; /* 8px - эквивалент gap-2 */
 
 > § <br> ПОРЯДОК ЗАГРУЗКИ СТИЛЕЙ КОМПОНЕНТОВ
 
-Стили компонентов разбиты на отдельные CSS файлы в папке `app/styles/components/`. **Порядок загрузки критически важен** для корректной работы компонентов, так как составные компоненты зависят от базовых.
+Стили компонентов разбиты на отдельные CSS файлы в папке `styles/wrappers/` (обертки над Bootstrap) и `styles/layout/` (компоненты макета). **Порядок загрузки критически важен** для корректной работы компонентов, так как составные компоненты зависят от базовых.
 
 **Принцип организации:**
 Стили организованы по принципу "от простого к сложному": сначала базовые независимые компоненты, затем составные компоненты, которые их используют.
 
 **Порядок загрузки:**
+
+**Обертки над Bootstrap (`styles/wrappers/`):**
 
 1. **`button.css`** — базовый компонент кнопки
    - Независимый компонент
@@ -271,15 +273,28 @@ margin-right: 0.5rem; /* 8px - эквивалент gap-2 */
    - Зависит от: `button.css` (кнопки внутри группы), `dropdown.css` (при схлопывании в dropdown)
    - Используется в: `cmp-button-group`
 
+**Компоненты макета (`styles/layout/`):**
+
+5. **`header.css`** — стили хедера приложения
+   - Независимый компонент
+   - Содержит многослойную тень и стили для фиксированной темной темы
+
+6. **`footer.css`** — стили футера приложения
+   - Независимый компонент
+   - Содержит многослойную тень направленную вверх
+
 **Реализация в `index.html`:**
 ```html
 <!-- Стили компонентов (порядок загрузки важен!) -->
-<!-- 1. Базовые компоненты (независимые) -->
-<link rel="stylesheet" href="app/styles/components/button.css">
-<link rel="stylesheet" href="app/styles/components/dropdown-menu-item.css">
-<!-- 2. Составные компоненты (зависят от базовых) -->
-<link rel="stylesheet" href="app/styles/components/dropdown.css">
-<link rel="stylesheet" href="app/styles/components/button-group.css">
+<!-- 1. Базовые обертки над Bootstrap (независимые) -->
+<link rel="stylesheet" href="styles/wrappers/button.css">
+<link rel="stylesheet" href="styles/wrappers/dropdown-menu-item.css">
+<!-- 2. Составные обертки над Bootstrap (зависят от базовых) -->
+<link rel="stylesheet" href="styles/wrappers/dropdown.css">
+<link rel="stylesheet" href="styles/wrappers/button-group.css">
+<!-- 3. Компоненты макета -->
+<link rel="stylesheet" href="styles/layout/header.css">
+<link rel="stylesheet" href="styles/layout/footer.css">
 ```
 
 **Важно:**
