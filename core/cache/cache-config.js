@@ -27,6 +27,7 @@
         'portfolios': null,                       // Без TTL (локальные данные)
         'strategies': null,                       // Без TTL (локальные данные)
         'settings': null,                         // Без TTL
+        'theme': null,                            // Без TTL
         'favorites': null,                        // Без TTL
         'ui-state': null                          // Без TTL
     };
@@ -47,7 +48,7 @@
         'cache-first': ['icons-cache', 'coins-list'],
         'network-first': ['market-metrics', 'api-cache'],
         'stale-while-revalidate': ['time-series', 'history'],
-        'cache-only': ['portfolios', 'strategies', 'settings', 'favorites', 'ui-state']
+        'cache-only': ['portfolios', 'strategies', 'settings', 'theme', 'favorites', 'ui-state']
     };
 
     /**

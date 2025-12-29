@@ -53,6 +53,7 @@
 
     const TEMPLATE = `<li class="dropdown-item p-0"
     :class="[itemClasses, { 'active': active, 'disabled': disabled }]"
+    :style="disabled ? {} : { cursor: 'pointer' }"
     @click="handleClick">
     <div class="d-flex align-items-start px-2 py-2">
         <!-- Левая иконка -->

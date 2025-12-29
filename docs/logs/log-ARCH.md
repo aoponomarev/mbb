@@ -5,6 +5,9 @@
 <!-- ПРАВИЛА ФОРМАТИРОВАНИЯ ЗАПИСЕЙ
 **КРИТИЧЕСКИ ВАЖНО**: При упоминании HTML-тегов в записях **ЗАПРЕЩЕНО** использовать обычные угловые скобки `<script>`, `<div>`, `<style>` и т.п. — они блокируют Markdown-превью. **ОБЯЗАТЕЛЬНО** использовать математические угловые скобки: ⟨script⟩, ⟨div⟩, ⟨style⟩ (U+27E8/U+27E9). Для скрытых комментариев используйте HTML-комментарии -->
 
+## Реализация переключения темы приложения
+29.12.2025 ◆ Реализована система переключения темы Light | Dark через Bootstrap data-bs-theme ▶ В app-ui-root.js добавлен метод toggleTheme(): переключение темы, сохранение через window.cacheManager.set('theme'), применение data-bs-theme к ⟨body⟩. Добавлена синхронная инициализация темы в data() с чтением из localStorage для избежания мерцания. В core/cache/cache-config.js добавлен 'theme': null в TTL и 'theme' в стратегию 'cache-only'. Тема сохраняется в слое hot (localStorage) через систему кэширования проекта ◉ Реализовать переключение темы приложения с сохранением в localStorage через единую систему кэширования, обеспечить синхронную инициализацию без мерцания @theme @cache @localStorage @bootstrap @ui
+
 ## Удаление debug-инструментации из компонентов
 29.12.2025 ◆ Удалены все блоки debug-логирования через fetch-запросы к локальному серверу ▶ В button.js удален блок `// #region agent log` с fetch-запросом из `buttonClasses()`. В button-group.js удален блок из `groupClasses()`. В dropdown.js удалены 3 блока из `dropdownClasses()` и `buttonClassesForDropdown()` (ENTRY и EXIT). Все fetch-запросы к `127.0.0.1:7243/ingest/` удалены, что устраняет ошибки `ERR_CONNECTION_REFUSED` в консоли браузера ◉ Очистить production код от debug-инструментации, устранить ошибки подключения к несуществующему серверу @components @cleanup @debug @button @button-group @dropdown
 

@@ -217,13 +217,14 @@
 <body class="min-vh-100 d-flex flex-column">
     <div id="app" class="flex-grow-1 d-flex flex-column">
         <!-- Header приложения (фиксирован к верху) -->
-        <header class="fixed-top bg-primary bg-opacity-75 text-white clearfix">
+        <header class="fixed-top bg-dark clearfix" data-bs-theme="dark" style="box-shadow: 0 2px 4px rgba(30, 35, 45, 0.05), 0 4px 8px rgba(0, 0, 0, 0.2), 0 8px 24px rgba(25, 30, 40, 0.1);">
             <!-- Кнопка меню (гамбургер) - слева -->
             <cmp-dropdown
                 button-text=""
                 button-icon="fas fa-bars"
+                button-variant="outline-light"
                 :menu-offset="-8"
-                :classes-add="{ root: 'float-start', button: 'hide-suffix rounded-0 icon-only', buttonContainer: 'py-3' }">
+                :classes-add="{ root: 'float-start', button: 'hide-suffix rounded-0 icon-only border-0', buttonContainer: 'py-3' }">
                 <template #items>
                     <li><dropdown-menu-item title="Пункт меню 1" @click="handleClick"></dropdown-menu-item></li>
                     <li><dropdown-menu-item title="Пункт меню 2" @click="handleClick"></dropdown-menu-item></li>
@@ -234,10 +235,11 @@
             <cmp-dropdown
                 button-text=""
                 button-icon="fas fa-cog"
+                button-variant="outline-light"
                 :menu-offset="-8"
-                :classes-add="{ root: 'float-end', button: 'hide-suffix rounded-0 icon-only', buttonContainer: 'py-3' }">
+                :classes-add="{ root: 'float-end', button: 'hide-suffix rounded-0 icon-only border-0', buttonContainer: 'py-3', menu: 'text-end' }">
                 <template #items>
-                    <li><dropdown-menu-item title="Настройка 1" @click="handleClick"></dropdown-menu-item></li>
+                    <li><dropdown-menu-item title="Light | Dark Theme" @click="toggleTheme"></dropdown-menu-item></li>
                     <li><dropdown-menu-item title="Настройка 2" @click="handleClick"></dropdown-menu-item></li>
                     <li><dropdown-menu-item title="Настройка 3" @click="handleClick"></dropdown-menu-item></li>
                 </template>
@@ -1468,7 +1470,7 @@
         </div>
 
         <!-- Footer приложения (фиксирован к низу) -->
-        <footer class="fixed-bottom bg-success bg-opacity-75 text-white py-3">
+        <footer class="fixed-bottom bg-body py-3" style="box-shadow: 0 -2px 4px rgba(30, 35, 45, 0.05), 0 -4px 8px rgba(0, 0, 0, 0.2), 0 -8px 24px rgba(25, 30, 40, 0.1);">
             <div class="container-fluid">
                 <p class="mb-0">Footer</p>
             </div>

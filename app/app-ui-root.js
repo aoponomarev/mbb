@@ -56,7 +56,27 @@
                 'cmp-button-group': window.cmpButtonGroup
             },
             data() {
+                // Синхронная инициализация темы (читаем напрямую из localStorage для избежания мерцания)
+                let initialTheme = 'light';
+                try {
+                    const savedTheme = localStorage.getItem('theme');
+                    if (savedTheme === 'dark' || savedTheme === 'light') {
+                        initialTheme = savedTheme;
+                    }
+                } catch (e) {
+                    // Игнорируем ошибки
+                }
+
+                // Применяем тему сразу при инициализации
+                if (initialTheme === 'dark') {
+                    document.body.setAttribute('data-bs-theme', 'dark');
+                } else {
+                    document.body.removeAttribute('data-bs-theme');
+                }
+
                 return {
+                    // Текущая тема приложения
+                    currentTheme: initialTheme,
                     // Данные для dropdown
                     dropdownItems: [
                         { id: 1, name: 'Элемент 1', description: 'Описание элемента 1', icon: 'fas fa-home', labelShort: 'Эл. 1' },
@@ -104,6 +124,25 @@
                 };
             },
             methods: {
+                async toggleTheme() {
+                    // Переключаем тему
+                    this.currentTheme = this.currentTheme === 'light' ? 'dark' : 'light';
+
+                    // Сохраняем через cacheManager (асинхронно)
+                    if (window.cacheManager) {
+                        await window.cacheManager.set('theme', this.currentTheme);
+                    } else {
+                        // Fallback на прямое localStorage, если cacheManager ещё не загружен
+                        localStorage.setItem('theme', this.currentTheme);
+                    }
+
+                    // Применяем тему к body через data-bs-theme (Bootstrap 5)
+                    if (this.currentTheme === 'dark') {
+                        document.body.setAttribute('data-bs-theme', 'dark');
+                    } else {
+                        document.body.removeAttribute('data-bs-theme');
+                    }
+                },
                 handleClick(event) {
                 },
                 handleSuffixClick(event, item) {
@@ -136,6 +175,19 @@
                 }
             }
         }).mount('#app');
+
+        // Инициализация темы при загрузке (если не была применена в data())
+        // Дополнительная проверка на случай, если тема была изменена до монтирования Vue
+        try {
+            const savedTheme = localStorage.getItem('theme');
+            if (savedTheme === 'dark') {
+                document.body.setAttribute('data-bs-theme', 'dark');
+            } else {
+                document.body.removeAttribute('data-bs-theme');
+            }
+        } catch (e) {
+            // Игнорируем ошибки
+        }
 
         // Инициализация автоматической маркировки элементов после монтирования Vue
         // Ждем, чтобы Vue успел смонтировать все компоненты
