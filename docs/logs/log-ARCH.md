@@ -5,6 +5,9 @@
 <!-- ПРАВИЛА ФОРМАТИРОВАНИЯ ЗАПИСЕЙ
 **КРИТИЧЕСКИ ВАЖНО**: При упоминании HTML-тегов в записях **ЗАПРЕЩЕНО** использовать обычные угловые скобки `<script>`, `<div>`, `<style>` и т.п. — они блокируют Markdown-превью. **ОБЯЗАТЕЛЬНО** использовать математические угловые скобки: ⟨script⟩, ⟨div⟩, ⟨style⟩ (U+27E8/U+27E9). Для скрытых комментариев используйте HTML-комментарии -->
 
+## Удаление debug-инструментации из компонентов
+29.12.2025 ◆ Удалены все блоки debug-логирования через fetch-запросы к локальному серверу ▶ В button.js удален блок `// #region agent log` с fetch-запросом из `buttonClasses()`. В button-group.js удален блок из `groupClasses()`. В dropdown.js удалены 3 блока из `dropdownClasses()` и `buttonClassesForDropdown()` (ENTRY и EXIT). Все fetch-запросы к `127.0.0.1:7243/ingest/` удалены, что устраняет ошибки `ERR_CONNECTION_REFUSED` в консоли браузера ◉ Очистить production код от debug-инструментации, устранить ошибки подключения к несуществующему серверу @components @cleanup @debug @button @button-group @dropdown
+
 ## Упрощение валидатора verticalBreakpoint в button-group
 28.12.2025:0c326d2 ◆ Упрощен валидатор prop verticalBreakpoint после удаления неиспользуемых breakpoints ▶ В button-group.js обновлен валидатор verticalBreakpoint: изменен с ['sm', 'md', 'lg', 'xl', 'xxl'] на value === 'sm' (теперь принимает только 'sm' или null). В docs/doc-components.md обновлено описание prop verticalBreakpoint: указано, что поддерживается только 'sm' (576px) ◉ Упростить валидацию после удаления неиспользуемых breakpoints, обновить документацию @components @button-group @validation @refactoring
 

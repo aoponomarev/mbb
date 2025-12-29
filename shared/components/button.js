@@ -201,9 +201,6 @@ window.cmpButton = {
                 this.classesAdd?.root,
                 this.classesRemove?.root
             );
-            // #region agent log
-            fetch('http://127.0.0.1:7243/ingest/6397d191-f6f2-43f4-b4da-44a3482bedec',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'button.js:buttonClasses',message:'buttonClasses EXIT',data:{result,baseClasses},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'A,B,C'})}).catch(()=>{});
-            // #endregion
             return result;
         },
 
