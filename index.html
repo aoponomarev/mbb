@@ -217,7 +217,7 @@
 <body class="min-vh-100 d-flex flex-column">
     <div id="app" class="flex-grow-1 d-flex flex-column">
         <!-- Header приложения (фиксирован к верху) -->
-        <header class="fixed-top bg-dark clearfix" data-bs-theme="dark" style="box-shadow: 0 2px 4px rgba(30, 35, 45, 0.05), 0 4px 8px rgba(0, 0, 0, 0.2), 0 8px 24px rgba(25, 30, 40, 0.1);">
+        <header class="fixed-top bg-dark bg-opacity-90 clearfix" data-bs-theme="dark" style="box-shadow: 0 2px 4px rgba(30, 35, 45, 0.05), 0 4px 8px rgba(0, 0, 0, 0.2), 0 8px 24px rgba(25, 30, 40, 0.1), 0 0 0 1000px rgba(255, 255, 255, 0.1) inset;">
             <!-- Кнопка меню (гамбургер) - слева -->
             <cmp-dropdown
                 button-text=""
@@ -252,7 +252,7 @@
                 <!-- Контент приложения загружается через Vue компоненты -->
                 <div class="container flex-grow-1">
                     <!-- Тестовая секция для визуального контроля высоты -->
-                    <div class="mb-4 p-3 bg-light border rounded">
+                    <div class="mb-4 p-3 border rounded">
                         <h3 class="h6 mb-3">Визуальный контроль высоты элементов</h3>
                         <div class="d-flex align-items-center" style="gap: 0;">
                             <!-- Поле ввода -->
