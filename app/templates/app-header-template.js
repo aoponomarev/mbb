@@ -25,7 +25,7 @@
  * - Фиксированное позиционирование: fixed-top
  * - Темная тема: bg-dark bg-opacity-90, data-bs-theme="dark" (фиксированная, не переключается)
  * - Многослойная тень направленная вниз с белым inset для осветления фона
- * - Кнопки используют outline-light variant с border-0 для прозрачного фона
+ * - Кнопки используют link variant с text-white text-decoration-none для белого цвета без подчеркивания
  * - Меню настроек выровнено по правому краю через text-end
  * Слоты:
  * - #menu-items — элементы меню (гамбургер) слева
@@ -45,9 +45,9 @@
     <cmp-dropdown
         button-text=""
         button-icon="fas fa-bars"
-        button-variant="outline-light"
+        button-variant="link"
         :menu-offset="-8"
-        :classes-add="{ root: 'float-start', button: 'hide-suffix rounded-0 icon-only border-0', buttonContainer: 'py-3' }">
+        :classes-add="{ root: 'float-start', button: 'hide-suffix rounded-0 icon-only border-0 text-white text-decoration-none', buttonIcon: 'text-white', buttonContainer: 'py-3' }">
         <template #items>
             <slot name="menu-items"></slot>
         </template>
@@ -56,9 +56,9 @@
     <cmp-dropdown
         button-text=""
         button-icon="fas fa-cog"
-        button-variant="outline-light"
+        button-variant="link"
         :menu-offset="-8"
-        :classes-add="{ root: 'float-end', button: 'hide-suffix rounded-0 icon-only border-0', buttonContainer: 'py-3', menu: 'text-end' }">
+        :classes-add="{ root: 'float-end', button: 'hide-suffix rounded-0 icon-only border-0 text-white text-decoration-none', buttonIcon: 'text-white', buttonContainer: 'py-3', menu: 'text-end' }">
         <template #items>
             <slot name="settings-items"></slot>
         </template>
