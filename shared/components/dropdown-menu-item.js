@@ -21,8 +21,59 @@
 // - По умолчанию все зоны (иконка, текст, суффикс) эмитят общее событие 'click'
 //   Раздельные события (click-icon, click-text, click-suffix) срабатывают только если назначены явно
 //
+// API КОМПОНЕНТА:
+//
+// Входные параметры (props):
+// Обязательные:
+// - title (String, required) — заголовок пункта меню
+// Опциональные:
+// - icon (String) — CSS класс иконки слева (Font Awesome, Material Symbols)
+// - subtitle (String) — подзаголовок (вторая строка текста)
+// - suffix (Object) — суффикс справа. Формат: { type: 'badge'|'icon'|'indicator'|'chevron'|'info', value: String|Number, variant: String, expanded: Boolean, tooltip: String }
+// - tooltipIcon (String) — всплывающая подсказка для иконки слева (по умолчанию нативная через title, можно переключить на Bootstrap через tooltipIconBootstrap)
+// - tooltipText (String) — всплывающая подсказка для текстовой области (по умолчанию нативная через title, можно переключить на Bootstrap через tooltipTextBootstrap)
+// - tooltipSuffix (String) — всплывающая подсказка для суффикса (приоритет над suffix.tooltip, по умолчанию нативная через title, можно переключить на Bootstrap через tooltipSuffixBootstrap)
+// - tooltipIconBootstrap (Boolean, default: false) — использовать Bootstrap tooltip для иконки вместо нативной подсказки
+// - tooltipTextBootstrap (Boolean, default: false) — использовать Bootstrap tooltip для текста вместо нативной подсказки
+// - tooltipSuffixBootstrap (Boolean, default: false) — использовать Bootstrap tooltip для суффикса вместо нативной подсказки
+// - active (Boolean) — активное состояние пункта меню
+// - disabled (Boolean) — отключённое состояние пункта меню
+// - iconOpacity (Number, default: 0.5) — прозрачность иконки слева (0-1)
+// - subtitleOpacity (Number, default: 0.5) — прозрачность подзаголовка (0-1)
+// - classesAdd (Object, default: {}) — классы для добавления на различные элементы компонента. Структура: { root: 'классы', icon: 'классы', subtitle: 'классы', suffix: 'классы' }
+// - classesRemove (Object, default: {}) — классы для удаления с различных элементов компонента. Структура: { root: 'классы', icon: 'классы', subtitle: 'классы', suffix: 'классы' }
+//
+// Выходные события (emits):
+// - click — общее событие клика по пункту меню (эмитится всегда при клике на любую зону)
+// - click-icon — клик по иконке слева (эмитится вместе с click)
+// - click-text — клик по текстовой области (эмитится вместе с click)
+// - click-suffix — клик по суффиксу справа (эмитится вместе с click)
+//
+// Примечание: Все зоны (иконка, текст, суффикс) эмитят общее событие click по умолчанию. Раздельные события (click-icon, click-text, click-suffix) срабатывают только если назначены явно в родительском компоненте.
+//
+// ОСОБЕННОСТИ РЕАЛИЗАЦИИ:
+// Структура layout и CSS-классы: см. в шапке шаблона `shared/templates/dropdown-menu-item-template.js`
+// Bootstrap-совместимость:
+// - Компонент использует класс dropdown-item Bootstrap для базовой стилизации
+// - Состояния active и disabled применяются через классы Bootstrap
+// - Поддержка тем Bootstrap через CSS-переменные (var(--bs-body-color), var(--bs-secondary-color) и т.п.)
+// Подсказки (tooltips):
+// - По умолчанию: нативные подсказки браузера через атрибут title (не требуют инициализации)
+// - Опционально: Bootstrap tooltips через props tooltipIconBootstrap, tooltipTextBootstrap, tooltipSuffixBootstrap (Boolean, default: false)
+// - Если соответствующий prop = true, используется Bootstrap tooltip с инициализацией через window.bootstrap.Tooltip
+// - Bootstrap tooltips уничтожаются в beforeUnmount() для предотвращения утечек памяти
+// - Раздельные подсказки для иконки (tooltipIcon), текста (tooltipText) и суффикса (tooltipSuffix или suffix.tooltip)
+// Обработка событий:
+// - По умолчанию все зоны (иконка, текст, суффикс) эмитят общее событие 'click'
+// - Раздельные события (click-icon, click-text, click-suffix) эмитятся всегда при клике на соответствующую зону
+// - Обработчики событий используют .stop для предотвращения всплытия
+// Использование нативного Bootstrap dropdown-menu:
+// - Кастомный компонент dropdown-menu (контейнер выпадающего меню) не создаётся
+// - Используется нативный Bootstrap dropdown-menu через классы и JavaScript API
+// - Bootstrap 5 уже предоставляет полный функционал: клавиатурную навигацию, позиционирование через Popper.js, управление через JavaScript API, поддержку тем, закрытие при клике вне меню
+//
 // АРХИТЕКТУРА:
-// - Шаблон: shared/templates/dropdown-menu-item-template.html
+// - Шаблон: shared/templates/dropdown-menu-item-template.js (ID: dropdown-menu-item-template)
 // - Зависимости: Bootstrap 5, Font Awesome 6, Vue.js
 // - См. также: docs/doc-architect.md (принципы модульности, запрет кастомных стилей)
 

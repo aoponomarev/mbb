@@ -18,17 +18,34 @@
  * - Компонент использует шаблон через template: '#dropdown-menu-item-template'
  *
  * ОСОБЕННОСТИ ШАБЛОНА:
- * - Поддержка подзаголовка (subtitle) через отдельный элемент
+ * Структура HTML:
+ * - Корневой элемент: ⟨li class="dropdown-item p-0"⟩ с условными классами 'active' и 'disabled'
+ * - Внутренний контейнер: ⟨div class="d-flex align-items-start px-2 py-2"⟩ для layout
+ * - Элементы: иконка (⟨span class="icon"⟩), текстовая область (⟨div class="flex-grow-1 text-break text-wrap"⟩), суффикс (⟨span⟩)
+ * Layout и CSS-классы:
+ * - Все стили реализованы через Bootstrap утилиты: d-flex, align-items-start, text-break, text-wrap, lh-sm, mt-1, opacity-50 и т.п.
+ * - Выравнивание элементов: иконка и суффикс выровнены по первой строке текста через align-items-start и pt-1
+ * - Текстовая область растягивается через flex-grow-1
+ * - Перенос текста: текстовая область использует text-break и text-wrap для переноса длинного текста
+ * - min-width: 0 на flex-элементе для корректного обрезания текста
+ * - Подзаголовок отображается через ⟨small⟩ с классом mt-1 для отступа
+ * Условный рендеринг:
+ * - Иконка: условный рендеринг через v-if="icon"
+ * - Подзаголовок: условный рендеринг через v-if="subtitle"
+ * - Суффикс: условный рендеринг через v-if="suffix"
+ * - Состояния: классы 'active' и 'disabled' применяются условно через :class
+ * Адаптивность:
  * - Адаптивность через классы .icon, .subtitle (управляется CSS)
- * - Раздельные события кликов по зонам (иконка, текст, суффикс)
- * - Поддержка нативных и Bootstrap tooltips через условные атрибуты
- * - Анимация chevron через Font Awesome класс fa-rotate-90 и inline transition
- * - Перенос текста через text-break и text-wrap для длинных заголовков
+ * События:
+ * - Раздельные события кликов по зонам (иконка, текст, суффикс) через @click.stop
+ * Подсказки (tooltips):
+ * - Поддержка нативных и Bootstrap tooltips через условные атрибуты (data-bs-toggle, data-bs-title, title)
+ * Анимация chevron:
+ * - Анимация chevron через Font Awesome класс fa-rotate-90 и inline transition (единственное исключение из запрета inline-стилей)
  *
  * ССЫЛКИ:
  * - Общие принципы работы с шаблонами: docs/doc-architect.md (раздел "Вынос x-template шаблонов")
- * - Описание компонента: docs/doc-components.md (раздел "Компонент dropdown-menu-item")
- * - Адаптивность: docs/doc-guide-ii.md (раздел "Компоненты" → "Адаптивность компонентов")
+ * - Компонент: shared/components/dropdown-menu-item.js
  */
 
 (function() {

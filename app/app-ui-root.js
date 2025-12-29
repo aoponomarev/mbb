@@ -59,12 +59,19 @@
                 return {
                     // Данные для dropdown
                     dropdownItems: [
-                        { id: 1, name: 'Элемент 1', description: 'Описание элемента 1' },
-                        { id: 2, name: 'Элемент 2', description: 'Описание элемента 2' },
-                        { id: 3, name: 'Элемент 3', description: 'Описание элемента 3' },
-                        { id: 4, name: 'Элемент 4', description: 'Описание элемента 4' },
-                        { id: 5, name: 'Элемент 5', description: 'Описание элемента 5' }
+                        { id: 1, name: 'Элемент 1', description: 'Описание элемента 1', icon: 'fas fa-home', labelShort: 'Эл. 1' },
+                        { id: 2, name: 'Элемент 2', description: 'Описание элемента 2', icon: 'fas fa-user', labelShort: 'Эл. 2' },
+                        { id: 3, name: 'Элемент 3', description: 'Описание элемента 3', icon: 'fas fa-cog', labelShort: 'Эл. 3' },
+                        { id: 4, name: 'Элемент 4', description: 'Описание элемента 4', icon: 'fas fa-file', labelShort: 'Эл. 4' },
+                        { id: 5, name: 'Элемент 5', description: 'Описание элемента 5', icon: 'fas fa-folder', labelShort: 'Эл. 5' }
                     ],
+                    // Данные для режима select (отдельные переменные для каждого dropdown)
+                    selectedDropdownItem1: null, // Только иконка
+                    selectedDropdownItem2: null, // Иконка + полный текст
+                    selectedDropdownItem3: null, // Иконка + укороченный текст
+                    selectedDropdownItem4: null, // Только полный текст
+                    selectedDropdownItem5: null, // Только value
+                    selectedDropdownItem6: null, // Все вместе
                     longList: Array.from({ length: 50 }, (_, i) => ({
                         id: i + 1,
                         name: `Элемент ${i + 1}`,

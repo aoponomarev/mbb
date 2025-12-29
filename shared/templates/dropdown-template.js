@@ -17,18 +17,31 @@
  * - Компонент использует шаблон через template: '#dropdown-template'
  *
  * ОСОБЕННОСТИ ШАБЛОНА:
- * - Использование компонента cmp-button для кнопки триггера (через <cmp-button>)
- * - Поддержка кастомной кнопки через слот #button
+ * Структура HTML:
+ * - Корневой элемент: ⟨div class="dropdown"⟩ с ref="dropdownContainer"
+ * - Кнопка триггера: компонент ⟨cmp-button⟩ или кастомная кнопка через слот #button
+ * - Выпадающее меню: ⟨ul class="dropdown-menu"⟩ с условным классом 'show' при открытии
+ * Layout и CSS-классы:
+ * - Использование компонента cmp-button для кнопки триггера (через ⟨cmp-button⟩) для единообразия
+ * - Прокручиваемая область: ⟨div class="dropdown-menu-scrollable"⟩ с overflow-y: auto и настраиваемой max-height
+ * - Использование только Bootstrap классов для стилизации
+ * Условный рендеринг:
+ * - Кастомная кнопка через слот #button (v-if="!$slots.button" для стандартной кнопки)
  * - Поисковое поле с условным рендерингом (v-if="searchable")
  * - Прокручиваемая область для длинных списков (v-if="scrollable")
- * - Слоты для элементов списка с ограниченной областью видимости (filteredItems, searchQuery)
  * - Пустое состояние при поиске с проверкой filteredItems && filteredItems.length
+ * Слоты:
+ * - #button — кастомная кнопка триггера (с ограниченной областью видимости: isOpen, toggle)
+ * - #items — элементы списка (с ограниченной областью видимости: filteredItems, searchQuery, handleItemSelect)
+ * Адаптивность:
+ * - Адаптивность кнопки триггера реализована через CSS классы компонента .dropdown-responsive и .btn-responsive с вложенными селекторами
+ * - С иконкой на мобильных: если задан buttonIcon, на мобильных отображается только иконка, на десктопе — только текст buttonText
+ * - С укороченным текстом на мобильных: если buttonIcon не задан, но задан buttonTextShort, на мобильных отображается укороченный текст, на десктопе — полный buttonText
+ * - Без адаптивности: если не заданы ни buttonIcon, ни buttonTextShort, всегда отображается полный buttonText
  *
  * ССЫЛКИ:
  * - Общие принципы работы с шаблонами: docs/doc-architect.md (раздел "Вынос x-template шаблонов")
- * - Описание компонента: docs/doc-components.md (раздел "Компонент dropdown")
- * - Адаптивность: docs/doc-guide-ii.md (раздел "Компоненты" → "Адаптивность компонентов")
- * - Стратегия совместимости с Bootstrap: docs/doc-components.md (раздел "Стратегия максимальной совместимости с Bootstrap")
+ * - Компонент: shared/components/dropdown.js
  */
 
 (function() {
@@ -39,9 +52,9 @@
     <cmp-button
         v-if="!$slots.button"
         ref="dropdownButton"
-        :label="buttonText"
-        :label-short="buttonTextShort"
-        :icon="buttonIcon"
+        :label="computedButtonText"
+        :label-short="computedButtonTextShort"
+        :icon="computedButtonIcon"
         :variant="buttonVariant"
         :size="buttonSize"
         :button-attributes="buttonAttributes"
@@ -77,13 +90,13 @@
             <div
                 class="dropdown-menu-scrollable"
                 :style="{ maxHeight: maxHeight, overflowY: 'auto' }">
-                <slot name="items" :filteredItems="filteredItems" :searchQuery="searchQuery"></slot>
+                <slot name="items" :filteredItems="filteredItems" :searchQuery="searchQuery" :handleItemSelect="handleItemSelect"></slot>
             </div>
         </template>
 
         <!-- Обычный список (если не прокручиваемый) -->
         <template v-else>
-            <slot name="items" :filteredItems="filteredItems" :searchQuery="searchQuery"></slot>
+            <slot name="items" :filteredItems="filteredItems" :searchQuery="searchQuery" :handleItemSelect="handleItemSelect"></slot>
         </template>
 
         <!-- Пустое состояние при поиске -->

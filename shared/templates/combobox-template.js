@@ -18,18 +18,32 @@
  * - Компонент использует шаблон через template: '#combobox-template'
  *
  * ОСОБЕННОСТИ ШАБЛОНА:
+ * Структура HTML:
+ * - Режим 'input': ⟨div⟩ с классом position-relative, внутри ⟨input⟩ и крестик через Font Awesome иконку
+ * - Режим 'combobox': ⟨div class="input-group"⟩ с иконкой слева (опционально), ⟨input⟩, крестик через CSS псевдоэлемент, кнопка dropdown, выпадающее меню ⟨ul class="dropdown-menu"⟩
+ * Layout и CSS-классы:
  * - Два режима работы: 'input' (простое текстовое поле) и 'combobox' (с dropdown)
- * - Крестик для очистки через CSS псевдоэлемент (combobox-clear) в режиме combobox
- * - Крестик через Font Awesome иконку в режиме input
- * - Поддержка виртуального скроллинга (структура заложена, рендеринг через v-if="!virtualScrolling")
- * - Подсветка найденного текста через v-html и highlightItemText (структура заложена)
- * - Группировка элементов (структура заложена для будущей реализации)
- * - Слоты для элементов списка с ограниченной областью видимости (visibleItems, searchQuery, highlightText, selectedIndex)
+ * - Крестик для очистки в режиме combobox: через CSS псевдоэлемент ::before с Font Awesome иконкой (\f00d) на ⟨span class="input-group-text combobox-clear"⟩
+ * - Крестик в режиме input: через Font Awesome иконку ⟨i class="fas fa-times"⟩ с position-absolute
+ * - Использование Bootstrap input-group для режима combobox
+ * Условный рендеринг:
+ * - Режим 'input': v-if="mode === 'input'" — рендерится как простое текстовое поле без dropdown
+ * - Режим 'combobox': v-else — рендерится как input-group с dropdown
+ * - Иконка слева: условный рендеринг через v-if="icon"
+ * - Крестик для очистки: условный рендеринг через v-if="clearable && displayValue" (combobox) или v-if="clearable && modelValue" (input)
+ * - Прокручиваемая область: условный рендеринг через v-if="scrollable || virtualScrolling"
+ * - Виртуальный скроллинг: рендеринг через v-if="!virtualScrolling" для обычного списка, v-else для виртуального
+ * - Пустое состояние: условный рендеринг через v-if="visibleItems.length === 0 && searchQuery"
+ * Слоты:
+ * - #items — элементы списка (с ограниченной областью видимости: visibleItems, searchQuery, highlightText, selectedIndex)
+ * - #item — переопределение отображения элемента (с ограниченной областью видимости: item, index, highlightedText)
+ * Структура для будущих расширений:
+ * - Подсветка найденного текста: структура заложена через v-html и highlightItemText
+ * - Группировка элементов: структура заложена для будущей реализации через v-if="groupBy"
  *
  * ССЫЛКИ:
  * - Общие принципы работы с шаблонами: docs/doc-architect.md (раздел "Вынос x-template шаблонов")
- * - Описание компонента: docs/doc-components.md (раздел "Компонент combobox")
- * - Стратегия совместимости с Bootstrap: docs/doc-components.md (раздел "Стратегия максимальной совместимости с Bootstrap")
+ * - Компонент: shared/components/combobox.js
  */
 
 (function() {

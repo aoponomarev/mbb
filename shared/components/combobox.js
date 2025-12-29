@@ -21,10 +21,83 @@
 // - Программный доступ к Bootstrap API через ref
 // - Поддержка тем Bootstrap через CSS-переменные
 //
+// API КОМПОНЕНТА:
+//
+// Входные параметры (props):
+// Базовые:
+// - modelValue (String | Array) — значение компонента (v-model). Для множественного выбора — массив значений
+// - items (Array) — массив элементов для выбора. Может быть массивом строк или объектов с полями label, value, id
+// - placeholder (String, default: 'Выберите или введите...') — плейсхолдер для поля ввода
+// Режимы:
+// - mode (String, default: 'combobox') — режим работы: 'combobox' (комбобокс) или 'input' (простое текстовое поле)
+// - multiple (Boolean, default: false) — режим множественного выбора (структура заложена для будущей реализации)
+// Поведение:
+// - allowCustom (Boolean, default: true) — разрешить произвольный ввод (не только из списка)
+// - strict (Boolean, default: false) — только значения из списка (запрет произвольного ввода)
+// - autocomplete (Boolean, default: true) — включить автодополнение и фильтрацию
+// - clearable (Boolean, default: true) — показывать крестик для очистки (реализовано через CSS псевдоэлемент ::before)
+// Фильтрация и поиск:
+// - filterFunction (Function, default: null) — кастомная функция фильтрации (items, query) => filteredItems
+// - debounce (Number, default: 300) — задержка для debounce поиска (мс)
+// - highlightMatches (Boolean, default: false) — подсветка найденного текста (структура заложена для будущей реализации)
+// - itemLabel (String | Function, default: null) — поле для label или функция получения label
+// - itemValue (String | Function, default: null) — поле для value или функция получения value
+// Прокрутка:
+// - scrollable (Boolean, default: false) — включить прокрутку для длинных списков
+// - maxHeight (String, default: '300px') — максимальная высота прокручиваемой области
+// - virtualScrolling (Boolean, default: false) — виртуальный скроллинг (структура заложена для будущей реализации)
+// - virtualItemHeight (Number, default: 38) — высота элемента для виртуального скроллинга (px)
+// Группировка:
+// - groupBy (String | Function, default: null) — поле для группировки или функция (структура заложена для будущей реализации)
+// Валидация:
+// - required (Boolean, default: false) — обязательное поле
+// - pattern (String, default: null) — паттерн для валидации (HTML5)
+// - disabled (Boolean, default: false) — отключить компонент
+// UI:
+// - size (String, default: null) — размер: 'sm' или 'lg'
+// - variant (String, default: 'outline-secondary') — вариант кнопки dropdown (Bootstrap button variants)
+// - icon (String, default: null) — иконка слева (Font Awesome класс)
+// Дополнительные:
+// - classesAdd (Object, default: {}) — классы для добавления на различные элементы компонента. Структура: { root: 'классы', menu: 'классы' }
+// - classesRemove (Object, default: {}) — классы для удаления с различных элементов компонента. Структура: { root: 'классы', menu: 'классы' }
+// - menuClasses (String, default: '') — дополнительные классы для dropdown-menu (для обратной совместимости, рекомендуется использовать classesAdd.menu)
+// - menuStyle (Object, default: {}) — дополнительные стили для dropdown-menu
+// - dropdownId (String, default: null) — ID для кнопки dropdown (для Bootstrap)
+// - emptySearchText (String, default: 'Ничего не найдено') — текст при пустом результате поиска
+//
+// Выходные события (emits):
+// - update:modelValue — обновление значения (v-model)
+// - select — выбор элемента: { value, label, item }
+// - input — ввод текста: value
+// - focus — фокус на поле ввода
+// - blur — потеря фокуса
+// - clear — очистка значения
+// - show — открытие dropdown
+// - hide — закрытие dropdown
+//
+// Методы (через ref):
+// - show() — программное открытие dropdown
+// - hide() — программное закрытие dropdown
+// - toggle() — программное переключение dropdown
+// - getBootstrapInstance() — получение экземпляра Bootstrap Dropdown для прямого доступа к API
+//
+// ОСОБЕННОСТИ РЕАЛИЗАЦИИ:
+// Структура layout и CSS-классы: см. в шапке шаблона `shared/templates/combobox-template.js`
+// Клавиатурная навигация:
+// - ArrowDown / ArrowUp — навигация по элементам
+// - Enter — выбор элемента или принятие произвольного значения
+// - Escape — закрытие dropdown
+// - Tab — закрытие dropdown при переходе
+// Структура для будущих расширений:
+// - Подсветка найденного текста: метод highlightItemText(), computed highlightText, слот item с highlightedText
+// - Виртуальный скроллинг: computed visibleItems, virtualVisibleItems, обработчик handleScroll(), props virtualScrolling, virtualItemHeight
+// - Множественный выбор: prop multiple, логика в handleItemSelect(), computed isMultiple
+// - Группировка: prop groupBy, структура в шаблоне
+//
 // АРХИТЕКТУРА:
-// - Шаблон: shared/templates/combobox-template.html
+// - Шаблон: shared/templates/combobox-template.js (ID: combobox-template)
 // - Зависимости: Bootstrap 5, Font Awesome 6, Vue.js
-// - См. также: docs/doc-components.md (стратегия совместимости с Bootstrap)
+// - См. также: docs/doc-comp-principles.md (раздел "Стратегия максимальной совместимости с Bootstrap")
 
 window.cmpCombobox = {
     template: '#combobox-template',

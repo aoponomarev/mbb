@@ -17,16 +17,28 @@
  * - Компонент использует шаблон через template: '#button-group-template'
  *
  * ОСОБЕННОСТИ ШАБЛОНА:
+ * Структура HTML:
  * - Двойной рендер: группа кнопок (>= breakpoint) и dropdown (< breakpoint)
- * - Поддержка type="button" через cmp-button
- * - Поддержка type="checkbox" и type="radio" через нативный HTML
- * - Наследование variant и size от группы
- * - Слоты для переопределения кнопок
+ * - Группа кнопок: ⟨div class="btn-group"⟩ с условными классами для видимости (d-none d-{breakpoint}-inline-flex)
+ * - Dropdown: ⟨cmp-dropdown⟩ с условными классами для видимости (d-{breakpoint}-none)
+ * Layout и CSS-классы:
+ * - Адаптивное схлопывание в dropdown: CSS-переключение через Bootstrap utilities (d-none, d-{breakpoint}-inline-flex для группы, d-{breakpoint}-none для dropdown)
+ * - Мгновенное переключение через CSS (без JS resize listener), использование стандартных Bootstrap utilities
+ * - Оба режима независимы и совместимы с Bootstrap JS API
+ * Условный рендеринг:
+ * - Группа кнопок: условная видимость через классы d-none d-{breakpoint}-inline-flex (видна >= breakpoint)
+ * - Dropdown: условная видимость через классы d-{breakpoint}-none (виден < breakpoint)
+ * - Типы кнопок: type="button" через ⟨cmp-button⟩, type="checkbox" и type="radio" через нативный HTML
+ * Нативный HTML для checkbox/radio:
+ * - Используется стандартная Bootstrap структура: ⟨input class="btn-check"⟩ + ⟨label class="btn"⟩
+ * - Классы выравнивания: d-flex, align-items-center для label
+ * Слоты:
+ * - default — содержимое кнопок (fallback для кастомных кнопок)
+ * - button-{index} — переопределение конкретной кнопки по индексу (параметры слота: { button, index })
  *
  * ССЫЛКИ:
  * - Общие принципы работы с шаблонами: docs/doc-architect.md (раздел "Вынос x-template шаблонов")
- * - Описание компонента: docs/doc-components.md (раздел "Компонент button-group")
- * - Стратегия совместимости с Bootstrap: docs/doc-components.md (раздел "Стратегия максимальной совместимости с Bootstrap")
+ * - Компонент: shared/components/button-group.js
  */
 
 (function() {

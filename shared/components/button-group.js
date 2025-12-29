@@ -16,10 +16,79 @@
  * - Синхронизация событий между кнопками и пунктами меню
  * - Детерминированные хэши экземпляров (instanceHash)
  *
+ * API КОМПОНЕНТА:
+ *
+ * Входные параметры (props):
+ * Базовые свойства группы:
+ * - size (String) — размер группы: 'sm', 'lg' или '' (по умолчанию). Применяется ко всем кнопкам, если не переопределено в конфигурации кнопки
+ * - variant (String, default: 'secondary') — базовый вариант Bootstrap для всех кнопок. Если кнопка не имеет собственного variant, наследует от группы
+ * - vertical (Boolean, default: false) — вертикальная ориентация группы (добавляет класс btn-group-vertical)
+ * - verticalBreakpoint (String) — адаптивная вертикальная ориентация: 'sm' (576px). На мобильных (< 576px) группа отображается вертикально, на десктопе (>= 576px) — горизонтально
+ * - role (String, default: 'group') — ARIA-роль группы
+ * - ariaLabel (String) — ARIA-метка для группы
+ * - classesAdd (Object, default: {}) — классы для добавления на различные элементы компонента. Структура: { root: 'классы', dropdown: 'классы', dropdownButton: 'классы', dropdownMenu: 'классы' }
+ * - classesRemove (Object, default: {}) — классы для удаления с различных элементов компонента. Структура: { root: 'классы', dropdown: 'классы', dropdownButton: 'классы', dropdownMenu: 'классы' }
+ * Адаптивность (схлопывание в dropdown):
+ * - collapseBreakpoint (String) — брейкпоинт для схлопывания группы в dropdown: 'sm', 'md', 'lg', 'xl', 'xxl'. Если не указан, группа всегда отображается как группа кнопок
+ * - dropdownLabel (String, default: 'Действия') — текст кнопки dropdown при схлопывании
+ * - dropdownIcon (String) — иконка кнопки dropdown (Font Awesome класс)
+ * - dropdownVariant (String) — вариант кнопки dropdown. Если не указан, наследует от variant группы
+ * Конфигурация кнопок:
+ * - buttons (Array, required) — массив конфигураций кнопок. Каждый элемент — объект ButtonConfig:
+ *   ButtonConfig:
+ *   - type (String, required) — тип кнопки: 'button', 'checkbox' или 'radio'
+ *   - label (String) — текст кнопки (для всех типов)
+ *   - labelShort (String) — укороченная версия текста для мобильных (только для type="button")
+ *   - icon (String) — CSS класс иконки (Font Awesome, Material Symbols)
+ *   - variant (String) — вариант Bootstrap (переопределяет групповой)
+ *   - size (String) — размер кнопки (переопределяет групповой)
+ *   - disabled (Boolean) — отключённое состояние
+ *   - loading (Boolean) — состояние загрузки (только для type="button")
+ *   - active (Boolean) — активное состояние (для checkbox/radio)
+ *   - suffix (Object | Array) — суффикс справа (только для type="button"). Формат аналогичен cmp-button
+ *   - tooltip (String) — общая подсказка
+ *   - tooltipIcon (String) — подсказка для иконки (только для type="button")
+ *   - tooltipText (String) — подсказка для текста (только для type="button")
+ *   - tooltipSuffix (String) — подсказка для суффикса (только для type="button")
+ *   - [key: data-bs-${string}] (any) — произвольные Bootstrap data-атрибуты для прозрачности JS API
+ *   - [key: string] (any) — любые другие атрибуты
+ *
+ * Выходные события (emits):
+ * - button-click — клик по кнопке (type="button"). Параметры: (event, { button, index, type })
+ * - button-click-icon — клик по иконке кнопки (type="button"). Параметры: (event, { button, index, type })
+ * - button-click-text — клик по тексту кнопки (type="button"). Параметры: (event, { button, index, type })
+ * - button-click-suffix — клик по суффиксу кнопки (type="button"). Параметры: (event, { button, index, type })
+ * - button-change — изменение состояния checkbox/radio. Параметры: (event, { button, index, active, type })
+ * - button-toggle — переключение состояния checkbox/radio. Параметры: ({ button, index, active, type })
+ *
+ * Слоты:
+ * - default — содержимое кнопок (fallback для кастомных кнопок)
+ * - button-{index} — переопределение конкретной кнопки по индексу. Параметры слота: { button, index }
+ *
+ * ДЕТАЛЬНЫЕ ОСОБЕННОСТИ РЕАЛИЗАЦИИ:
+ * Структура layout и CSS-классы: см. в шапке шаблона `shared/templates/button-group-template.js`
+ * Использование компонента cmp-button для type="button":
+ * - Все пропсы cmp-button поддерживаются через ButtonConfig
+ * - Адаптивность через CSS классы .btn-responsive работает автоматически
+ * - Suffix и tooltips поддерживаются полностью
+ * Наследование стилей:
+ * - Компонент поддерживает наследование variant и size от группы к кнопкам
+ * - Если кнопка не имеет собственного variant, наследует от variant группы
+ * - Если кнопка не имеет собственного size, наследует от size группы
+ * - Кнопка может переопределить групповые стили, указав собственные variant или size
+ * Маппинг данных при схлопывании:
+ * - Маппинг ButtonConfig → DropdownMenuItem: label → title, icon → icon, suffix → suffix, type="checkbox/radio" + active → active: true, disabled → disabled, tooltip → tooltipText
+ * Синхронизация состояния:
+ * - Компонент использует внутреннее состояние buttonStates для синхронизации
+ * - При создании компонента состояние инициализируется из props
+ * - При изменении checkbox/radio состояние обновляется в buttonStates
+ * - Для radio автоматически сбрасываются все остальные radio в группе при выборе
+ * - Состояние синхронизируется с dropdown при схлопывании
+ * - События синхронизируются между кнопками и пунктами меню
+ *
  * ССЫЛКИ:
- * - Общие принципы работы с компонентами: docs/doc-components.md (раздел "Принципы работы с компонентами")
- * - Описание компонента: docs/doc-components.md (раздел "Компонент button-group")
- * - Стратегия совместимости с Bootstrap: docs/doc-components.md (раздел "Стратегия максимальной совместимости с Bootstrap")
+ * - Общие принципы работы с компонентами: docs/doc-comp-principles.md
+ * - Стратегия совместимости с Bootstrap: docs/doc-comp-principles.md (раздел "Стратегия максимальной совместимости с Bootstrap")
  * - Адаптивность: docs/doc-guide-ii.md (раздел "Компоненты" → "Адаптивность компонентов")
  * - Шаблон: shared/templates/button-group-template.js
  */

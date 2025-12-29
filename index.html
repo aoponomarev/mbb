@@ -1192,6 +1192,154 @@
                         </div>
                     </div>
 
+                    <!-- Dropdown в режиме select (индикация выбранного пункта) -->
+                    <div class="mb-4">
+                        <h3 class="h5 mb-3">Режим select (индикация выбранного пункта на кнопке)</h3>
+                        <p class="text-muted mb-3">Компонент dropdown может работать как ⟨select⟩, показывая выбранный пункт меню на кнопке триггера. Поддерживаются любые комбинации элементов: иконка, полный текст, укороченный текст, value.</p>
+
+                        <div class="d-flex flex-wrap gap-2 mb-3">
+                            <!-- Только иконка -->
+                            <cmp-dropdown
+                                :select-mode="true"
+                                v-model:selected-item="selectedDropdownItem1"
+                                :items="dropdownItems"
+                                item-label="name"
+                                item-value="id"
+                                item-icon="icon"
+                                item-label-short="labelShort"
+                                :button-display="{ icon: true, label: false, labelShort: false, value: false }"
+                                button-text="Выберите элемент">
+                                <template #items="{ filteredItems, handleItemSelect }">
+                                    <li v-for="item in filteredItems" :key="item.id">
+                                        <dropdown-menu-item
+                                            :title="item.name"
+                                            :icon="item.icon"
+                                            :subtitle="item.description"
+                                            @click="handleItemSelect(item, item.id)">
+                                        </dropdown-menu-item>
+                                    </li>
+                                </template>
+                            </cmp-dropdown>
+
+                            <!-- Иконка + полный текст -->
+                            <cmp-dropdown
+                                :select-mode="true"
+                                v-model:selected-item="selectedDropdownItem2"
+                                :items="dropdownItems"
+                                item-label="name"
+                                item-value="id"
+                                item-icon="icon"
+                                :button-display="{ icon: true, label: true, labelShort: false, value: false }"
+                                button-text="Выберите элемент">
+                                <template #items="{ filteredItems, handleItemSelect }">
+                                    <li v-for="item in filteredItems" :key="item.id">
+                                        <dropdown-menu-item
+                                            :title="item.name"
+                                            :icon="item.icon"
+                                            :subtitle="item.description"
+                                            @click="handleItemSelect(item, item.id)">
+                                        </dropdown-menu-item>
+                                    </li>
+                                </template>
+                            </cmp-dropdown>
+
+                            <!-- Иконка + укороченный текст (на мобильных) -->
+                            <cmp-dropdown
+                                :select-mode="true"
+                                v-model:selected-item="selectedDropdownItem3"
+                                :items="dropdownItems"
+                                item-label="name"
+                                item-value="id"
+                                item-icon="icon"
+                                item-label-short="labelShort"
+                                :button-display="{ icon: true, labelShort: true, label: false, value: false }"
+                                button-text="Выберите элемент">
+                                <template #items="{ filteredItems, handleItemSelect }">
+                                    <li v-for="item in filteredItems" :key="item.id">
+                                        <dropdown-menu-item
+                                            :title="item.name"
+                                            :icon="item.icon"
+                                            :subtitle="item.description"
+                                            @click="handleItemSelect(item, item.id)">
+                                        </dropdown-menu-item>
+                                    </li>
+                                </template>
+                            </cmp-dropdown>
+
+                            <!-- Только полный текст -->
+                            <cmp-dropdown
+                                :select-mode="true"
+                                v-model:selected-item="selectedDropdownItem4"
+                                :items="dropdownItems"
+                                item-label="name"
+                                item-value="id"
+                                :button-display="{ icon: false, label: true, labelShort: false, value: false }"
+                                button-text="Выберите элемент">
+                                <template #items="{ filteredItems, handleItemSelect }">
+                                    <li v-for="item in filteredItems" :key="item.id">
+                                        <dropdown-menu-item
+                                            :title="item.name"
+                                            :subtitle="item.description"
+                                            @click="handleItemSelect(item, item.id)">
+                                        </dropdown-menu-item>
+                                    </li>
+                                </template>
+                            </cmp-dropdown>
+
+                            <!-- Только value (id) -->
+                            <cmp-dropdown
+                                :select-mode="true"
+                                v-model:selected-item="selectedDropdownItem5"
+                                :items="dropdownItems"
+                                item-label="name"
+                                item-value="id"
+                                :button-display="{ icon: false, label: false, labelShort: false, value: true }"
+                                button-text="Выберите элемент">
+                                <template #items="{ filteredItems, handleItemSelect }">
+                                    <li v-for="item in filteredItems" :key="item.id">
+                                        <dropdown-menu-item
+                                            :title="item.name"
+                                            :subtitle="item.description"
+                                            @click="handleItemSelect(item, item.id)">
+                                        </dropdown-menu-item>
+                                    </li>
+                                </template>
+                            </cmp-dropdown>
+
+                            <!-- Все вместе: иконка + полный текст + укороченный текст -->
+                            <cmp-dropdown
+                                :select-mode="true"
+                                v-model:selected-item="selectedDropdownItem6"
+                                :items="dropdownItems"
+                                item-label="name"
+                                item-value="id"
+                                item-icon="icon"
+                                item-label-short="labelShort"
+                                :button-display="{ icon: true, label: true, labelShort: true, value: false }"
+                                button-text="Выберите элемент">
+                                <template #items="{ filteredItems, handleItemSelect }">
+                                    <li v-for="item in filteredItems" :key="item.id">
+                                        <dropdown-menu-item
+                                            :title="item.name"
+                                            :icon="item.icon"
+                                            :subtitle="item.description"
+                                            @click="handleItemSelect(item, item.id)">
+                                        </dropdown-menu-item>
+                                    </li>
+                                </template>
+                            </cmp-dropdown>
+                        </div>
+                        <p class="text-muted small">
+                            Выбрано:
+                            Dropdown 1: {{ selectedDropdownItem1 || '(ничего)' }},
+                            Dropdown 2: {{ selectedDropdownItem2 || '(ничего)' }},
+                            Dropdown 3: {{ selectedDropdownItem3 || '(ничего)' }},
+                            Dropdown 4: {{ selectedDropdownItem4 || '(ничего)' }},
+                            Dropdown 5: {{ selectedDropdownItem5 || '(ничего)' }},
+                            Dropdown 6: {{ selectedDropdownItem6 || '(ничего)' }}
+                        </p>
+                    </div>
+
                     <hr class="my-5">
 
                     <h2 class="mb-4">Примеры компонента dropdown-menu-item</h2>

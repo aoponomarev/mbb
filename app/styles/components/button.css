@@ -184,9 +184,18 @@
   }
 }
 
-/* Скрыть стандартный Bootstrap chevron для кнопок с классом dropdown-toggle внутри btn-responsive */
+/* Используем стандартный Bootstrap треугольник для dropdown-toggle (идентично combobox) */
+/* Убрано скрытие - теперь треугольник отображается через стандартный Bootstrap CSS */
+/* Выравнивание треугольника по вертикали для btn-responsive */
+/* Проблема: ::after добавляется к <button>, но внутри button есть flexbox .d-flex */
+/* Решение: align-items:center на самом button для выравнивания ::after псевдоэлемента */
+.btn-responsive.dropdown-toggle {
+  display: inline-flex;
+  align-items: center;
+}
+
 .btn-responsive.dropdown-toggle::after {
-  display: none !important;
+  margin-left: 0.5rem;
 }
 
 /* Вертикальный padding для внутреннего контейнера кнопки в зависимости от размера */
@@ -215,6 +224,11 @@
 
 /* Скрытие суффиксов (chevron) в кнопке при использовании класса hide-suffix */
 .btn-responsive.hide-suffix .suffix-container {
+  display: none !important;
+}
+
+/* Скрытие Bootstrap треугольника для dropdown-toggle с классом hide-suffix */
+.btn-responsive.dropdown-toggle.hide-suffix::after {
   display: none !important;
 }
 

@@ -7,17 +7,65 @@
  * размеров, состояний, адаптивности и детерминированных хэшей экземпляров.
  *
  * ОСОБЕННОСТИ РЕАЛИЗАЦИИ:
- * - Анимация chevron через Font Awesome классы (fa-rotate-90) + inline transition (единственное исключение из запрета inline-стилей)
- * - Условный рендеринг всех опциональных элементов
+ * Структура layout и CSS-классы: см. в шапке шаблона `shared/templates/button-template.js`
+ * Bootstrap-совместимость:
+ * - Компонент использует классы btn, btn-{variant}, btn-{size} Bootstrap для базовой стилизации
+ * - Состояния disabled и loading применяются через атрибут disabled и классы Bootstrap
+ * - Поддержка тем Bootstrap через CSS-переменные (var(--bs-body-color), var(--bs-secondary-color) и т.п.)
+ * - Полная обратная совместимость: компонент — обёртка над нативной Bootstrap кнопкой, все стандартные классы и атрибуты Bootstrap работают корректно
+ * Использование в комплексных компонентах:
+ * - Компонент cmp-button может использоваться в других компонентах (например, cmp-dropdown) для кнопок триггеров Bootstrap
+ * - Для этого используется prop buttonAttributes с атрибутами Bootstrap (data-bs-toggle, aria-expanded, id, class)
+ * - Атрибуты из buttonAttributes передаются на реальный DOM-элемент ⟨button⟩ через v-bind
+ * - Bootstrap API работает напрямую с реальным DOM-элементом (не с Vue-компонентом)
+ * - Доступ к реальному DOM-элементу через $refs.componentName.$el для инициализации Bootstrap
+ * - Классы из buttonAttributes.class объединяются с классами из buttonClasses
+ * Подсказки (tooltips):
  * - Нативные подсказки браузера через атрибут title (не Bootstrap Tooltip)
- * - Паддинги переносятся на внутренний контейнер для корректной работы подсказок
+ * - Не требуют инициализации и уничтожения — работают автоматически через браузер
+ * - Раздельные подсказки для иконки (tooltipIcon), текста (tooltipText) и каждого элемента суффикса (если suffix — массив, каждый элемент может иметь свой tooltip)
+ * Обработка событий:
  * - По умолчанию все зоны (иконка, текст, суффикс) эмитят общее событие 'click'
- * - Поддержка множественных суффиксов через массив
- * - Использование в комплексных компонентах (dropdown, modal) через prop buttonAttributes
+ * - Раздельные события (click-icon, click-text, click-suffix) эмитятся всегда при клике на соответствующую зону
+ * - Обработчики событий используют .stop для предотвращения всплытия
+ * Множественные суффиксы:
+ * - suffix может быть массивом элементов для поддержки нескольких badge/icon/indicator одновременно
+ * - Каждый элемент массива может иметь свой tooltip
+ * Анимация chevron:
+ * - Анимация chevron через Font Awesome классы (fa-rotate-90) + inline transition (единственное исключение из запрета inline-стилей)
+ *
+ * API КОМПОНЕНТА:
+ *
+ * Входные параметры (props):
+ * - label (String) — текст кнопки (отображается на десктопе, если задана иконка или укороченный текст)
+ * - labelShort (String) — укороченная версия текста для мобильных (используется, если icon не задан)
+ * - icon (String) — CSS класс иконки слева (Font Awesome, Material Symbols)
+ * - suffix (Object | Array) — суффикс справа. Может быть одиночным объектом или массивом элементов. Формат элемента:
+ *   { type: 'badge'|'icon'|'indicator'|'chevron'|'info', value: String|Number, variant: String, expanded: Boolean, tooltip: String }
+ * - tooltipIcon (String) — всплывающая подсказка для иконки слева
+ * - tooltipText (String) — всплывающая подсказка для текстовой области
+ * - tooltipSuffix (String) — всплывающая подсказка для суффикса (приоритет над suffix.tooltip, работает только для одиночного suffix)
+ * - variant (String, default: 'primary') — вариант Bootstrap: 'primary', 'secondary', 'success', 'danger', 'warning', 'info', 'light', 'dark', 'outline-*', 'link'
+ * - size (String) — размер кнопки: 'sm', 'lg' или null (по умолчанию)
+ * - disabled (Boolean) — отключённое состояние кнопки
+ * - loading (Boolean) — состояние загрузки (показывает спиннер вместо иконки/текста)
+ * - type (String, default: 'button') — тип кнопки: 'button', 'submit', 'reset'
+ * - iconOpacity (Number, default: 1) — прозрачность иконки слева (0-1)
+ * - buttonId (String) — идентификатор экземпляра для генерации детерминированного хэша (instanceHash)
+ * - classesAdd (Object, default: {}) — классы для добавления на различные элементы компонента. Структура: { root: 'классы', icon: 'классы', label: 'классы', suffix: 'классы' }
+ * - classesRemove (Object, default: {}) — классы для удаления с различных элементов компонента. Структура: { root: 'классы', icon: 'классы', label: 'классы', suffix: 'классы' }
+ * - buttonAttributes (Object, default: {}) — произвольные атрибуты для передачи на корневой <button> элемент. Используется для интеграции с Bootstrap API (dropdown, modal и т.д.)
+ *
+ * Выходные события (emits):
+ * - click — общее событие клика по кнопке (эмитится всегда при клике на любую зону)
+ * - click-icon — клик по иконке слева (эмитится вместе с click)
+ * - click-text — клик по текстовой области (эмитится вместе с click)
+ * - click-suffix — клик по элементу суффикса (эмитится вместе с click, передаёт элемент суффикса как второй аргумент)
+ *
+ * Примечание: Все зоны (иконка, текст, суффикс) эмитят общее событие click по умолчанию. Раздельные события (click-icon, click-text, click-suffix) срабатывают только если назначены явно в родительском компоненте.
  *
  * ССЫЛКИ:
- * - Общие принципы работы с компонентами: docs/doc-components.md (раздел "Принципы работы с компонентами")
- * - Описание компонента: docs/doc-components.md (раздел "Компонент button")
+ * - Общие принципы работы с компонентами: docs/doc-comp-principles.md
  * - Адаптивность: docs/doc-guide-ii.md (раздел "Компоненты" → "Адаптивность компонентов")
  * - Выравнивание высоты: docs/doc-guide-ii.md (раздел "Макет и выравнивание" → "Выравнивание высоты элементов")
  * - Детерминированные хэши: docs/doc-architect.md (раздел "Детерминированные хэши компонентов")
@@ -147,18 +195,9 @@ window.cmpButton = {
         suffixArray() {
             const baseSuffix = this.suffix ? (Array.isArray(this.suffix) ? this.suffix : [this.suffix]) : [];
 
-            // Автоматически добавляем chevron для dropdown-toggle
-            if (this.buttonAttributes?.class?.includes('dropdown-toggle') ||
-                (typeof this.buttonAttributes?.class === 'string' && this.buttonAttributes.class.includes('dropdown-toggle'))) {
-                // Проверяем, нет ли уже chevron в suffix
-                const hasChevron = baseSuffix.some(item =>
-                    (typeof item === 'object' && item.type === 'chevron') ||
-                    item === 'chevron'
-                );
-                if (!hasChevron) {
-                    return [...baseSuffix, { type: 'chevron', value: 'fas fa-chevron-down' }];
-                }
-            }
+            // УДАЛЕНО: Автоматическое добавление chevron для dropdown-toggle
+            // Теперь используем стандартный Bootstrap треугольник через CSS псевдоэлемент ::after
+            // (идентично combobox)
 
             return baseSuffix;
         },
