@@ -5,6 +5,9 @@
 <!-- ПРАВИЛА ФОРМАТИРОВАНИЯ ЗАПИСЕЙ
 **КРИТИЧЕСКИ ВАЖНО**: При упоминании HTML-тегов в записях **ЗАПРЕЩЕНО** использовать обычные угловые скобки `<script>`, `<div>`, `<style>` и т.п. — они блокируют Markdown-превью. **ОБЯЗАТЕЛЬНО** использовать математические угловые скобки: ⟨script⟩, ⟨div⟩, ⟨style⟩ (U+27E8/U+27E9). Для скрытых комментариев используйте HTML-комментарии -->
 
+## Реализация функциональности метрик рынка в футере
+30.12.2025 ◆ Создан модуль market-metrics.js и реализована функциональность отображения метрик рынка в футере ▶ Создан core/api/market-metrics.js: модуль для получения метрик рынка (FGI, VIX с fallback-стратегией из 3 источников, BTC Dominance, Open Interest, Funding Rate, Long/Short Ratio). Обновлен app-footer.js: добавлены данные метрик (строковые и числовые значения), методы fetchMarketIndices(), getMSKTime(), getNextUpdateTime(), scheduleNextUpdate(), formatOIMobile(), formatValueMobile(). Реализовано автоматическое обновление метрик 3 раза в день (09:00, 12:00, 18:00 МСК). Обновлен core/modules-config.js: добавлен модуль market-metrics в секцию core, добавлена зависимость market-metrics для app-footer ◉ Реализовать отображение метрик рынка в футере приложения с автоматическим обновлением по расписанию @footer @api @market-metrics @architecture @modules @scheduling
+
 ## Исправление зависимостей app-ui-root
 29.12.2025:73419f5 ◆ Добавлены отсутствующие зависимости app-header и app-footer в modules-config.js ▶ В core/modules-config.js обновлен массив deps для модуля app-ui-root: добавлены 'app-header' и 'app-footer'. Это исправляет потенциальную ошибку инициализации "не все компоненты загружены", так как app-ui-root проверяет наличие window.appHeader и window.appFooter, но эти модули не были указаны в зависимостях ◉ Исправить баг с зависимостями модулей, обеспечить корректную загрузку компонентов макета @fix @dependencies @modules-config @app-ui-root
 

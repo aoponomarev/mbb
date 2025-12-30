@@ -174,6 +174,13 @@
                 deps: [],
                 category: 'core'
             },
+            {
+                id: 'market-metrics',
+                src: 'core/api/market-metrics.js',
+                type: 'local',
+                deps: [],
+                category: 'core'
+            },
             // Config
             {
                 id: 'api-config',
@@ -327,7 +334,7 @@
                 id: 'app-footer',
                 src: 'app/components/app-footer.js',
                 type: 'local',
-                deps: ['vue'],
+                deps: ['vue', 'market-metrics'],
                 category: 'components'
             }
         ],

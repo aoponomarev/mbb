@@ -18,14 +18,16 @@
  *
  * ОСОБЕННОСТИ ШАБЛОНА:
  * Структура HTML:
- * - Корневой элемент: ⟨footer⟩ с классами fixed-bottom, bg-body, py-3
- * - Внутренний контейнер: ⟨div class="container-fluid"⟩
+ * - Корневой элемент: ⟨footer⟩ с классами fixed-bottom, bg-body, py-2, px-2 px-md-5, font-monospace, text-muted, d-flex, align-items-center, justify-content-between, flex-wrap
+ * - Время МСК: скрыто на мобильных (d-none d-md-inline), видно на десктопе
+ * - Список метрик: метрики рынка (FGI, VIX, BTC, OI, FR, LSR) в виде спанов с адаптивными паддингами (px-1 px-md-2)
+ * - Без промежуточных оберток: все классы на корневом элементе footer
  * Layout и CSS-классы:
  * - Фиксированное позиционирование: fixed-bottom
  * - Фон: bg-body (наследует тему от body, переключается вместе с темой)
  * - Многослойная тень направленная вверх с холодными стальными оттенками
- * Слоты:
- * - default — содержимое футера
+ * - Минимум стилей: только базовые Bootstrap классы (text-muted, small, font-monospace на футере)
+ * - Распределение элементов: d-flex, justify-content-between, flex-wrap для равномерного распределения спанов
  *
  * ССЫЛКИ:
  * - Общие принципы работы с шаблонами: docs/doc-architect.md (раздел "Вынос x-template шаблонов")
@@ -36,10 +38,26 @@
 (function() {
     'use strict';
 
-    const TEMPLATE = `<footer class="fixed-bottom bg-body py-3 app-footer">
-    <div class="container-fluid">
-        <slot></slot>
-    </div>
+    const TEMPLATE = `<footer class="fixed-bottom bg-body py-2 px-2 px-md-5 app-footer font-monospace text-muted d-flex align-items-center justify-content-between flex-wrap">
+        <span class="d-none d-md-inline px-1 px-md-2">{{ mskTime }}</span>
+        <span class="px-1 px-md-2">FGI:{{ fgi }}</span>
+        <span class="px-1 px-md-2">
+            <span class="d-inline d-md-none">VIX:{{ formatValueMobile(vixValue, vix) }}</span>
+            <span class="d-none d-md-inline">VIX:{{ vix }}</span>
+        </span>
+        <span class="px-1 px-md-2">
+            <span class="d-inline d-md-none">BTC:{{ formatValueMobile(btcDomValue, btcDom) }}%</span>
+            <span class="d-none d-md-inline">BTC:{{ btcDom }}</span>
+        </span>
+        <span class="px-1 px-md-2">
+            <span class="d-inline d-md-none">OI:{{ formatOIMobile() }}</span>
+            <span class="d-none d-md-inline">OI:{{ oi }}</span>
+        </span>
+        <span class="px-1 px-md-2">FR:{{ fr }}</span>
+        <span class="px-1 px-md-2">
+            <span class="d-inline d-md-none">LSR:{{ formatValueMobile(lsrValue, lsr) }}</span>
+            <span class="d-none d-md-inline">LSR:{{ lsr }}</span>
+        </span>
 </footer>`;
 
     /**
