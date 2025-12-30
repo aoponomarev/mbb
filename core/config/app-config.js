@@ -71,6 +71,8 @@
                 coinsList: 86400000, // 1 день
                 metrics: 3600000     // 1 час
             },
+            // AI провайдер по умолчанию
+            aiProvider: 'yandex', // 'yandex' | 'perplexity'
             perplexity: {
                 model: 'sonar-pro', // Модель Perplexity по умолчанию
                 models: [
@@ -78,6 +80,14 @@
                     { value: 'sonar', label: 'sonar' },
                     { value: 'llama-3.1-sonar-small-128k-online', label: 'llama-3.1-sonar-small-128k-online' },
                     { value: 'llama-3.1-sonar-large-128k-online', label: 'llama-3.1-sonar-large-128k-online' }
+                ]
+            },
+            yandex: {
+                folderId: 'b1gv03a122le5a934cqj', // Folder ID для Yandex Cloud
+                model: 'gpt://b1gv03a122le5a934cqj/yandexgpt-lite/latest', // Модель YandexGPT по умолчанию
+                models: [
+                    { value: 'gpt://b1gv03a122le5a934cqj/yandexgpt-lite/latest', label: 'YandexGPT Lite' },
+                    { value: 'gpt://b1gv03a122le5a934cqj/yandexgpt/latest', label: 'YandexGPT' }
                 ]
             },
             marketUpdates: {

@@ -34,10 +34,10 @@
             icon: 'fas fa-adjust',
             description: 'Настройка таймзоны и языка перевода новостей'
         },
-        'perplexityModal': {
-            title: 'Perplexity',
+        'aiApiModal': {
+            title: 'AI API',
             icon: 'fas fa-robot',
-            description: 'Настройки API Perplexity для получения новостей'
+            description: 'Настройки AI провайдеров (YandexGPT, Perplexity) для получения новостей и переводов'
         }
     };
 

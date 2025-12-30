@@ -38,8 +38,11 @@
         'timezone': null,                         // Без TTL
         'favorites': null,                        // Без TTL
         'ui-state': null,                         // Без TTL
+        'ai-provider': null,                      // Без TTL (текущий провайдер: 'yandex' | 'perplexity')
         'perplexity-api-key': null,               // Без TTL (чувствительные данные)
         'perplexity-model': null,                 // Без TTL
+        'yandex-api-key': null,                   // Без TTL (чувствительные данные)
+        'yandex-model': null,                     // Без TTL
         'translation-language': null,              // Без TTL
         'crypto-news-cache-max-age': 24 * 60 * 60 * 1000,  // 24 часа - максимальный возраст кэша новостей
         'market-update-fallback': 3 * 60 * 60 * 1000,        // 3 часа - fallback при ошибке расчета времени обновления
@@ -62,7 +65,7 @@
         'cache-first': ['icons-cache', 'coins-list'],
         'network-first': ['market-metrics', 'api-cache'],
         'stale-while-revalidate': ['time-series', 'history'],
-        'cache-only': ['portfolios', 'strategies', 'settings', 'theme', 'timezone', 'favorites', 'ui-state', 'perplexity-api-key', 'perplexity-model', 'translation-language']
+        'cache-only': ['portfolios', 'strategies', 'settings', 'theme', 'timezone', 'favorites', 'ui-state', 'ai-provider', 'perplexity-api-key', 'perplexity-model', 'yandex-api-key', 'yandex-model', 'translation-language']
     };
 
     /**

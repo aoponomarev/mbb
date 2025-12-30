@@ -1,23 +1,24 @@
 /**
  * ================================================================================================
- * TOOLTIPS TRANSLATOR - Модуль перевода tooltips через Perplexity AI
+ * TOOLTIPS TRANSLATOR - Модуль перевода tooltips через AI провайдеры
  * ================================================================================================
  *
- * ЦЕЛЬ: Перевод всех tooltips из конфига на указанный язык через Perplexity API.
+ * ЦЕЛЬ: Перевод всех tooltips из конфига на указанный язык через AI провайдер (YandexGPT, Perplexity).
  * Используется единый запрос с парсингом ответа по разделителям.
  *
  * ПРИНЦИПЫ:
  * - Единый запрос для всех tooltips (экономия API квоты)
  * - Парсинг ответа по разделителям (---TOOLTIP:ключ---)
- * - Кэширование переводов в localStorage с ключом tooltips-{versionHash}-{language}
+ * - Кэширование переводов в localStorage с ключом tooltips-{provider}-{versionHash}-{language}
  * - Версионирование кэша (при смене версии старые ключи удаляются)
+ * - Отдельное кэширование для каждого провайдера
  *
  * ИСПОЛЬЗОВАНИЕ:
  * await window.tooltipsTranslator.translateAllTooltips('en');
  *
  * ССЫЛКИ:
  * - Конфигурация tooltips: core/config/tooltips-config.js
- * - Perplexity API: core/api/perplexity.js
+ * - AI Provider Manager: core/api/ai-provider-manager.js
  * - Кэш-менеджер: core/cache/cache-manager.js
  */
 
@@ -111,8 +112,8 @@
             throw new Error('tooltips-translator: tooltipsConfig не загружен');
         }
 
-        if (!window.perplexityAPI || !window.perplexityAPI.sendPerplexityRequest) {
-            throw new Error('tooltips-translator: perplexityAPI не загружен');
+        if (!window.aiProviderManager) {
+            throw new Error('tooltips-translator: aiProviderManager не загружен');
         }
 
         if (!window.cacheManager) {
@@ -123,20 +124,8 @@
             throw new Error('tooltips-translator: appConfig не загружен');
         }
 
-        // Получаем настройки Perplexity
-        let apiKey, model;
-        try {
-            apiKey = await window.cacheManager.get('perplexity-api-key');
-            model = await window.cacheManager.get('perplexity-model') ||
-                    window.appConfig.get('defaults.perplexity.model', 'sonar-pro');
-        } catch (error) {
-            console.error('tooltips-translator: ошибка загрузки настроек Perplexity:', error);
-            throw new Error('Не удалось загрузить настройки Perplexity');
-        }
-
-        if (!apiKey || typeof apiKey !== 'string' || apiKey.trim() === '') {
-            throw new Error('API ключ Perplexity не настроен');
-        }
+        // Получаем текущий провайдер
+        const providerName = await window.aiProviderManager.getCurrentProviderName();
 
         // Получаем все tooltips из конфига
         const allTooltips = window.tooltipsConfig.TOOLTIPS;
@@ -167,10 +156,8 @@ Format: each translation on a new line after its marker (---TOOLTIP:ключ---)
 Do not translate the markers themselves, only the text after each marker.`;
 
         try {
-            // Отправляем запрос к Perplexity
-            const response = await window.perplexityAPI.sendPerplexityRequest(
-                apiKey,
-                model,
+            // Отправляем запрос через текущий провайдер
+            const response = await window.aiProviderManager.sendRequest(
                 [{ role: 'user', content: prompt }]
             );
 
@@ -181,27 +168,28 @@ Do not translate the markers themselves, only the text after each marker.`;
                 response.toLowerCase().includes('error') ||
                 response.toLowerCase().includes('unable')
             )) {
-                console.warn('tooltips-translator: Perplexity вернул сообщение об ошибке/ограничении');
-                throw new Error('Perplexity API вернул ошибку или ограничение');
+                console.warn(`tooltips-translator: ${providerName} вернул сообщение об ошибке/ограничении`);
+                throw new Error(`${providerName} API вернул ошибку или ограничение`);
             }
 
             // Парсим ответ
             const translations = parseTooltipsResponse(response);
 
             if (Object.keys(translations).length === 0) {
-                console.warn('tooltips-translator: не удалось распарсить ответ от Perplexity');
-                throw new Error('Не удалось распарсить ответ от Perplexity');
+                console.warn(`tooltips-translator: не удалось распарсить ответ от ${providerName}`);
+                throw new Error(`Не удалось распарсить ответ от ${providerName}`);
             }
 
-            // Сохраняем переводы в кэш
+            // Сохраняем переводы в кэш с указанием провайдера
+            // Ключ: tooltips-{provider}-{versionHash}-{language}
             const versionHash = window.appConfig.getVersionHash();
-            const cacheKey = `tooltips-${versionHash}-${language}`;
+            const cacheKey = `tooltips-${providerName}-${versionHash}-${language}`;
 
             await window.cacheManager.set(cacheKey, translations, {
                 useVersioning: false // Ключ уже содержит версию в имени
             });
 
-            console.log(`tooltips-translator: переведено ${Object.keys(translations).length} tooltips на ${targetLanguage}`);
+            console.log(`tooltips-translator: переведено ${Object.keys(translations).length} tooltips на ${targetLanguage} через ${providerName}`);
 
             // Обновляем кэш в tooltipsConfig
             if (window.tooltipsConfig && typeof window.tooltipsConfig.refreshCache === 'function') {

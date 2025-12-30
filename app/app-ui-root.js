@@ -46,7 +46,7 @@
             return;
         }
 
-        if (!window.cmpDropdownMenuItem || !window.cmpButton || !window.cmpDropdown || !window.cmpCombobox || !window.cmpButtonGroup || !window.appHeader || !window.appFooter || !window.cmpModal || !window.cmpModalButtons || !window.cmpTimezoneSelector || !window.modalExampleBody || !window.perplexitySettings || !window.timezoneModalBody) {
+        if (!window.cmpDropdownMenuItem || !window.cmpButton || !window.cmpDropdown || !window.cmpCombobox || !window.cmpButtonGroup || !window.appHeader || !window.appFooter || !window.cmpModal || !window.cmpModalButtons || !window.cmpTimezoneSelector || !window.modalExampleBody || !window.aiApiSettings || !window.timezoneModalBody) {
             console.error('app-ui-root: не все компоненты загружены');
             return;
         }
@@ -65,7 +65,7 @@
                 'cmp-timezone-selector': window.cmpTimezoneSelector,
                 'timezone-modal-body': window.timezoneModalBody,
                 'modal-example-body': window.modalExampleBody,
-                'perplexity-settings': window.perplexitySettings,
+                'ai-api-settings': window.aiApiSettings,
                 'app-header': window.appHeader,
                 'app-footer': window.appFooter
             },
@@ -375,9 +375,9 @@
                         console.error('Failed to save timezone/language:', error);
                     }
                 },
-                openPerplexityModal() {
-                    if (this.$refs.perplexityModal) {
-                        this.$refs.perplexityModal.show();
+                openAiApiModal() {
+                    if (this.$refs.aiApiModal) {
+                        this.$refs.aiApiModal.show();
                     }
                 }
             },

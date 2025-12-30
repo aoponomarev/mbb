@@ -32,8 +32,7 @@
  * - scheduleNextUpdate() — планирование следующего обновления
  * - formatOIMobile() — форматирование OI для мобильной версии (компактный формат с буквенным обозначением миллиарда, например "8.4B")
  * - formatValueMobile() — форматирование значения для мобильной версии (округление до десятых долей, кроме FR)
- * - loadPerplexitySettings() — загрузка настроек Perplexity из кэша
- * - fetchSingleCryptoNews(index) — запрос одной новости крипты через Perplexity AI (с переводом, по индексу 0-4)
+ * - fetchSingleCryptoNews(index) — запрос одной новости крипты через AI провайдер (с переводом, по индексу 0-4)
  * - parseSingleNews(response) — парсинг одной новости с переводом по явным маркерам (---NEWS---, ---TRANSLATION---, ---END---)
  * - cleanMarkdown(text) — очистка текста от markdown-разметки и артефактов (цифры-сноски после точек)
  * - cleanTranslation(text) — очистка перевода от артефактов (примеры из промпта, префиксы)
@@ -85,8 +84,6 @@ window.appFooter = {
             currentNewsIndex: 0, // Индекс текущей новости (0-4)
             currentNews: '', // Текущая отображаемая новость
             currentNewsTranslated: '', // Перевод текущей новости для tooltip
-            perplexityApiKey: '', // API ключ Perplexity
-            perplexityModel: window.appConfig?.get('defaults.perplexity.model', 'sonar-pro'),
             translationLanguage: window.appConfig?.get('defaults.translationLanguage', 'ru')
         };
     },
@@ -312,48 +309,23 @@ window.appFooter = {
             return value.toFixed(1);
         },
 
-        // Загрузка настроек Perplexity из кэша
-        async loadPerplexitySettings() {
+
+        // Запрос одной новости крипты через AI провайдер (с переводом)
+        async fetchSingleCryptoNews(index) {
+            if (!window.aiProviderManager) {
+                return null;
+            }
+
+            // Проверяем наличие API ключа перед запросом
             try {
-                const defaultApiKey = ''; // API ключ должен быть настроен пользователем через модальное окно настроек
-
-                if (window.cacheManager) {
-                    const savedApiKey = await window.cacheManager.get('perplexity-api-key');
-                    const savedModel = await window.cacheManager.get('perplexity-model');
-
-                    if (savedApiKey) {
-                        this.perplexityApiKey = savedApiKey;
-                    } else {
-                        // Используем ключ по умолчанию
-                        this.perplexityApiKey = defaultApiKey;
-                    }
-
-                    if (savedModel) {
-                        this.perplexityModel = savedModel;
-                    }
-                } else {
-                    const savedApiKey = localStorage.getItem('perplexity-api-key');
-                    const savedModel = localStorage.getItem('perplexity-model');
-
-                    if (savedApiKey) {
-                        this.perplexityApiKey = savedApiKey;
-                    } else {
-                        // Используем ключ по умолчанию
-                        this.perplexityApiKey = defaultApiKey;
-                    }
-
-                    if (savedModel) {
-                        this.perplexityModel = savedModel;
-                    }
+                const providerName = await window.aiProviderManager.getCurrentProviderName();
+                const apiKey = await window.aiProviderManager.getApiKey(providerName);
+                if (!apiKey) {
+                    console.warn(`app-footer: API ключ для ${providerName} не настроен. Откройте настройки "AI API" для настройки.`);
+                    return null;
                 }
             } catch (error) {
-                console.error('Failed to load Perplexity settings:', error);
-            }
-        },
-
-        // Запрос одной новости крипты через Perplexity AI (с переводом)
-        async fetchSingleCryptoNews(index) {
-            if (!this.perplexityApiKey || !window.perplexityAPI) {
+                console.error('app-footer: ошибка проверки API ключа:', error);
                 return null;
             }
 
@@ -386,15 +358,15 @@ Format the response as follows:
 [${targetLanguage} translation]
 ---END---`;
 
-                const response = await window.perplexityAPI.sendPerplexityRequest(
-                    this.perplexityApiKey,
-                    this.perplexityModel,
+                // Отправляем запрос через текущий провайдер
+                const response = await window.aiProviderManager.sendRequest(
                     [{ role: 'user', content: prompt }]
                 );
 
                 // Проверяем на ошибки/ограничения
                 if (response && (response.toLowerCase().includes('cannot provide') || response.toLowerCase().includes('limited') || response.toLowerCase().includes('error'))) {
-                    console.warn('Perplexity API returned error/limitation message for index', index);
+                    const providerName = await window.aiProviderManager.getCurrentProviderName();
+                    console.warn(`${providerName} API returned error/limitation message for index`, index);
                     return null;
                 }
 
@@ -546,9 +518,6 @@ Format the response as follows:
 
         // Загрузка языка перевода из кэша
         await this.loadTranslationLanguage();
-
-        // Загрузка настроек Perplexity
-        await this.loadPerplexitySettings();
 
         // Инициализация времени
         this.updateTime();

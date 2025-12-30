@@ -99,7 +99,7 @@
     let currentVersionHash = null;
 
     /**
-     * Загрузить кэш переводов для текущей версии и языка
+     * Загрузить кэш переводов для текущей версии, языка и провайдера
      * @param {string} language - язык ('ru', 'en', 'es', etc.)
      * @returns {Promise<Object|null>} - кэш переводов или null
      */
@@ -109,8 +109,15 @@
         }
 
         try {
+            // Получаем текущий провайдер для формирования ключа кэша
+            let providerName = 'yandex'; // Дефолтный провайдер
+            if (window.aiProviderManager) {
+                providerName = await window.aiProviderManager.getCurrentProviderName();
+            }
+
             const versionHash = window.appConfig.getVersionHash();
-            const cacheKey = `tooltips-${versionHash}-${language}`;
+            // Ключ кэша включает провайдера: tooltips-{provider}-{versionHash}-{language}
+            const cacheKey = `tooltips-${providerName}-${versionHash}-${language}`;
             const cached = await window.cacheManager.get(cacheKey);
 
             if (cached && typeof cached === 'object') {

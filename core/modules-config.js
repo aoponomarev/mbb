@@ -188,11 +188,40 @@
                 deps: [],
                 category: 'core'
             },
+            // AI Providers
+            {
+                id: 'base-provider',
+                src: 'core/api/ai-providers/base-provider.js',
+                type: 'local',
+                deps: [],
+                category: 'core'
+            },
+            {
+                id: 'yandex-provider',
+                src: 'core/api/ai-providers/yandex-provider.js',
+                type: 'local',
+                deps: ['base-provider'],
+                category: 'core'
+            },
+            {
+                id: 'perplexity-provider',
+                src: 'core/api/ai-providers/perplexity-provider.js',
+                type: 'local',
+                deps: ['base-provider', 'perplexity'],
+                category: 'core'
+            },
+            {
+                id: 'ai-provider-manager',
+                src: 'core/api/ai-provider-manager.js',
+                type: 'local',
+                deps: ['yandex-provider', 'perplexity-provider'],
+                category: 'core'
+            },
             {
                 id: 'tooltips-translator',
                 src: 'core/api/tooltips-translator.js',
                 type: 'local',
-                deps: ['perplexity', 'tooltips-config', 'cache-manager', 'app-config'],
+                deps: ['ai-provider-manager', 'tooltips-config', 'cache-manager', 'app-config'],
                 category: 'core'
             },
             // Config
@@ -316,6 +345,13 @@
                 category: 'templates'
             },
             {
+                id: 'ai-api-settings-template',
+                src: 'app/templates/ai-api-settings-template.js',
+                type: 'local',
+                deps: [],
+                category: 'templates'
+            },
+            {
                 id: 'app-header-template',
                 src: 'app/templates/app-header-template.js',
                 type: 'local',
@@ -429,6 +465,13 @@
                 category: 'components'
             },
             {
+                id: 'ai-api-settings',
+                src: 'app/components/ai-api-settings.js',
+                type: 'local',
+                deps: ['vue', 'modal', 'ai-api-settings-template', 'ai-provider-manager'],
+                category: 'components'
+            },
+            {
                 id: 'timezone-modal-body',
                 src: 'app/components/timezone-modal-body.js',
                 type: 'local',
@@ -443,7 +486,7 @@
                 id: 'app-ui-root',
                 src: 'app/app-ui-root.js',
                 type: 'local',
-                deps: ['dropdown-menu-item', 'button', 'dropdown', 'combobox', 'button-group', 'app-header', 'app-footer', 'modal', 'modal-buttons', 'modal-example-body', 'perplexity-settings', 'timezone-modal-body'],
+                deps: ['dropdown-menu-item', 'button', 'dropdown', 'combobox', 'button-group', 'app-header', 'app-footer', 'modal', 'modal-buttons', 'modal-example-body', 'ai-api-settings', 'timezone-modal-body'],
                 category: 'app'
             }
         ]
