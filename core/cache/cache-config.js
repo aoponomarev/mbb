@@ -30,7 +30,9 @@
         'theme': null,                            // Без TTL
         'timezone': null,                         // Без TTL
         'favorites': null,                        // Без TTL
-        'ui-state': null                          // Без TTL
+        'ui-state': null,                         // Без TTL
+        'perplexity-api-key': null,               // Без TTL (чувствительные данные)
+        'perplexity-model': null                  // Без TTL
     };
 
     // Версии схем данных
@@ -49,7 +51,7 @@
         'cache-first': ['icons-cache', 'coins-list'],
         'network-first': ['market-metrics', 'api-cache'],
         'stale-while-revalidate': ['time-series', 'history'],
-        'cache-only': ['portfolios', 'strategies', 'settings', 'theme', 'timezone', 'favorites', 'ui-state']
+        'cache-only': ['portfolios', 'strategies', 'settings', 'theme', 'timezone', 'favorites', 'ui-state', 'perplexity-api-key', 'perplexity-model']
     };
 
     /**

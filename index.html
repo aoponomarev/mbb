@@ -241,7 +241,7 @@
             <template #settings-items>
                 <li><dropdown-menu-item title="Light | Dark Theme" @click="toggleTheme"></dropdown-menu-item></li>
                 <li><dropdown-menu-item title="Таймзона" @click="openTimezoneModal"></dropdown-menu-item></li>
-                <li><dropdown-menu-item title="Настройка 3" @click="handleClick"></dropdown-menu-item></li>
+                <li><dropdown-menu-item title="Perplexity" @click="openPerplexityModal"></dropdown-menu-item></li>
             </template>
         </app-header>
 
@@ -396,6 +396,34 @@
                                     @click="saveTimezone">
                                 </cmp-button>
                             </template>
+                        </cmp-modal>
+                        <!-- Пример модалки настроек Perplexity -->
+                        <cmp-modal
+                            ref="perplexityModalStatic"
+                            modal-id="perplexityModalStatic"
+                            :centered="true"
+                            :static="true">
+                            <template #header>
+                                <h5 class="modal-title" @click="openPerplexityModal" style="cursor: pointer;">Perplexity</h5>
+                                <button type="button" class="btn-close" aria-label="Закрыть"></button>
+                            </template>
+                            <template #body>
+                                <perplexity-settings></perplexity-settings>
+                            </template>
+                            <!-- Кнопки регистрируются автоматически через modalApi в perplexity-settings -->
+                        </cmp-modal>
+                        <cmp-modal
+                            ref="perplexityModal"
+                            modal-id="perplexityModal"
+                            :centered="true">
+                            <template #header>
+                                <h5 class="modal-title">Perplexity</h5>
+                                <button type="button" class="btn-close" aria-label="Закрыть" data-bs-dismiss="modal"></button>
+                            </template>
+                            <template #body>
+                                <perplexity-settings></perplexity-settings>
+                            </template>
+                            <!-- Кнопки регистрируются автоматически через modalApi в perplexity-settings -->
                         </cmp-modal>
                         <!-- Пример с новой системой управления кнопками -->
                         <cmp-modal

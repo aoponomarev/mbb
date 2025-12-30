@@ -40,7 +40,7 @@
             return;
         }
 
-        if (!window.cmpDropdownMenuItem || !window.cmpButton || !window.cmpDropdown || !window.cmpCombobox || !window.cmpButtonGroup || !window.appHeader || !window.appFooter || !window.cmpModal || !window.cmpModalButtons || !window.cmpTimezoneSelector || !window.modalExampleBody) {
+        if (!window.cmpDropdownMenuItem || !window.cmpButton || !window.cmpDropdown || !window.cmpCombobox || !window.cmpButtonGroup || !window.appHeader || !window.appFooter || !window.cmpModal || !window.cmpModalButtons || !window.cmpTimezoneSelector || !window.modalExampleBody || !window.perplexitySettings) {
             console.error('app-ui-root: не все компоненты загружены');
             return;
         }
@@ -58,6 +58,7 @@
                 'cmp-modal-buttons': window.cmpModalButtons,
                 'cmp-timezone-selector': window.cmpTimezoneSelector,
                 'modal-example-body': window.modalExampleBody,
+                'perplexity-settings': window.perplexitySettings,
                 'app-header': window.appHeader,
                 'app-footer': window.appFooter
             },
@@ -259,6 +260,11 @@
                         }
                     } catch (error) {
                         console.error('Failed to save timezone:', error);
+                    }
+                },
+                openPerplexityModal() {
+                    if (this.$refs.perplexityModal) {
+                        this.$refs.perplexityModal.show();
                     }
                 }
             }

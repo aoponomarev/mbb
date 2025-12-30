@@ -54,16 +54,16 @@
     ref="modalElement">
     <div :class="dialogClasses">
         <div class="modal-content">
-            <div class="modal-header" v-if="$slots.header || hasButtons('header')">
+            <div class="modal-header" v-if="$slots.header || hasHeaderButtons">
                 <slot name="header"></slot>
-                <cmp-modal-buttons location="header" v-if="hasButtons('header')"></cmp-modal-buttons>
+                <cmp-modal-buttons location="header" v-if="hasHeaderButtons"></cmp-modal-buttons>
             </div>
             <div class="modal-body" v-if="$slots.body">
                 <slot name="body"></slot>
             </div>
-            <div class="modal-footer" v-if="$slots.footer || hasButtons('footer')">
+            <div class="modal-footer" v-if="$slots.footer || hasFooterButtons">
                 <slot name="footer"></slot>
-                <cmp-modal-buttons location="footer" v-if="hasButtons('footer')"></cmp-modal-buttons>
+                <cmp-modal-buttons location="footer" v-if="hasFooterButtons"></cmp-modal-buttons>
             </div>
         </div>
     </div>

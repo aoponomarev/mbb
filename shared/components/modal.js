@@ -89,13 +89,19 @@ window.cmpModal = {
         }
     },
 
+    components: {
+        'cmp-modal-buttons': window.cmpModalButtons
+    },
+
     data() {
         return {
             isOpen: false,
             modalInstance: null,
             // Единый реестр всех кнопок модального окна
             // Map<buttonId, buttonConfig> - кнопка регистрируется один раз, может отображаться в header, footer или в обоих
-            buttons: new Map()
+            buttons: new Map(),
+            // Счетчик для принудительной реактивности computed свойств
+            buttonsUpdateCounter: 0
         };
     },
 
@@ -129,17 +135,43 @@ window.cmpModal = {
         },
 
         /**
-         * Проверка наличия кнопок для конкретного места
+         * Проверка наличия кнопок для header
+         * Используем buttonsUpdateCounter для реактивности
          */
-        hasButtons() {
-            return (location) => {
-                for (const button of this.buttons.values()) {
-                    if (button.locations.includes(location) && button.visible) {
-                        return true;
-                    }
+        hasHeaderButtons() {
+            // Используем buttonsUpdateCounter для принудительной реактивности
+            const _ = this.buttonsUpdateCounter;
+            let hasButtons = false;
+            for (const button of this.buttons.values()) {
+                if (button.locations.includes('header') && button.visible) {
+                    hasButtons = true;
+                    break;
                 }
-                return false;
-            };
+            }
+            // #region agent log
+            fetch('http://127.0.0.1:7243/ingest/6397d191-f6f2-43f4-b4da-44a3482bedec',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'modal.js:hasHeaderButtons',message:'hasHeaderButtons computed',data:{hasButtons,buttonsSize:this.buttons.size,buttonsUpdateCounter:this.buttonsUpdateCounter},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'D'})}).catch(()=>{});
+            // #endregion
+            return hasButtons;
+        },
+
+        /**
+         * Проверка наличия кнопок для footer
+         * Используем buttonsUpdateCounter для реактивности
+         */
+        hasFooterButtons() {
+            // Используем buttonsUpdateCounter для принудительной реактивности
+            const _ = this.buttonsUpdateCounter;
+            let hasButtons = false;
+            for (const button of this.buttons.values()) {
+                if (button.locations.includes('footer') && button.visible) {
+                    hasButtons = true;
+                    break;
+                }
+            }
+            // #region agent log
+            fetch('http://127.0.0.1:7243/ingest/6397d191-f6f2-43f4-b4da-44a3482bedec',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'modal.js:hasFooterButtons',message:'hasFooterButtons computed',data:{hasButtons,buttonsSize:this.buttons.size,buttonsUpdateCounter:this.buttonsUpdateCounter},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'D'})}).catch(()=>{});
+            // #endregion
+            return hasButtons;
         }
     },
 
@@ -181,6 +213,9 @@ window.cmpModal = {
          * @param {string} config.icon - CSS класс иконки (Font Awesome, Material Symbols)
          */
         registerButton(buttonId, config) {
+            // #region agent log
+            fetch('http://127.0.0.1:7243/ingest/6397d191-f6f2-43f4-b4da-44a3482bedec',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'modal.js:registerButton',message:'registerButton called',data:{buttonId,locations:config.locations,static:this.static,buttonsSize:this.buttons.size},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'C'})}).catch(()=>{});
+            // #endregion
             // Нормализуем locations в массив
             const locations = Array.isArray(config.locations)
                 ? config.locations
@@ -213,8 +248,11 @@ window.cmpModal = {
                 icon: config.icon || null
             });
 
-            // Принудительное обновление для реактивности
-            this.$forceUpdate();
+            // Увеличиваем счетчик для принудительной реактивности computed свойств
+            this.buttonsUpdateCounter++;
+            // #region agent log
+            fetch('http://127.0.0.1:7243/ingest/6397d191-f6f2-43f4-b4da-44a3482bedec',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'modal.js:registerButton',message:'button registered',data:{buttonId,normalizedLocations,buttonsSize:this.buttons.size,buttonsUpdateCounter:this.buttonsUpdateCounter},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'C'})}).catch(()=>{});
+            // #endregion
         },
 
         /**
@@ -236,8 +274,8 @@ window.cmpModal = {
                 }
             });
 
-            // Принудительное обновление для реактивности
-            this.$forceUpdate();
+            // Увеличиваем счетчик для принудительной реактивности computed свойств
+            this.buttonsUpdateCounter++;
         },
 
         /**
@@ -246,7 +284,8 @@ window.cmpModal = {
          */
         removeButton(buttonId) {
             if (this.buttons.delete(buttonId)) {
-                this.$forceUpdate();
+                // Увеличиваем счетчик для принудительной реактивности computed свойств
+                this.buttonsUpdateCounter++;
             }
         },
 
@@ -271,6 +310,9 @@ window.cmpModal = {
                     result.push(button);
                 }
             }
+            // #region agent log
+            fetch('http://127.0.0.1:7243/ingest/6397d191-f6f2-43f4-b4da-44a3482bedec',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'modal.js:getButtonsForLocation',message:'getButtonsForLocation called',data:{location,buttonsSize:this.buttons.size,resultCount:result.length,result:result.map(b=>({id:b.id,label:b.label,visible:b.visible}))},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'E'})}).catch(()=>{});
+            // #endregion
             return result;
         }
     },
@@ -279,6 +321,9 @@ window.cmpModal = {
      * Предоставление API для управления кнопками через provide/inject
      */
     provide() {
+        // #region agent log
+        fetch('http://127.0.0.1:7243/ingest/6397d191-f6f2-43f4-b4da-44a3482bedec',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'modal.js:provide',message:'provide called',data:{static:this.static,hasRegisterButton:!!this.registerButton},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'A'})}).catch(()=>{});
+        // #endregion
         return {
             modalApi: {
                 registerButton: this.registerButton,

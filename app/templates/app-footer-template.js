@@ -21,6 +21,7 @@
  * - Корневой элемент: ⟨footer⟩ с классами fixed-bottom, bg-body, py-2, px-2 px-md-5, font-monospace, text-muted, d-flex, align-items-center, justify-content-between, flex-wrap
  * - Время МСК: скрыто на мобильных (d-none d-md-inline), видно на десктопе
  * - Список метрик: метрики рынка (FGI, VIX, BTC, OI, FR, LSR) в виде спанов с адаптивными паддингами (px-1 px-md-2)
+ * - Новость крипты: одна строка под метриками, скрыта на мобильных (d-none d-md-block), overflow-x-hidden, кликабельна для переключения, tooltip с полным текстом
  * - Без промежуточных оберток: все классы на корневом элементе footer
  * Layout и CSS-классы:
  * - Фиксированное позиционирование: fixed-bottom
@@ -58,6 +59,7 @@
             <span class="d-inline d-md-none">LSR:{{ formatValueMobile(lsrValue, lsr) }}</span>
             <span class="d-none d-md-inline">LSR:{{ lsr }}</span>
         </span>
+        <div class="d-none d-md-block w-100 mt-1 px-1 px-md-2 overflow-x-hidden" style="text-overflow: ellipsis; white-space: nowrap; cursor: pointer;" v-if="currentNews" @click="switchToNextNews" :title="currentNewsTranslated || currentNews">{{ currentNews }}</div>
 </footer>`;
 
     /**

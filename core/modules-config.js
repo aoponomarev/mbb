@@ -181,6 +181,13 @@
                 deps: [],
                 category: 'core'
             },
+            {
+                id: 'perplexity',
+                src: 'core/api/perplexity.js',
+                type: 'local',
+                deps: [],
+                category: 'core'
+            },
             // Config
             {
                 id: 'api-config',
@@ -281,6 +288,13 @@
                 category: 'templates'
             },
             {
+                id: 'perplexity-settings-template',
+                src: 'app/templates/perplexity-settings-template.js',
+                type: 'local',
+                deps: [],
+                category: 'templates'
+            },
+            {
                 id: 'app-header-template',
                 src: 'app/templates/app-header-template.js',
                 type: 'local',
@@ -355,14 +369,14 @@
                 id: 'app-footer',
                 src: 'app/components/app-footer.js',
                 type: 'local',
-                deps: ['vue', 'market-metrics'],
+                deps: ['vue', 'market-metrics', 'perplexity'],
                 category: 'components'
             },
             {
                 id: 'modal',
                 src: 'shared/components/modal.js',
                 type: 'local',
-                deps: ['vue', 'modal-buttons-template'],
+                deps: ['vue', 'modal-buttons-template', 'modal-buttons'],
                 category: 'components'
             },
             {
@@ -385,6 +399,13 @@
                 type: 'local',
                 deps: ['vue', 'modal'],
                 category: 'components'
+            },
+            {
+                id: 'perplexity-settings',
+                src: 'app/components/perplexity-settings.js',
+                type: 'local',
+                deps: ['vue', 'modal', 'perplexity-settings-template'],
+                category: 'components'
             }
         ],
 
@@ -394,7 +415,7 @@
                 id: 'app-ui-root',
                 src: 'app/app-ui-root.js',
                 type: 'local',
-                deps: ['dropdown-menu-item', 'button', 'dropdown', 'combobox', 'button-group', 'app-header', 'app-footer', 'modal', 'modal-buttons', 'modal-example-body'],
+                deps: ['dropdown-menu-item', 'button', 'dropdown', 'combobox', 'button-group', 'app-header', 'app-footer', 'modal', 'modal-buttons', 'modal-example-body', 'perplexity-settings'],
                 category: 'app'
             }
         ]
