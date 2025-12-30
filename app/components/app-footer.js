@@ -9,21 +9,30 @@
  * - Наследует тему от body (bg-body), переключается вместе с темой приложения
  * - Фиксированное позиционирование внизу страницы
  * - Отображение метрик рынка (FGI, VIX, BTC Dominance, OI, FR, LSR)
- * - Отображение времени МСК
+ * - Отображение времени в выбранной таймзоне (кликабельно для выбора таймзоны)
  * - Обновление метрик 3 раза в день (09:00, 12:00, 18:00 МСК)
  *
  * ДАННЫЕ:
  * - Метрики рынка: fgi, vix, btcDom, oi, fr, lsr (строковые значения)
  * - Числовые значения: fgiValue, vixValue, btcDomValue, oiValue, frValue, lsrValue
- * - Время МСК: mskTime (формат "MCK hh:mm")
+ * - Таймзона: timezone (по умолчанию 'Europe/Moscow')
+ * - Время: timeDisplay (формат "ABBR hh:mm", где ABBR — аббревиатура таймзоны)
  *
  * МЕТОДЫ:
  * - fetchMarketIndices() — загрузка всех метрик через window.marketMetrics
- * - getMSKTime() — получение текущего времени МСК в формате "MCK hh:mm"
+ * - getTime() — получение текущего времени в выбранной таймзоне
+ * - getTimezoneAbbr() — получение аббревиатуры таймзоны
+ * - updateTime() — обновление отображаемого времени
+ * - loadTimezone() — загрузка таймзоны из кэша
+ * - saveTimezone(timezone) — сохранение таймзоны в кэш
+ * - openTimezoneModal() — открытие модального окна выбора таймзоны (эмитит событие)
  * - getNextUpdateTime() — расчет следующего времени обновления (09:00, 12:00, 18:00 МСК)
  * - scheduleNextUpdate() — планирование следующего обновления
  * - formatOIMobile() — форматирование OI для мобильной версии (компактный формат с буквенным обозначением миллиарда, например "8.4B")
  * - formatValueMobile() — форматирование значения для мобильной версии (округление до десятых долей, кроме FR)
+ *
+ * СОБЫТИЯ:
+ * - open-timezone-modal — эмитируется при клике на время в футере для открытия модального окна выбора таймзоны
  *
  * ССЫЛКИ:
  * - Шаблон: app/templates/app-footer-template.js
@@ -52,8 +61,9 @@ window.appFooter = {
             frValue: null,
             lsrValue: null,
 
-            // Время МСК
-            mskTime: 'MCK --:--',
+            // Время
+            timezone: 'Europe/Moscow', // Таймзона по умолчанию
+            timeDisplay: 'MCK --:--',
 
             // Таймеры
             updateTimer: null,
@@ -104,13 +114,12 @@ window.appFooter = {
             }
         },
 
-        // Получение текущего времени МСК в формате "MCK hh:mm"
-        getMSKTime() {
+        // Получение текущего времени в выбранной таймзоне
+        getTime() {
             try {
                 const now = new Date();
-                // Получаем время в МСК через Intl.DateTimeFormat
                 const formatter = new Intl.DateTimeFormat('en-US', {
-                    timeZone: 'Europe/Moscow',
+                    timeZone: this.timezone,
                     hour: '2-digit',
                     minute: '2-digit',
                     hour12: false
@@ -118,19 +127,68 @@ window.appFooter = {
                 const parts = formatter.formatToParts(now);
                 const hours = parts.find(p => p.type === 'hour').value;
                 const minutes = parts.find(p => p.type === 'minute').value;
-                return `MCK ${hours}:${minutes}`;
+
+                // Получаем аббревиатуру таймзоны
+                const tzAbbr = this.getTimezoneAbbr();
+                return `${tzAbbr} ${hours}:${minutes}`;
             } catch (error) {
                 // Fallback на системное время
                 const now = new Date();
                 const hours = String(now.getHours()).padStart(2, '0');
                 const minutes = String(now.getMinutes()).padStart(2, '0');
-                return `MCK ${hours}:${minutes}`;
+                return `SYS ${hours}:${minutes}`;
             }
         },
 
-        // Обновление времени МСК
-        updateMSKTime() {
-            this.mskTime = this.getMSKTime();
+        // Получение аббревиатуры таймзоны
+        getTimezoneAbbr() {
+            const tzMap = {
+                'Europe/Moscow': 'MCK',
+                'Europe/London': 'LON',
+                'America/New_York': 'NYC',
+                'America/Los_Angeles': 'LAX',
+                'Asia/Tokyo': 'TYO',
+                'Asia/Shanghai': 'SHA',
+                'Europe/Berlin': 'BER',
+                'America/Chicago': 'CHI',
+                'UTC': 'UTC'
+            };
+            return tzMap[this.timezone] || this.timezone.split('/').pop().substring(0, 3).toUpperCase();
+        },
+
+        // Обновление времени
+        updateTime() {
+            this.timeDisplay = this.getTime();
+        },
+
+        // Загрузка таймзоны из кэша
+        async loadTimezone() {
+            try {
+                if (window.cacheManager) {
+                    const savedTimezone = await window.cacheManager.get('timezone');
+                    if (savedTimezone && typeof savedTimezone === 'string') {
+                        this.timezone = savedTimezone;
+                    }
+                } else {
+                    const savedTimezone = localStorage.getItem('timezone');
+                    if (savedTimezone) {
+                        this.timezone = savedTimezone;
+                    }
+                }
+            } catch (error) {
+                console.error('Failed to load timezone:', error);
+            }
+        },
+
+        // Обновление таймзоны (вызывается извне после сохранения в кэш)
+        async saveTimezone(timezone) {
+            this.timezone = timezone;
+            this.updateTime();
+        },
+
+        // Открытие модального окна выбора таймзоны
+        openTimezoneModal() {
+            this.$emit('open-timezone-modal');
         },
 
         // Расчет следующего времени обновления (09:00, 12:00, 18:00 МСК)
@@ -210,12 +268,15 @@ window.appFooter = {
         }
     },
 
-    mounted() {
-        // Инициализация времени МСК
-        this.updateMSKTime();
+    async mounted() {
+        // Загрузка таймзоны из кэша
+        await this.loadTimezone();
+
+        // Инициализация времени
+        this.updateTime();
         // Обновляем время каждую минуту
         this.timeUpdateTimer = setInterval(() => {
-            this.updateMSKTime();
+            this.updateTime();
         }, 60 * 1000);
 
         // Загрузка метрик при разблокировке приложения

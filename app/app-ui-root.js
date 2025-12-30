@@ -40,7 +40,7 @@
             return;
         }
 
-        if (!window.cmpDropdownMenuItem || !window.cmpButton || !window.cmpDropdown || !window.cmpCombobox || !window.cmpButtonGroup || !window.appHeader || !window.appFooter) {
+        if (!window.cmpDropdownMenuItem || !window.cmpButton || !window.cmpDropdown || !window.cmpCombobox || !window.cmpButtonGroup || !window.appHeader || !window.appFooter || !window.cmpModal || !window.cmpModalButtons || !window.cmpTimezoneSelector || !window.modalExampleBody) {
             console.error('app-ui-root: не все компоненты загружены');
             return;
         }
@@ -54,6 +54,10 @@
                 'cmp-dropdown': window.cmpDropdown,
                 'cmp-combobox': window.cmpCombobox,
                 'cmp-button-group': window.cmpButtonGroup,
+                'cmp-modal': window.cmpModal,
+                'cmp-modal-buttons': window.cmpModalButtons,
+                'cmp-timezone-selector': window.cmpTimezoneSelector,
+                'modal-example-body': window.modalExampleBody,
                 'app-header': window.appHeader,
                 'app-footer': window.appFooter
             },
@@ -122,7 +126,10 @@
                         id: i + 1,
                         label: `Город ${i + 1}`,
                         value: `city-${i + 1}`
-                    }))
+                    })),
+                    // Таймзона
+                    selectedTimezone: 'Europe/Moscow',
+                    initialTimezone: 'Europe/Moscow' // Исходное значение таймзоны при открытии модального окна
                 };
             },
             methods: {
@@ -174,6 +181,85 @@
                 handleButtonGroupClick(event, data) {
                     console.log('Button click:', data);
                     // Здесь можно добавить логику обработки клика по кнопке в группе
+                },
+                openExampleModal() {
+                    if (this.$refs.exampleModal) {
+                        this.$refs.exampleModal.show();
+                    }
+                },
+                openExampleModalNew() {
+                    if (this.$refs.exampleModalNew) {
+                        this.$refs.exampleModalNew.show();
+                    }
+                },
+                closeExampleModal() {
+                    if (this.$refs.exampleModal) {
+                        this.$refs.exampleModal.hide();
+                    }
+                },
+                async openTimezoneModal() {
+                    // Загружаем текущую таймзону из кэша
+                    try {
+                        if (window.cacheManager) {
+                            const savedTimezone = await window.cacheManager.get('timezone');
+                            if (savedTimezone && typeof savedTimezone === 'string') {
+                                this.selectedTimezone = savedTimezone;
+                                this.initialTimezone = savedTimezone;
+                            } else {
+                                this.initialTimezone = this.selectedTimezone;
+                            }
+                        } else {
+                            const savedTimezone = localStorage.getItem('timezone');
+                            if (savedTimezone) {
+                                this.selectedTimezone = savedTimezone;
+                                this.initialTimezone = savedTimezone;
+                            } else {
+                                this.initialTimezone = this.selectedTimezone;
+                            }
+                        }
+                    } catch (error) {
+                        console.error('Failed to load timezone:', error);
+                        this.initialTimezone = this.selectedTimezone;
+                    }
+
+                    if (this.$refs.timezoneModal) {
+                        this.$refs.timezoneModal.show();
+                    }
+                },
+                cancelTimezone() {
+                    // Если таймзона изменена - восстанавливаем исходное значение
+                    if (this.selectedTimezone !== this.initialTimezone) {
+                        this.selectedTimezone = this.initialTimezone;
+                    } else {
+                        // Если таймзона не изменена - закрываем модальное окно
+                        if (this.$refs.timezoneModal) {
+                            this.$refs.timezoneModal.hide();
+                        }
+                    }
+                },
+                async saveTimezone() {
+                    try {
+                        if (window.cacheManager) {
+                            await window.cacheManager.set('timezone', this.selectedTimezone);
+                        } else {
+                            localStorage.setItem('timezone', this.selectedTimezone);
+                        }
+
+                        // Обновляем исходное значение
+                        this.initialTimezone = this.selectedTimezone;
+
+                        // Обновляем время в футере
+                        if (this.$refs.appFooter) {
+                            await this.$refs.appFooter.saveTimezone(this.selectedTimezone);
+                        }
+
+                        // Закрываем модальное окно
+                        if (this.$refs.timezoneModal) {
+                            this.$refs.timezoneModal.hide();
+                        }
+                    } catch (error) {
+                        console.error('Failed to save timezone:', error);
+                    }
                 }
             }
         }).mount('#app');

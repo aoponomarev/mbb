@@ -7,6 +7,7 @@
 - § *Вызов методов из computed свойств* — правила для безопасного использования методов в `computed`.
 - § *Работа с отступами (gaps) в составных компонентах* — систематизация работы с gaps (отступами между дочерними элементами) в flexbox-контейнерах.
 - § *Порядок загрузки стилей компонентов* — принципы организации CSS файлов компонентов и порядок их загрузки.
+- § *Использование системы управления кнопками модального окна* — практические примеры регистрации и управления кнопками через modalApi.
 
 > § <br> РАБОТА С `this.$el` В VUE 3
 
@@ -301,4 +302,134 @@ margin-right: 0.5rem; /* 8px - эквивалент gap-2 */
 - Не изменяйте порядок загрузки без проверки зависимостей
 - При добавлении нового компонента определите его зависимости и разместите файл в правильной позиции
 - Каждый файл содержит подробную шапку с описанием зависимостей и порядка загрузки
+
+> § <br> ИСПОЛЬЗОВАНИЕ СИСТЕМЫ УПРАВЛЕНИЯ КНОПКАМИ МОДАЛЬНОГО ОКНА
+
+## Базовый пример
+
+Компонент внутри `body` модального окна регистрирует кнопки через `inject`:
+
+```javascript
+// app/components/modal-example-body.js
+window.modalExampleBody = {
+    template: `...`,
+
+    inject: ['modalApi'],
+
+    mounted() {
+        // Регистрация кнопок при монтировании
+        if (this.modalApi) {
+            this.modalApi.registerButton('save', {
+                locations: ['footer'],
+                label: 'Сохранить',
+                variant: 'primary',
+                disabled: false,
+                onClick: () => this.handleSave()
+            });
+        }
+    },
+
+    beforeUnmount() {
+        // Удаление кнопок при размонтировании
+        if (this.modalApi) {
+            this.modalApi.removeButton('save');
+        }
+    }
+};
+```
+
+## Реактивное обновление состояния кнопок
+
+Состояние кнопок обновляется реактивно при изменении данных формы:
+
+```javascript
+watch: {
+    formData: {
+        deep: true,
+        handler() {
+            // Обновление состояния кнопки "Сохранить"
+            this.modalApi.updateButton('save', {
+                disabled: !this.hasChanges || !this.isValid
+            });
+        }
+    }
+}
+```
+
+## Кнопка в нескольких местах
+
+Одна кнопка может отображаться в header и footer одновременно:
+
+```javascript
+this.modalApi.registerButton('save', {
+    locations: ['header', 'footer'], // В обоих местах
+    label: 'Сохранить',
+    variant: 'primary',
+    onClick: () => this.handleSave()
+});
+
+// Обновление состояния обновится ВО ВСЕХ местах автоматически
+this.modalApi.updateButton('save', { disabled: true });
+```
+
+## Проверка доступности modalApi
+
+Всегда проверяйте доступность `modalApi` перед использованием:
+
+```javascript
+// ❌ НЕПРАВИЛЬНО - может упасть, если modalApi не доступен
+mounted() {
+    this.modalApi.registerButton('save', {...});
+}
+
+// ✅ ПРАВИЛЬНО - проверка доступности
+mounted() {
+    if (this.modalApi) {
+        this.modalApi.registerButton('save', {...});
+    }
+}
+```
+
+## Очистка кнопок при размонтировании
+
+Обязательно удаляйте кнопки при размонтировании компонента:
+
+```javascript
+beforeUnmount() {
+    if (this.modalApi) {
+        // Удаляем все зарегистрированные кнопки
+        this.modalApi.removeButton('save');
+        this.modalApi.removeButton('cancel');
+    }
+}
+```
+
+## Совместимость со слотами
+
+Система управления кнопками работает параллельно со слотами. Можно использовать:
+- Только слоты (традиционный подход)
+- Только динамические кнопки (через modalApi)
+- Комбинацию слотов и динамических кнопок
+
+**Пример комбинации:**
+```html
+<cmp-modal>
+    <template #footer>
+        <!-- Статическая кнопка через слот -->
+        <cmp-button label="Статическая" variant="secondary"></cmp-button>
+    </template>
+    <template #body>
+        <!-- Динамические кнопки регистрируются здесь -->
+        <modal-example-body></modal-example-body>
+    </template>
+</cmp-modal>
+```
+
+## ССЫЛКИ
+
+- Принципы системы: `docs/doc-comp-principles.md` (раздел "Система управления кнопками модального окна")
+- Архитектура: `docs/doc-architect.md` (раздел "Система управления кнопками модального окна")
+- Компонент модального окна: `shared/components/modal.js`
+- Компонент рендеринга кнопок: `shared/components/modal-buttons.js`
+- Пример использования: `app/components/modal-example-body.js`
 

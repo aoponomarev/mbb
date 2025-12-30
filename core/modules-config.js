@@ -260,6 +260,27 @@
                 category: 'templates'
             },
             {
+                id: 'modal-template',
+                src: 'shared/templates/modal-template.js',
+                type: 'local',
+                deps: [],
+                category: 'templates'
+            },
+            {
+                id: 'modal-buttons-template',
+                src: 'shared/templates/modal-buttons-template.js',
+                type: 'local',
+                deps: [],
+                category: 'templates'
+            },
+            {
+                id: 'timezone-selector-template',
+                src: 'shared/templates/timezone-selector-template.js',
+                type: 'local',
+                deps: [],
+                category: 'templates'
+            },
+            {
                 id: 'app-header-template',
                 src: 'app/templates/app-header-template.js',
                 type: 'local',
@@ -281,7 +302,7 @@
                 id: 'vue',
                 src: 'https://unpkg.com/vue@3/dist/vue.global.prod.js',
                 type: 'external',
-                deps: ['button-template', 'dropdown-menu-item-template', 'dropdown-template', 'combobox-template', 'button-group-template'],
+                deps: ['button-template', 'dropdown-menu-item-template', 'dropdown-template', 'combobox-template', 'button-group-template', 'modal-template', 'timezone-selector-template'],
                 category: 'libraries'
             }
         ],
@@ -336,6 +357,34 @@
                 type: 'local',
                 deps: ['vue', 'market-metrics'],
                 category: 'components'
+            },
+            {
+                id: 'modal',
+                src: 'shared/components/modal.js',
+                type: 'local',
+                deps: ['vue', 'modal-buttons-template'],
+                category: 'components'
+            },
+            {
+                id: 'modal-buttons',
+                src: 'shared/components/modal-buttons.js',
+                type: 'local',
+                deps: ['vue', 'button', 'modal-buttons-template'],
+                category: 'components'
+            },
+            {
+                id: 'timezone-selector',
+                src: 'shared/components/timezone-selector.js',
+                type: 'local',
+                deps: ['vue'],
+                category: 'components'
+            },
+            {
+                id: 'modal-example-body',
+                src: 'app/components/modal-example-body.js',
+                type: 'local',
+                deps: ['vue', 'modal'],
+                category: 'components'
             }
         ],
 
@@ -345,7 +394,7 @@
                 id: 'app-ui-root',
                 src: 'app/app-ui-root.js',
                 type: 'local',
-                deps: ['dropdown-menu-item', 'button', 'dropdown', 'combobox', 'button-group', 'app-header', 'app-footer'],
+                deps: ['dropdown-menu-item', 'button', 'dropdown', 'combobox', 'button-group', 'app-header', 'app-footer', 'modal', 'modal-buttons', 'modal-example-body'],
                 category: 'app'
             }
         ]

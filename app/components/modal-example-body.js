@@ -1,0 +1,150 @@
+/**
+ * ================================================================================================
+ * MODAL EXAMPLE BODY COMPONENT - Компонент-пример для демонстрации системы управления кнопками
+ * ================================================================================================
+ *
+ * ЦЕЛЬ: Демонстрация использования системы управления кнопками модального окна.
+ *
+ * ОСОБЕННОСТИ:
+ * - Регистрация кнопок через inject modalApi
+ * - Реактивное обновление состояния кнопок при изменении данных формы
+ * - Демонстрация кнопок в header и footer одновременно
+ *
+ * ССЫЛКИ:
+ * - Система управления кнопками: shared/components/modal.js
+ * - Принципы: docs/doc-comp-principles.md
+ */
+
+window.modalExampleBody = {
+    template: `
+        <div>
+            <p>Содержимое модального окна. Здесь может быть любой контент: текст, формы, изображения и т.д.</p>
+            <div class="mb-3">
+                <label for="exampleInput" class="form-label">Пример поля ввода</label>
+                <input
+                    type="text"
+                    class="form-control"
+                    id="exampleInput"
+                    v-model="formData.inputValue"
+                    placeholder="Введите текст">
+            </div>
+            <div class="form-check">
+                <input
+                    class="form-check-input"
+                    type="checkbox"
+                    id="exampleCheck"
+                    v-model="formData.checkboxValue">
+                <label class="form-check-label" for="exampleCheck">
+                    Пример чекбокса
+                </label>
+            </div>
+        </div>
+    `,
+
+    inject: ['modalApi'],
+
+    data() {
+        return {
+            formData: {
+                inputValue: '',
+                checkboxValue: false
+            },
+            initialData: {
+                inputValue: '',
+                checkboxValue: false
+            }
+        };
+    },
+
+    computed: {
+        hasChanges() {
+            return JSON.stringify(this.formData) !== JSON.stringify(this.initialData);
+        },
+        isValid() {
+            return this.formData.inputValue.length > 0;
+        }
+    },
+
+    watch: {
+        formData: {
+            deep: true,
+            handler() {
+                // Реактивно обновляем состояние кнопок при изменении формы
+                if (this.modalApi) {
+                    this.modalApi.updateButton('save', {
+                        disabled: !this.hasChanges || !this.isValid
+                    });
+                }
+            }
+        }
+    },
+
+    methods: {
+        handleCancel() {
+            if (this.hasChanges) {
+                // Восстанавливаем исходные значения
+                this.formData = JSON.parse(JSON.stringify(this.initialData));
+            } else {
+                // Закрываем модальное окно
+                if (this.$parent.$refs && this.$parent.$refs.exampleModal) {
+                    this.$parent.$refs.exampleModal.hide();
+                }
+            }
+        },
+        handleSave() {
+            // Сохраняем данные
+            this.initialData = JSON.parse(JSON.stringify(this.formData));
+            console.log('Данные сохранены:', this.formData);
+
+            // Закрываем модальное окно
+            if (this.$parent.$refs && this.$parent.$refs.exampleModal) {
+                this.$parent.$refs.exampleModal.hide();
+            }
+        },
+        handleExport() {
+            console.log('Экспорт данных:', this.formData);
+        }
+    },
+
+    mounted() {
+        // Регистрируем кнопки при монтировании
+        if (this.modalApi) {
+            // Кнопка "Сохранить" в header и footer
+            this.modalApi.registerButton('save', {
+                locations: ['header', 'footer'],
+                label: 'Сохранить',
+                variant: 'primary',
+                disabled: !this.hasChanges || !this.isValid,
+                onClick: () => this.handleSave()
+            });
+
+            // Кнопка "Отмена" только в footer
+            this.modalApi.registerButton('cancel', {
+                locations: ['footer'],
+                label: 'Отмена',
+                variant: 'secondary',
+                classesAdd: { root: 'me-auto' },
+                onClick: () => this.handleCancel()
+            });
+
+            // Кнопка "Экспорт" только в header
+            this.modalApi.registerButton('export', {
+                locations: ['header'],
+                label: 'Экспорт',
+                variant: 'outline-primary',
+                icon: 'fa fa-download',
+                onClick: () => this.handleExport()
+            });
+        }
+    },
+
+    beforeUnmount() {
+        // Удаляем кнопки при размонтировании
+        if (this.modalApi) {
+            this.modalApi.removeButton('save');
+            this.modalApi.removeButton('cancel');
+            this.modalApi.removeButton('export');
+        }
+    }
+};
+

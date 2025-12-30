@@ -39,7 +39,7 @@
     'use strict';
 
     const TEMPLATE = `<footer class="fixed-bottom bg-body py-2 px-2 px-md-5 app-footer font-monospace text-muted d-flex align-items-center justify-content-between flex-wrap">
-        <span class="d-none d-md-inline px-1 px-md-2">{{ mskTime }}</span>
+        <span class="d-none d-md-inline px-1 px-md-2" @click="openTimezoneModal" style="cursor: pointer;">{{ timeDisplay }}</span>
         <span class="px-1 px-md-2">FGI:{{ fgi }}</span>
         <span class="px-1 px-md-2">
             <span class="d-inline d-md-none">VIX:{{ formatValueMobile(vixValue, vix) }}</span>
