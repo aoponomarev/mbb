@@ -112,6 +112,17 @@
                         localStorage.removeItem(key);
                     }
                     return true;
+                },
+                keys: async () => {
+                    // Получить все ключи из localStorage
+                    const allKeys = [];
+                    for (let i = 0; i < localStorage.length; i++) {
+                        const key = localStorage.key(i);
+                        if (key) {
+                            allKeys.push(key);
+                        }
+                    }
+                    return allKeys;
                 }
             };
         } else if (config.type === 'indexedDB') {
@@ -148,6 +159,19 @@
                         localStorage.removeItem(`idb_${layer}_${key}`);
                     }
                     return true;
+                },
+                keys: async () => {
+                    // Получить все ключи для этого слоя из localStorage (fallback для IndexedDB)
+                    const prefix = `idb_${layer}_`;
+                    const allKeys = [];
+                    for (let i = 0; i < localStorage.length; i++) {
+                        const key = localStorage.key(i);
+                        if (key && key.startsWith(prefix)) {
+                            // Убираем префикс
+                            allKeys.push(key.substring(prefix.length));
+                        }
+                    }
+                    return allKeys;
                 }
             };
         }

@@ -240,8 +240,8 @@
             </template>
             <template #settings-items>
                 <li><dropdown-menu-item title="Light | Dark Theme" @click="toggleTheme"></dropdown-menu-item></li>
-                <li><dropdown-menu-item title="Таймзона" @click="openTimezoneModal"></dropdown-menu-item></li>
-                <li><dropdown-menu-item title="Perplexity" @click="openPerplexityModal"></dropdown-menu-item></li>
+                <li><dropdown-menu-item :title="modalsConfig?.getModalTitle('timezoneModal') || 'Таймзона & i18n'" @click="openTimezoneModal"></dropdown-menu-item></li>
+                <li><dropdown-menu-item :title="modalsConfig?.getModalTitle('perplexityModal') || 'Perplexity'" @click="openPerplexityModal"></dropdown-menu-item></li>
             </template>
         </app-header>
 
@@ -250,6 +250,70 @@
             <main class="flex-grow-1 d-flex flex-column">
                 <!-- Контент приложения загружается через Vue компоненты -->
                 <div class="container flex-grow-1">
+                    <!-- ВРЕМЕННЫЙ ПРИМЕР: Тестирование системы перевода tooltips -->
+                    <div class="mb-4 p-3 border rounded bg-light">
+                        <h2 class="mb-3">Тестирование системы перевода tooltips</h2>
+                        <p class="text-muted small mb-3">
+                            Проверка работы tooltipsConfig.getTooltip() для разных типов tooltips.
+                            При смене языка перевода в настройках tooltips должны автоматически обновляться.
+                        </p>
+                        <div class="d-flex flex-wrap gap-2 mb-3">
+                            <cmp-button
+                                label="Сохранить"
+                                icon="fas fa-save"
+                                :tooltip-icon="tooltips['button.save.icon'] || 'Иконка: Сохранить'"
+                                :tooltip-text="tooltips['button.save.text'] || 'Основной текст: Сохранить изменения'"
+                                @click="handleClick">
+                            </cmp-button>
+                            <cmp-button
+                                label="Удалить"
+                                icon="fas fa-trash"
+                                variant="danger"
+                                :tooltip-icon="tooltips['button.delete.icon'] || 'Иконка: Удалить'"
+                                :tooltip-text="tooltips['button.delete.text'] || 'Основной текст: Удалить элемент'"
+                                @click="handleClick">
+                            </cmp-button>
+                            <cmp-button
+                                label="Загрузить"
+                                icon="fas fa-download"
+                                variant="success"
+                                :tooltip-icon="tooltips['button.load.icon'] || 'Иконка: Загрузить'"
+                                :tooltip-text="tooltips['button.load.text'] || 'Основной текст: Загрузить файл'"
+                                @click="handleClick">
+                            </cmp-button>
+                            <cmp-button
+                                label="Уведомления"
+                                icon="fas fa-bell"
+                                :tooltip-icon="tooltips['button.notifications.icon'] || 'Иконка: Уведомления'"
+                                :tooltip-text="tooltips['button.notifications.text'] || 'Основной текст: Просмотр уведомлений'"
+                                :suffix="{ type: 'badge', value: 5, variant: 'secondary', tooltip: tooltips['button.notifications.suffix.badge'] || 'Суффикс: 5 новых уведомлений' }"
+                                @click="handleClick">
+                            </cmp-button>
+                            <cmp-button
+                                label="Экспорт"
+                                icon="fas fa-download"
+                                :tooltip-icon="tooltips['button.export.icon'] || 'Иконка: Экспорт'"
+                                :tooltip-text="tooltips['button.export.text'] || 'Основной текст: Экспорт данных'"
+                                :suffix="{ type: 'icon', value: 'fas fa-external-link-alt', tooltip: tooltips['button.export.suffix.icon'] || 'Суффикс: Открыть в новой вкладке' }"
+                                @click="handleClick">
+                            </cmp-button>
+                            <cmp-button
+                                label="Справка"
+                                icon="fas fa-question-circle"
+                                :tooltip-icon="tooltips['button.help.icon'] || 'Иконка: Справка'"
+                                :tooltip-text="tooltips['button.help.text'] || 'Основной текст: Открыть справку'"
+                                :suffix="{ type: 'info', value: 'fas fa-info-circle text-info', tooltip: tooltips['button.help.suffix.info'] || 'Суффикс: Открыть справку' }"
+                                @click="handleClick">
+                            </cmp-button>
+                        </div>
+                        <div class="mt-3 p-2 bg-white rounded border">
+                            <small class="text-muted">
+                                <strong>Текущий язык:</strong> {{ currentTranslationLanguage || 'ru' }} |
+                                <strong>tooltipsConfig:</strong> {{ tooltipsConfig ? 'загружен' : 'не загружен' }}
+                            </small>
+                        </div>
+                    </div>
+
                     <!-- Тестовая секция для визуального контроля высоты -->
                     <div class="mb-4 p-3 border rounded">
                         <h2 class="mb-4">Визуальный контроль высоты элементов</h2>
@@ -295,116 +359,57 @@
                     <!-- Пример модального окна -->
                     <div class="mb-4">
                         <h2 class="mb-4">Пример модального окна</h2>
-                        <p class="text-muted mb-3">Ниже показаны примеры модальных окон. Первые два используют традиционные слоты для кнопок. Третий пример демонстрирует новую систему управления кнопками через modalApi.</p>
-                        <cmp-modal
-                            ref="exampleModalStatic"
-                            modal-id="exampleModalStatic"
-                            :centered="true"
-                            :static="true">
-                            <template #header>
-                                <h5 class="modal-title" @click="openExampleModal" style="cursor: pointer;">Заголовок модального окна</h5>
-                                <button type="button" class="btn-close" aria-label="Закрыть"></button>
-                            </template>
-                            <template #body>
-                                <p>Содержимое модального окна. Здесь может быть любой контент: текст, формы, изображения и т.д.</p>
-                            </template>
-                            <template #footer>
-                                <cmp-button
-                                    label="Отмена"
-                                    variant="secondary"
-                                    :classes-add="{ root: 'me-auto' }">
-                                </cmp-button>
-                                <cmp-button
-                                    label="Сохранить"
-                                    variant="primary"
-                                    :button-attributes="{ 'data-bs-dismiss': 'modal' }">
-                                </cmp-button>
-                            </template>
-                        </cmp-modal>
-                        <cmp-modal
-                            ref="exampleModal"
-                            modal-id="exampleModal"
-                            :centered="true">
-                            <template #header>
-                                <h5 class="modal-title">Заголовок модального окна</h5>
-                                <button type="button" class="btn-close" aria-label="Закрыть" @click="closeExampleModal"></button>
-                            </template>
-                            <template #body>
-                                <p>Содержимое модального окна. Здесь может быть любой контент: текст, формы, изображения и т.д.</p>
-                            </template>
-                            <template #footer>
-                                <cmp-button
-                                    label="Отмена"
-                                    variant="secondary"
-                                    :classes-add="{ root: 'me-auto' }"
-                                    :button-attributes="{ 'data-bs-dismiss': 'modal' }">
-                                </cmp-button>
-                                <cmp-button
-                                    label="Сохранить"
-                                    variant="primary"
-                                    :button-attributes="{ 'data-bs-dismiss': 'modal' }">
-                                </cmp-button>
-                            </template>
-                        </cmp-modal>
+                        <p class="text-muted mb-3">Ниже показаны примеры модальных окон. Все модальные окна приложения используют систему управления кнопками через modalApi.</p>
                         <cmp-modal
                             ref="timezoneModalStatic"
                             modal-id="timezoneModalStatic"
+                            :title="modalsConfig?.getModalTitle('timezoneModal')"
                             :centered="true"
                             :static="true">
                             <template #header>
-                                <h5 class="modal-title" @click="openTimezoneModal" style="cursor: pointer;">Таймзона</h5>
+                                <h5 class="modal-title" @click="openTimezoneModal" style="cursor: pointer;">{{ modalsConfig?.getModalTitle('timezoneModal') || 'Таймзона & i18n' }}</h5>
                                 <button type="button" class="btn-close" aria-label="Закрыть"></button>
                             </template>
                             <template #body>
-                                <cmp-timezone-selector v-model="selectedTimezone"></cmp-timezone-selector>
-                            </template>
-                            <template #footer>
-                                <cmp-button
-                                    label="Отмена"
-                                    variant="secondary"
-                                    :classes-add="{ root: 'me-auto' }"
-                                    @click="cancelTimezone">
-                                </cmp-button>
-                                <cmp-button
-                                    label="Сохранить"
-                                    variant="primary"
-                                    @click="saveTimezone">
-                                </cmp-button>
+                                <timezone-modal-body
+                                    v-model="selectedTimezone"
+                                    :initial-value="initialTimezone"
+                                    :translation-language="selectedTranslationLanguage"
+                                    :initial-translation-language="initialTranslationLanguage"
+                                    :on-save="saveTimezone"
+                                    :on-cancel="cancelTimezone">
+                                </timezone-modal-body>
                             </template>
                         </cmp-modal>
                         <cmp-modal
                             ref="timezoneModal"
                             modal-id="timezoneModal"
+                            :title="modalsConfig?.getModalTitle('timezoneModal')"
                             :centered="true">
                             <template #header>
-                                <h5 class="modal-title">Таймзона</h5>
+                                <h5 class="modal-title">{{ modalsConfig?.getModalTitle('timezoneModal') || 'Таймзона & i18n' }}</h5>
                                 <button type="button" class="btn-close" aria-label="Закрыть" data-bs-dismiss="modal"></button>
                             </template>
                             <template #body>
-                                <cmp-timezone-selector v-model="selectedTimezone"></cmp-timezone-selector>
-                            </template>
-                            <template #footer>
-                                <cmp-button
-                                    label="Отмена"
-                                    variant="secondary"
-                                    :classes-add="{ root: 'me-auto' }"
-                                    @click="cancelTimezone">
-                                </cmp-button>
-                                <cmp-button
-                                    label="Сохранить"
-                                    variant="primary"
-                                    @click="saveTimezone">
-                                </cmp-button>
+                                <timezone-modal-body
+                                    v-model="selectedTimezone"
+                                    :initial-value="initialTimezone"
+                                    :translation-language="selectedTranslationLanguage"
+                                    :initial-translation-language="initialTranslationLanguage"
+                                    :on-save="saveTimezone"
+                                    :on-cancel="cancelTimezone">
+                                </timezone-modal-body>
                             </template>
                         </cmp-modal>
                         <!-- Пример модалки настроек Perplexity -->
                         <cmp-modal
                             ref="perplexityModalStatic"
                             modal-id="perplexityModalStatic"
+                            :title="modalsConfig?.getModalTitle('perplexityModal')"
                             :centered="true"
                             :static="true">
                             <template #header>
-                                <h5 class="modal-title" @click="openPerplexityModal" style="cursor: pointer;">Perplexity</h5>
+                                <h5 class="modal-title" @click="openPerplexityModal" style="cursor: pointer;">{{ modalsConfig?.getModalTitle('perplexityModal') || 'Perplexity' }}</h5>
                                 <button type="button" class="btn-close" aria-label="Закрыть"></button>
                             </template>
                             <template #body>
@@ -415,9 +420,10 @@
                         <cmp-modal
                             ref="perplexityModal"
                             modal-id="perplexityModal"
+                            :title="modalsConfig?.getModalTitle('perplexityModal')"
                             :centered="true">
                             <template #header>
-                                <h5 class="modal-title">Perplexity</h5>
+                                <h5 class="modal-title">{{ modalsConfig?.getModalTitle('perplexityModal') || 'Perplexity' }}</h5>
                                 <button type="button" class="btn-close" aria-label="Закрыть" data-bs-dismiss="modal"></button>
                             </template>
                             <template #body>
@@ -742,8 +748,7 @@
                                 dropdown-size="sm"
                                 size="sm"
                                 :buttons="[
-                                    { type: 'button', label: 'Настройка 1', variant: 'outline-dark', size: 'sm', icon: 'fas fa-sliders-h' },
-                                    { type: 'button', label: 'Настройка 2', variant: 'outline-dark', size: 'sm', icon: 'fas fa-adjust' },
+                                    { type: 'button', label: 'Таймзона & i18n', variant: 'outline-dark', size: 'sm', icon: 'fas fa-adjust', onClick: () => vm.openTimezoneModal() },
                                     { type: 'checkbox', label: 'Включить', variant: 'outline-dark' }
                                 ]"
                                 @button-click="handleButtonGroupClick"

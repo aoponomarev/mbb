@@ -188,6 +188,13 @@
                 deps: [],
                 category: 'core'
             },
+            {
+                id: 'tooltips-translator',
+                src: 'core/api/tooltips-translator.js',
+                type: 'local',
+                deps: ['perplexity', 'tooltips-config', 'cache-manager', 'app-config'],
+                category: 'core'
+            },
             // Config
             {
                 id: 'api-config',
@@ -199,6 +206,20 @@
             {
                 id: 'app-config',
                 src: 'core/config/app-config.js',
+                type: 'local',
+                deps: [],
+                category: 'core'
+            },
+            {
+                id: 'modals-config',
+                src: 'core/config/modals-config.js',
+                type: 'local',
+                deps: [],
+                category: 'core'
+            },
+            {
+                id: 'tooltips-config',
+                src: 'core/config/tooltips-config.js',
                 type: 'local',
                 deps: [],
                 category: 'core'
@@ -376,7 +397,7 @@
                 id: 'modal',
                 src: 'shared/components/modal.js',
                 type: 'local',
-                deps: ['vue', 'modal-buttons-template', 'modal-buttons'],
+                deps: ['vue', 'modal-buttons-template', 'modal-buttons', 'modals-config'],
                 category: 'components'
             },
             {
@@ -390,7 +411,7 @@
                 id: 'timezone-selector',
                 src: 'shared/components/timezone-selector.js',
                 type: 'local',
-                deps: ['vue'],
+                deps: ['vue', 'timezone-selector-template'],
                 category: 'components'
             },
             {
@@ -406,6 +427,13 @@
                 type: 'local',
                 deps: ['vue', 'modal', 'perplexity-settings-template'],
                 category: 'components'
+            },
+            {
+                id: 'timezone-modal-body',
+                src: 'app/components/timezone-modal-body.js',
+                type: 'local',
+                deps: ['vue', 'modal', 'timezone-selector'],
+                category: 'components'
             }
         ],
 
@@ -415,7 +443,7 @@
                 id: 'app-ui-root',
                 src: 'app/app-ui-root.js',
                 type: 'local',
-                deps: ['dropdown-menu-item', 'button', 'dropdown', 'combobox', 'button-group', 'app-header', 'app-footer', 'modal', 'modal-buttons', 'modal-example-body', 'perplexity-settings'],
+                deps: ['dropdown-menu-item', 'button', 'dropdown', 'combobox', 'button-group', 'app-header', 'app-footer', 'modal', 'modal-buttons', 'modal-example-body', 'perplexity-settings', 'timezone-modal-body'],
                 category: 'app'
             }
         ]

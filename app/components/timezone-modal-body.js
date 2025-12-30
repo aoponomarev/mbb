@@ -1,15 +1,30 @@
 /**
  * ================================================================================================
- * TIMEZONE MODAL BODY COMPONENT - Компонент body модального окна выбора таймзоны
+ * TIMEZONE MODAL BODY COMPONENT - Компонент body модального окна выбора таймзоны и языка перевода
  * ================================================================================================
  *
- * ЦЕЛЬ: Интеграция timezone-selector с системой управления кнопками модального окна.
+ * ЦЕЛЬ: Интеграция timezone-selector и выбора языка перевода с системой управления кнопками модального окна.
  *
  * ОСОБЕННОСТИ:
  * - Использует cmp-timezone-selector для выбора таймзоны
+ * - Предоставляет выбор языка перевода новостей (10 языков)
  * - Регистрирует кнопки "Отмена" и "Сохранить" через modalApi
- * - Реактивно обновляет состояние кнопок при изменении таймзоны
- * - Управляет логикой отмены (восстановление исходного значения)
+ * - Реактивно обновляет состояние кнопок при изменении таймзоны или языка перевода
+ * - Управляет логикой отмены (восстановление исходных значений)
+ * - Поддерживает состояние "Сохранено, закрыть?" для кнопки "Сохранить"
+ *
+ * API КОМПОНЕНТА:
+ *
+ * Props:
+ * - modelValue (String, required) — текущая таймзона (v-model)
+ * - initialValue (String, required) — исходная таймзона при открытии модального окна
+ * - translationLanguage (String, default: 'ru') — текущий язык перевода (v-model)
+ * - initialTranslationLanguage (String, default: 'ru') — исходный язык перевода при открытии модального окна
+ * - onSave (Function, required) — функция сохранения (timezone, translationLanguage)
+ * - onCancel (Function, required) — функция отмены
+ *
+ * Inject:
+ * - modalApi — API для управления кнопками (предоставляется cmp-modal)
  *
  * ССЫЛКИ:
  * - Компонент выбора таймзоны: shared/components/timezone-selector.js
@@ -18,7 +33,31 @@
 
 window.timezoneModalBody = {
     template: `
-        <cmp-timezone-selector v-model="selectedTimezone"></cmp-timezone-selector>
+        <div class="row g-3">
+            <div class="col-md-6">
+                <label for="timezone-select" class="form-label">Таймзона</label>
+                <cmp-timezone-selector v-model="selectedTimezone" id="timezone-select"></cmp-timezone-selector>
+            </div>
+            <div class="col-md-6">
+                <label for="translation-language-select" class="form-label">Язык перевода</label>
+                <select
+                    id="translation-language-select"
+                    class="form-select"
+                    v-model="selectedTranslationLanguage"
+                    @change="$emit('update:translationLanguage', $event.target.value)">
+                    <option value="ru">Русский</option>
+                    <option value="en">English</option>
+                    <option value="es">Español</option>
+                    <option value="fr">Français</option>
+                    <option value="de">Deutsch</option>
+                    <option value="it">Italiano</option>
+                    <option value="pt">Português</option>
+                    <option value="zh">中文</option>
+                    <option value="ja">日本語</option>
+                    <option value="ko">한국어</option>
+                </select>
+            </div>
+        </div>
     `,
 
     components: {
@@ -36,6 +75,14 @@ window.timezoneModalBody = {
             type: String,
             required: true
         },
+        translationLanguage: {
+            type: String,
+            default: 'ru'
+        },
+        initialTranslationLanguage: {
+            type: String,
+            default: 'ru'
+        },
         onSave: {
             type: Function,
             required: true
@@ -52,7 +99,9 @@ window.timezoneModalBody = {
 
     data() {
         return {
-            selectedTimezone: this.modelValue
+            selectedTimezone: this.modelValue,
+            selectedTranslationLanguage: this.translationLanguage,
+            isSaved: false // Состояние успешного сохранения
         };
     },
 
@@ -60,37 +109,93 @@ window.timezoneModalBody = {
         modelValue(newVal) {
             this.selectedTimezone = newVal;
         },
+        translationLanguage(newVal) {
+            this.selectedTranslationLanguage = newVal;
+        },
         selectedTimezone(newVal) {
             this.$emit('update:modelValue', newVal);
-            // Обновляем состояние кнопки "Сохранить" при изменении таймзоны
-            if (this.modalApi) {
-                const hasChanges = newVal !== this.initialValue;
-                this.modalApi.updateButton('save', {
-                    disabled: !hasChanges
-                });
+            // Сбрасываем состояние сохранения при изменении полей
+            if (this.isSaved) {
+                this.isSaved = false;
             }
+            this.updateSaveButton();
+        },
+        selectedTranslationLanguage(newVal) {
+            this.$emit('update:translationLanguage', newVal);
+            // Сбрасываем состояние сохранения при изменении полей
+            if (this.isSaved) {
+                this.isSaved = false;
+            }
+            this.updateSaveButton();
         }
     },
 
     computed: {
         hasChanges() {
-            return this.selectedTimezone !== this.initialValue;
+            return this.selectedTimezone !== this.initialValue ||
+                   this.selectedTranslationLanguage !== this.initialTranslationLanguage;
         }
     },
 
     methods: {
+        updateSaveButton() {
+            if (!this.modalApi) return;
+
+            if (this.isSaved) {
+                // Состояние "Сохранено, закрыть?"
+                this.modalApi.updateButton('save', {
+                    label: 'Сохранено, закрыть?',
+                    variant: 'success',
+                    disabled: false
+                });
+            } else {
+                // Обычное состояние "Сохранить"
+                const hasChanges = this.selectedTimezone !== this.initialValue ||
+                                 this.selectedTranslationLanguage !== this.initialTranslationLanguage;
+                this.modalApi.updateButton('save', {
+                    label: 'Сохранить',
+                    variant: 'primary',
+                    disabled: !hasChanges
+                });
+            }
+        },
+
         handleCancel() {
             if (this.hasChanges) {
-                // Восстанавливаем исходное значение
+                // Восстанавливаем исходные значения
                 this.selectedTimezone = this.initialValue;
+                this.selectedTranslationLanguage = this.initialTranslationLanguage;
                 this.$emit('update:modelValue', this.initialValue);
+                this.$emit('update:translationLanguage', this.initialTranslationLanguage);
             } else {
                 // Закрываем модальное окно
                 this.onCancel();
             }
         },
         handleSave() {
-            this.onSave(this.selectedTimezone);
+            // Если уже сохранено - закрываем модальное окно через родительский компонент
+            if (this.isSaved) {
+                // Закрываем модальное окно через Bootstrap API
+                const modalElement = this.$el.closest('.modal');
+                if (modalElement && window.bootstrap && window.bootstrap.Modal) {
+                    const modalInstance = window.bootstrap.Modal.getInstance(modalElement);
+                    if (modalInstance) {
+                        // Убираем фокус перед закрытием
+                        if (document.activeElement && document.activeElement.blur) {
+                            document.activeElement.blur();
+                        }
+                        modalInstance.hide();
+                    }
+                }
+                return;
+            }
+
+            // Сохраняем данные
+            this.onSave(this.selectedTimezone, this.selectedTranslationLanguage);
+
+            // Переводим кнопку в состояние "Сохранено, закрыть?"
+            this.isSaved = true;
+            this.updateSaveButton();
         }
     },
 

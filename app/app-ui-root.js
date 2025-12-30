@@ -16,6 +16,12 @@
  * - Компоненты регистрируются в app через components
  * - App монтируется на #app элемент
  *
+ * ИНИЦИАЛИЗАЦИЯ ПРИЛОЖЕНИЯ:
+ * - Установка темы на body (data-bs-theme)
+ * - Установка CSS-класса версии на body (app-version-{hash})
+ * - Очистка кэша старых версий (clearOldVersions)
+ * - Инициализация автоматической маркировки элементов (autoMarkup)
+ *
  * ПРЕИМУЩЕСТВА:
  * - index.html остаётся компактным
  * - Логика инициализации изолирована
@@ -40,7 +46,7 @@
             return;
         }
 
-        if (!window.cmpDropdownMenuItem || !window.cmpButton || !window.cmpDropdown || !window.cmpCombobox || !window.cmpButtonGroup || !window.appHeader || !window.appFooter || !window.cmpModal || !window.cmpModalButtons || !window.cmpTimezoneSelector || !window.modalExampleBody || !window.perplexitySettings) {
+        if (!window.cmpDropdownMenuItem || !window.cmpButton || !window.cmpDropdown || !window.cmpCombobox || !window.cmpButtonGroup || !window.appHeader || !window.appFooter || !window.cmpModal || !window.cmpModalButtons || !window.cmpTimezoneSelector || !window.modalExampleBody || !window.perplexitySettings || !window.timezoneModalBody) {
             console.error('app-ui-root: не все компоненты загружены');
             return;
         }
@@ -57,6 +63,7 @@
                 'cmp-modal': window.cmpModal,
                 'cmp-modal-buttons': window.cmpModalButtons,
                 'cmp-timezone-selector': window.cmpTimezoneSelector,
+                'timezone-modal-body': window.timezoneModalBody,
                 'modal-example-body': window.modalExampleBody,
                 'perplexity-settings': window.perplexitySettings,
                 'app-header': window.appHeader,
@@ -81,9 +88,54 @@
                     document.body.removeAttribute('data-bs-theme');
                 }
 
+                // Синхронная инициализация языка перевода (читаем напрямую из localStorage)
+                // ВАЖНО: используем тот же источник, что и в mounted(), чтобы избежать рассинхронизации
+                let initialLanguage = 'ru';
+                try {
+                    // Пробуем сначала cacheManager (если доступен синхронно), потом localStorage
+                    if (window.cacheManager && typeof window.cacheManager.get === 'function') {
+                        // cacheManager асинхронный, поэтому для синхронной инициализации используем localStorage
+                        const savedLanguage = localStorage.getItem('translation-language');
+                        if (savedLanguage && typeof savedLanguage === 'string') {
+                            initialLanguage = savedLanguage;
+                        }
+                    } else {
+                        const savedLanguage = localStorage.getItem('translation-language');
+                        if (savedLanguage && typeof savedLanguage === 'string') {
+                            initialLanguage = savedLanguage;
+                        }
+                    }
+                } catch (e) {
+                    // Игнорируем ошибки
+                }
+
                 return {
+                    // Конфигурация модальных окон (для доступа в шаблоне)
+                    modalsConfig: window.modalsConfig || null,
+                    // Конфигурация tooltips (для доступа в шаблоне)
+                    tooltipsConfig: window.tooltipsConfig || null,
                     // Текущая тема приложения
                     currentTheme: initialTheme,
+                    // Текущий язык перевода (для отображения в тестовом примере)
+                    currentTranslationLanguage: initialLanguage,
+                    // Реактивные tooltips (обновляются при смене языка)
+                    tooltips: {
+                        'button.save.icon': '',
+                        'button.save.text': '',
+                        'button.delete.icon': '',
+                        'button.delete.text': '',
+                        'button.load.icon': '',
+                        'button.load.text': '',
+                        'button.notifications.icon': '',
+                        'button.notifications.text': '',
+                        'button.notifications.suffix.badge': '',
+                        'button.export.icon': '',
+                        'button.export.text': '',
+                        'button.export.suffix.icon': '',
+                        'button.help.icon': '',
+                        'button.help.text': '',
+                        'button.help.suffix.info': ''
+                    },
                     // Данные для dropdown
                     dropdownItems: [
                         { id: 1, name: 'Элемент 1', description: 'Описание элемента 1', icon: 'fas fa-home', labelShort: 'Эл. 1' },
@@ -130,10 +182,36 @@
                     })),
                     // Таймзона
                     selectedTimezone: 'Europe/Moscow',
-                    initialTimezone: 'Europe/Moscow' // Исходное значение таймзоны при открытии модального окна
+                    initialTimezone: 'Europe/Moscow', // Исходное значение таймзоны при открытии модального окна
+                    selectedTranslationLanguage: 'ru',
+                    initialTranslationLanguage: 'ru' // Исходное значение языка перевода при открытии модального окна
                 };
             },
             methods: {
+                /**
+                 * Обновить реактивные tooltips из tooltipsConfig
+                 * Вызывается при инициализации и смене языка
+                 */
+                updateTooltips() {
+                    if (!window.tooltipsConfig || typeof window.tooltipsConfig.getTooltip !== 'function') {
+                        return;
+                    }
+
+                    // Синхронизируем currentTranslationLanguage с currentLanguage из tooltipsConfig
+                    if (typeof window.tooltipsConfig.getCurrentLanguage === 'function') {
+                        const tooltipsLanguage = window.tooltipsConfig.getCurrentLanguage();
+                        if (tooltipsLanguage && tooltipsLanguage !== this.currentTranslationLanguage) {
+                            this.currentTranslationLanguage = tooltipsLanguage;
+                        }
+                    }
+
+                    // Обновляем все tooltips из конфига
+                    const keys = Object.keys(this.tooltips);
+                    keys.forEach(key => {
+                        const value = window.tooltipsConfig.getTooltip(key);
+                        this.tooltips[key] = value || '';
+                    });
+                },
                 async toggleTheme() {
                     // Переключаем тему
                     this.currentTheme = this.currentTheme === 'light' ? 'dark' : 'light';
@@ -183,23 +261,13 @@
                     console.log('Button click:', data);
                     // Здесь можно добавить логику обработки клика по кнопке в группе
                 },
-                openExampleModal() {
-                    if (this.$refs.exampleModal) {
-                        this.$refs.exampleModal.show();
-                    }
-                },
                 openExampleModalNew() {
                     if (this.$refs.exampleModalNew) {
                         this.$refs.exampleModalNew.show();
                     }
                 },
-                closeExampleModal() {
-                    if (this.$refs.exampleModal) {
-                        this.$refs.exampleModal.hide();
-                    }
-                },
                 async openTimezoneModal() {
-                    // Загружаем текущую таймзону из кэша
+                    // Загружаем текущую таймзону и язык перевода из кэша
                     try {
                         if (window.cacheManager) {
                             const savedTimezone = await window.cacheManager.get('timezone');
@@ -209,6 +277,16 @@
                             } else {
                                 this.initialTimezone = this.selectedTimezone;
                             }
+
+                            const savedLanguage = await window.cacheManager.get('translation-language');
+                            if (savedLanguage && typeof savedLanguage === 'string') {
+                                this.selectedTranslationLanguage = savedLanguage;
+                                this.initialTranslationLanguage = savedLanguage;
+                                this.currentTranslationLanguage = savedLanguage;
+                            } else {
+                                this.initialTranslationLanguage = this.selectedTranslationLanguage;
+                                this.currentTranslationLanguage = this.selectedTranslationLanguage;
+                            }
                         } else {
                             const savedTimezone = localStorage.getItem('timezone');
                             if (savedTimezone) {
@@ -217,10 +295,21 @@
                             } else {
                                 this.initialTimezone = this.selectedTimezone;
                             }
+
+                            const savedLanguage = localStorage.getItem('translation-language');
+                            if (savedLanguage) {
+                                this.selectedTranslationLanguage = savedLanguage;
+                                this.initialTranslationLanguage = savedLanguage;
+                                this.currentTranslationLanguage = savedLanguage;
+                            } else {
+                                this.initialTranslationLanguage = this.selectedTranslationLanguage;
+                                this.currentTranslationLanguage = this.selectedTranslationLanguage;
+                            }
                         }
                     } catch (error) {
-                        console.error('Failed to load timezone:', error);
+                        console.error('Failed to load timezone/language:', error);
                         this.initialTimezone = this.selectedTimezone;
+                        this.initialTranslationLanguage = this.selectedTranslationLanguage;
                     }
 
                     if (this.$refs.timezoneModal) {
@@ -228,44 +317,126 @@
                     }
                 },
                 cancelTimezone() {
-                    // Если таймзона изменена - восстанавливаем исходное значение
-                    if (this.selectedTimezone !== this.initialTimezone) {
+                    // Если таймзона или язык изменены - восстанавливаем исходные значения
+                    if (this.selectedTimezone !== this.initialTimezone ||
+                        this.selectedTranslationLanguage !== this.initialTranslationLanguage) {
                         this.selectedTimezone = this.initialTimezone;
+                        this.selectedTranslationLanguage = this.initialTranslationLanguage;
                     } else {
-                        // Если таймзона не изменена - закрываем модальное окно
+                        // Если ничего не изменено - закрываем модальное окно
                         if (this.$refs.timezoneModal) {
                             this.$refs.timezoneModal.hide();
                         }
                     }
                 },
-                async saveTimezone() {
+                async saveTimezone(timezone, translationLanguage) {
                     try {
+                        const timezoneToSave = timezone || this.selectedTimezone;
+                        const languageToSave = translationLanguage || this.selectedTranslationLanguage;
+
                         if (window.cacheManager) {
-                            await window.cacheManager.set('timezone', this.selectedTimezone);
+                            await window.cacheManager.set('timezone', timezoneToSave);
+                            await window.cacheManager.set('translation-language', languageToSave);
                         } else {
-                            localStorage.setItem('timezone', this.selectedTimezone);
+                            localStorage.setItem('timezone', timezoneToSave);
+                            localStorage.setItem('translation-language', languageToSave);
                         }
 
-                        // Обновляем исходное значение
-                        this.initialTimezone = this.selectedTimezone;
+                        // Обновляем исходные значения
+                        this.selectedTimezone = timezoneToSave;
+                        this.initialTimezone = timezoneToSave;
+                        this.selectedTranslationLanguage = languageToSave;
+                        this.initialTranslationLanguage = languageToSave;
+                        this.currentTranslationLanguage = languageToSave;
 
-                        // Обновляем время в футере
+                        // Обновляем таймзону в футере
                         if (this.$refs.appFooter) {
-                            await this.$refs.appFooter.saveTimezone(this.selectedTimezone);
+                            await this.$refs.appFooter.saveTimezone(timezoneToSave);
+                            // Обновляем язык перевода в футере
+                            if (this.$refs.appFooter.updateTranslationLanguage) {
+                                this.$refs.appFooter.updateTranslationLanguage(languageToSave);
+                            }
                         }
 
-                        // Закрываем модальное окно
-                        if (this.$refs.timezoneModal) {
-                            this.$refs.timezoneModal.hide();
+                        // Обновляем tooltips для нового языка
+                        if (window.tooltipsConfig && typeof window.tooltipsConfig.init === 'function') {
+                            try {
+                                await window.tooltipsConfig.init(languageToSave);
+                                // Обновляем реактивные tooltips после инициализации
+                                this.updateTooltips();
+                            } catch (error) {
+                                console.error('app-ui-root: ошибка обновления tooltips при смене языка:', error);
+                            }
                         }
+
+                        // Модальное окно закрывается через крестик или клик вне модального окна
+                        // Кнопка "Сохранить" не должна закрывать модальное окно
                     } catch (error) {
-                        console.error('Failed to save timezone:', error);
+                        console.error('Failed to save timezone/language:', error);
                     }
                 },
                 openPerplexityModal() {
                     if (this.$refs.perplexityModal) {
                         this.$refs.perplexityModal.show();
                     }
+                }
+            },
+
+            async mounted() {
+                // Загружаем таймзону и язык перевода из кэша при инициализации
+                // Это обеспечивает синхронизацию с футером и статическими примерами
+                try {
+                    let savedLanguage = 'ru';
+                    if (window.cacheManager) {
+                        const savedTimezone = await window.cacheManager.get('timezone');
+                        if (savedTimezone && typeof savedTimezone === 'string') {
+                            this.selectedTimezone = savedTimezone;
+                            this.initialTimezone = savedTimezone;
+                        }
+
+                        const lang = await window.cacheManager.get('translation-language');
+                        if (lang && typeof lang === 'string') {
+                            savedLanguage = lang;
+                            this.selectedTranslationLanguage = lang;
+                            this.initialTranslationLanguage = lang;
+                            this.currentTranslationLanguage = lang;
+                        }
+                    } else {
+                        const savedTimezone = localStorage.getItem('timezone');
+                        if (savedTimezone) {
+                            this.selectedTimezone = savedTimezone;
+                            this.initialTimezone = savedTimezone;
+                        }
+
+                        const lang = localStorage.getItem('translation-language');
+                        if (lang) {
+                            savedLanguage = lang;
+                            this.selectedTranslationLanguage = lang;
+                            this.initialTranslationLanguage = lang;
+                            this.currentTranslationLanguage = lang;
+                        }
+                    }
+
+                    // Инициализируем tooltips для загруженного языка
+                    // Ждём завершения инициализации перед обновлением реактивных tooltips
+                    if (window.tooltipsConfig && typeof window.tooltipsConfig.init === 'function') {
+                        try {
+                            await window.tooltipsConfig.init(savedLanguage);
+                            // Обновляем реактивные tooltips после инициализации
+                            // Синхронизируем currentTranslationLanguage с currentLanguage из tooltipsConfig
+                            if (window.tooltipsConfig && typeof window.tooltipsConfig.getCurrentLanguage === 'function') {
+                                const tooltipsLanguage = window.tooltipsConfig.getCurrentLanguage();
+                                if (tooltipsLanguage !== this.currentTranslationLanguage) {
+                                    this.currentTranslationLanguage = tooltipsLanguage;
+                                }
+                            }
+                            this.updateTooltips();
+                        } catch (error) {
+                            console.error('app-ui-root: ошибка инициализации tooltips при монтировании:', error);
+                        }
+                    }
+                } catch (error) {
+                    console.error('Failed to load timezone/language in app-ui-root:', error);
                 }
             }
         }).mount('#app');
@@ -282,6 +453,29 @@
         } catch (e) {
             // Игнорируем ошибки
         }
+
+        // Инициализация CSS-класса версии приложения на body
+        // Используется для версионной стилизации и привязки кэша к версии
+        try {
+            if (window.appConfig) {
+                const versionClass = window.appConfig.getVersionClass();
+                document.body.classList.add(versionClass);
+                console.log(`app-ui-root: версия приложения ${window.appConfig.CONFIG.version}, класс ${versionClass}`);
+            }
+        } catch (e) {
+            console.error('app-ui-root: ошибка установки класса версии:', e);
+        }
+
+        // Очистка кэша старых версий приложения
+        // Выполняется асинхронно, не блокирует инициализацию
+        if (window.cacheManager && typeof window.cacheManager.clearOldVersions === 'function') {
+            window.cacheManager.clearOldVersions().catch(error => {
+                console.error('app-ui-root: ошибка очистки старых версий кэша:', error);
+            });
+        }
+
+        // Инициализация tooltips теперь происходит в mounted() компонента
+        // Убрали дублирующий вызов отсюда, чтобы избежать гонки условий
 
         // Инициализация автоматической маркировки элементов после монтирования Vue
         // Ждем, чтобы Vue успел смонтировать все компоненты

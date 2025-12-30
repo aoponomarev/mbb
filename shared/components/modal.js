@@ -20,6 +20,7 @@
  * - centered (Boolean, default: false) — центрирование модального окна по вертикали
  * - titleId (String) — ID заголовка для aria-labelledby (генерируется автоматически, если не указан)
  * - static (Boolean, default: false) — статическое отображение модального окна (без backdrop, всегда видимо, для примеров)
+ * - title (String) — заголовок модального окна (опционально, если не указан, получается из modalsConfig по modalId)
  *
  * Выходные события (emits):
  * - show — событие открытия модального окна (синхронизировано с show.bs.modal)
@@ -39,14 +40,26 @@
  * - getBootstrapInstance() — получение экземпляра Bootstrap Modal для прямого доступа к API
  *
  * ПРАВИЛА ИСПОЛЬЗОВАНИЯ:
- * - Кнопка "Закрыть" не используется: закрытие модального окна выполняется только через крестик в header (btn-close)
+ * - Кнопка "Закрыть" не используется: закрытие модального окна выполняется только через крестик в header (btn-close) или клик вне модального окна (backdrop)
  * - Кнопка "Отмена" обязательна в footer: отменяет введенные данные (восстанавливает исходные значения полей) или закрывает окно, если данные не изменены
  *   - На форме с измененными данными: первый клик по "Отмена" восстанавливает исходные значения полей, второй клик закрывает окно
  *   - На форме без изменений: клик по "Отмена" сразу закрывает окно
- * - Кнопка "Сохранить" обязательна в footer, если есть изменяемые поля: сохраняет введенные данные и закрывает модальное окно
+ * - Кнопка "Сохранить" обязательна в footer, если есть изменяемые поля: имеет два состояния
+ *   - Обычное состояние: "Сохранить" (variant: 'primary', disabled если нет изменений или форма невалидна)
+ *     - При клике: сохраняет данные, переходит в состояние "Сохранено, закрыть?"
+ *   - Состояние успеха: "Сохранено, закрыть?" (variant: 'success', всегда enabled)
+ *     - При клике: закрывает модальное окно
+ *     - Автоматически сбрасывается в обычное состояние при изменении любых полей формы
+ *   - Кнопка "Сохранить" НЕ закрывает модальное окно напрямую: закрытие происходит только через крестик, клик вне модального окна или второй клик в состоянии "Сохранено, закрыть?"
+ * - Заголовок модального окна: обязательное требование идентичности заголовка модального окна и текста пункта меню/кнопки/ссылки, которая его открывает
+ *   - Заголовок определяется в `core/config/modals-config.js` (единый источник правды)
+ *   - Компонент поддерживает prop `title` для явной передачи заголовка
+ *   - Если prop `title` не передан, заголовок автоматически получается из `modalsConfig` по `modalId`
+ *   - Все пункты меню, кнопки и ссылки должны использовать `modalsConfig.getModalTitle(modalId)` для получения заголовка
  *
  * СИСТЕМА УПРАВЛЕНИЯ КНОПКАМИ:
  * Компонент предоставляет через provide/inject API для управления кнопками в header и footer:
+ * - title (String|null) — заголовок модального окна (computed, доступен через modalApi.title)
  * - registerButton(buttonId, config) — регистрация кнопки с указанием мест отображения (header, footer или оба)
  * - updateButton(buttonId, updates) — обновление состояния кнопки (реактивно обновляется во всех местах)
  * - removeButton(buttonId) — удаление кнопки
@@ -86,6 +99,10 @@ window.cmpModal = {
         static: {
             type: Boolean,
             default: false
+        },
+        title: {
+            type: String,
+            default: null
         }
     },
 
@@ -106,6 +123,16 @@ window.cmpModal = {
     },
 
     computed: {
+        modalTitle() {
+            // Приоритет: prop title > modalsConfig > null
+            if (this.title) {
+                return this.title;
+            }
+            if (window.modalsConfig) {
+                return window.modalsConfig.getModalTitle(this.modalId);
+            }
+            return null;
+        },
         modalClasses() {
             const classes = ['modal'];
             if (this.static) {
@@ -148,9 +175,6 @@ window.cmpModal = {
                     break;
                 }
             }
-            // #region agent log
-            fetch('http://127.0.0.1:7243/ingest/6397d191-f6f2-43f4-b4da-44a3482bedec',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'modal.js:hasHeaderButtons',message:'hasHeaderButtons computed',data:{hasButtons,buttonsSize:this.buttons.size,buttonsUpdateCounter:this.buttonsUpdateCounter},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'D'})}).catch(()=>{});
-            // #endregion
             return hasButtons;
         },
 
@@ -168,9 +192,6 @@ window.cmpModal = {
                     break;
                 }
             }
-            // #region agent log
-            fetch('http://127.0.0.1:7243/ingest/6397d191-f6f2-43f4-b4da-44a3482bedec',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'modal.js:hasFooterButtons',message:'hasFooterButtons computed',data:{hasButtons,buttonsSize:this.buttons.size,buttonsUpdateCounter:this.buttonsUpdateCounter},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'D'})}).catch(()=>{});
-            // #endregion
             return hasButtons;
         }
     },
@@ -183,6 +204,18 @@ window.cmpModal = {
         },
 
         hide() {
+            // Убираем фокус с активного элемента перед закрытием модального окна
+            // Это предотвращает ошибку доступности: "Blocked aria-hidden on an element because its descendant retained focus"
+            if (document.activeElement && document.activeElement.blur) {
+                document.activeElement.blur();
+            }
+            // Перемещаем фокус на body для гарантии
+            if (document.body && document.body.focus) {
+                document.body.focus();
+            } else {
+                // Если body не может получить фокус, просто убираем фокус
+                document.activeElement?.blur();
+            }
             if (this.modalInstance) {
                 this.modalInstance.hide();
             }
@@ -213,9 +246,6 @@ window.cmpModal = {
          * @param {string} config.icon - CSS класс иконки (Font Awesome, Material Symbols)
          */
         registerButton(buttonId, config) {
-            // #region agent log
-            fetch('http://127.0.0.1:7243/ingest/6397d191-f6f2-43f4-b4da-44a3482bedec',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'modal.js:registerButton',message:'registerButton called',data:{buttonId,locations:config.locations,static:this.static,buttonsSize:this.buttons.size},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'C'})}).catch(()=>{});
-            // #endregion
             // Нормализуем locations в массив
             const locations = Array.isArray(config.locations)
                 ? config.locations
@@ -250,9 +280,6 @@ window.cmpModal = {
 
             // Увеличиваем счетчик для принудительной реактивности computed свойств
             this.buttonsUpdateCounter++;
-            // #region agent log
-            fetch('http://127.0.0.1:7243/ingest/6397d191-f6f2-43f4-b4da-44a3482bedec',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'modal.js:registerButton',message:'button registered',data:{buttonId,normalizedLocations,buttonsSize:this.buttons.size,buttonsUpdateCounter:this.buttonsUpdateCounter},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'C'})}).catch(()=>{});
-            // #endregion
         },
 
         /**
@@ -310,9 +337,6 @@ window.cmpModal = {
                     result.push(button);
                 }
             }
-            // #region agent log
-            fetch('http://127.0.0.1:7243/ingest/6397d191-f6f2-43f4-b4da-44a3482bedec',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'modal.js:getButtonsForLocation',message:'getButtonsForLocation called',data:{location,buttonsSize:this.buttons.size,resultCount:result.length,result:result.map(b=>({id:b.id,label:b.label,visible:b.visible}))},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'E'})}).catch(()=>{});
-            // #endregion
             return result;
         }
     },
@@ -321,11 +345,9 @@ window.cmpModal = {
      * Предоставление API для управления кнопками через provide/inject
      */
     provide() {
-        // #region agent log
-        fetch('http://127.0.0.1:7243/ingest/6397d191-f6f2-43f4-b4da-44a3482bedec',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'modal.js:provide',message:'provide called',data:{static:this.static,hasRegisterButton:!!this.registerButton},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'A'})}).catch(()=>{});
-        // #endregion
         return {
             modalApi: {
+                title: this.modalTitle,
                 registerButton: this.registerButton,
                 updateButton: this.updateButton,
                 removeButton: this.removeButton,
@@ -358,6 +380,18 @@ window.cmpModal = {
                 });
 
                 this.$refs.modalElement.addEventListener('hide.bs.modal', () => {
+                    // Убираем фокус с активного элемента перед закрытием модального окна
+                    // Это предотвращает ошибку доступности: "Blocked aria-hidden on an element because its descendant retained focus"
+                    if (document.activeElement && document.activeElement.blur) {
+                        document.activeElement.blur();
+                    }
+                    // Перемещаем фокус на body для гарантии
+                    if (document.body && document.body.focus) {
+                        document.body.focus();
+                    } else {
+                        // Если body не может получить фокус, просто убираем фокус
+                        document.activeElement?.blur();
+                    }
                     this.isOpen = false;
                     this.$emit('hide');
                 });

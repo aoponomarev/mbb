@@ -10,11 +10,34 @@
  * - Использует систему управления кнопками модального окна
  * - Сохранение через cache-manager
  * - Валидация API ключа
+ * - Поддержка состояния "Сохранено, закрыть?" для кнопки "Сохранить"
+ * - Переключатель видимости API ключа (глазик)
  *
  * API КОМПОНЕНТА:
  *
+ * Data:
+ * - apiKey (String) — API ключ Perplexity
+ * - model (String) — модель Perplexity (по умолчанию 'sonar-pro')
+ * - initialApiKey (String) — исходный API ключ при открытии модального окна
+ * - initialModel (String) — исходная модель при открытии модального окна
+ * - showApiKey (Boolean) — видимость API ключа (для переключателя)
+ * - isSaved (Boolean) — состояние успешного сохранения
+ * - models (Array) — список доступных моделей Perplexity
+ *
+ * Computed:
+ * - hasChanges (Boolean) — есть ли изменения в полях
+ * - isValid (Boolean) — валидность формы (API ключ не пустой)
+ *
  * Inject:
  * - modalApi — API для управления кнопками (предоставляется cmp-modal)
+ *
+ * Методы:
+ * - loadSettings() — загрузка настроек из кэша
+ * - saveSettings() — сохранение настроек в кэш и обновление в app-footer
+ * - handleCancel() — обработка отмены (восстановление исходных значений или закрытие)
+ * - closeModal() — закрытие модального окна с удалением фокуса
+ * - updateSaveButton() — обновление состояния кнопки "Сохранить" (обычное/сохранено)
+ * - toggleApiKeyVisibility() — переключение видимости API ключа
  *
  * ССЫЛКИ:
  * - Шаблон: app/templates/perplexity-settings-template.js
@@ -28,18 +51,20 @@ window.perplexitySettings = {
     inject: ['modalApi'],
 
     data() {
+        const defaultModel = window.appConfig?.get('defaults.perplexity.model', 'sonar-pro');
+        const defaultModels = window.appConfig?.get('defaults.perplexity.models', [
+            { value: 'sonar-pro', label: 'sonar-pro' },
+            { value: 'sonar', label: 'sonar' },
+            { value: 'llama-3.1-sonar-small-128k-online', label: 'llama-3.1-sonar-small-128k-online' },
+            { value: 'llama-3.1-sonar-large-128k-online', label: 'llama-3.1-sonar-large-128k-online' }
+        ]);
         return {
             apiKey: '',
-            model: 'sonar-pro',
+            model: defaultModel,
             initialApiKey: '',
-            initialModel: 'sonar-pro',
+            initialModel: defaultModel,
             showApiKey: false,
-            models: [
-                { value: 'sonar-pro', label: 'sonar-pro' },
-                { value: 'sonar', label: 'sonar' },
-                { value: 'llama-3.1-sonar-small-128k-online', label: 'llama-3.1-sonar-small-128k-online' },
-                { value: 'llama-3.1-sonar-large-128k-online', label: 'llama-3.1-sonar-large-128k-online' }
-            ]
+            models: defaultModels
         };
     },
 
@@ -54,14 +79,22 @@ window.perplexitySettings = {
 
     watch: {
         apiKey() {
-            if (this.modalApi) {
+            // Сбрасываем состояние сохранения при изменении полей
+            if (this.isSaved) {
+                this.isSaved = false;
+                this.updateSaveButton();
+            } else if (this.modalApi) {
                 this.modalApi.updateButton('save', {
                     disabled: !this.hasChanges || !this.isValid
                 });
             }
         },
         model() {
-            if (this.modalApi) {
+            // Сбрасываем состояние сохранения при изменении полей
+            if (this.isSaved) {
+                this.isSaved = false;
+                this.updateSaveButton();
+            } else if (this.modalApi) {
                 this.modalApi.updateButton('save', {
                     disabled: !this.hasChanges || !this.isValid
                 });
@@ -108,8 +141,10 @@ window.perplexitySettings = {
                         this.model = savedModel;
                         this.initialModel = savedModel;
                     } else {
-                        this.model = 'sonar-pro';
-                        this.initialModel = 'sonar-pro';
+                        // Используем модель по умолчанию
+                        const defaultModel = window.appConfig?.get('defaults.perplexity.model', 'sonar-pro');
+                        this.model = defaultModel;
+                        this.initialModel = defaultModel;
                     }
                 } else {
                     const savedApiKey = localStorage.getItem('perplexity-api-key');
@@ -134,11 +169,18 @@ window.perplexitySettings = {
                 // В случае общей ошибки используем значения по умолчанию
                 this.apiKey = defaultApiKey;
                 this.initialApiKey = defaultApiKey;
-                this.model = 'sonar-pro';
-                this.initialModel = 'sonar-pro';
+                const defaultModel = window.appConfig?.get('defaults.perplexity.model', 'sonar-pro');
+                this.model = defaultModel;
+                this.initialModel = defaultModel;
             }
         },
         async saveSettings() {
+            // Если уже сохранено - закрываем модальное окно
+            if (this.isSaved) {
+                this.closeModal();
+                return;
+            }
+
             try {
                 if (window.cacheManager) {
                     await window.cacheManager.set('perplexity-api-key', this.apiKey.trim());
@@ -159,10 +201,31 @@ window.perplexitySettings = {
                     await this.$parent.$refs.appFooter.fetchCryptoNews();
                 }
 
-                // Закрываем модальное окно
-                this.closeModal();
+                // Переводим кнопку в состояние "Сохранено, закрыть?"
+                this.isSaved = true;
+                this.updateSaveButton();
             } catch (error) {
                 console.error('Failed to save Perplexity settings:', error);
+            }
+        },
+
+        updateSaveButton() {
+            if (!this.modalApi) return;
+
+            if (this.isSaved) {
+                // Состояние "Сохранено, закрыть?"
+                this.modalApi.updateButton('save', {
+                    label: 'Сохранено, закрыть?',
+                    variant: 'success',
+                    disabled: false
+                });
+            } else {
+                // Обычное состояние "Сохранить"
+                this.modalApi.updateButton('save', {
+                    label: 'Сохранить',
+                    variant: 'primary',
+                    disabled: !this.hasChanges || !this.isValid
+                });
             }
         },
         handleCancel() {
@@ -220,20 +283,11 @@ window.perplexitySettings = {
     },
 
     mounted() {
-        // #region agent log
-        fetch('http://127.0.0.1:7243/ingest/6397d191-f6f2-43f4-b4da-44a3482bedec',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'perplexity-settings.js:mounted',message:'mounted called',data:{hasModalApi:!!this.modalApi,modalApiType:typeof this.modalApi},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'A'})}).catch(()=>{});
-        // #endregion
         this.loadSettings();
 
         // Регистрируем кнопки при монтировании через $nextTick для гарантии доступности modalApi
         this.$nextTick(() => {
-            // #region agent log
-            fetch('http://127.0.0.1:7243/ingest/6397d191-f6f2-43f4-b4da-44a3482bedec',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'perplexity-settings.js:$nextTick',message:'$nextTick callback',data:{hasModalApi:!!this.modalApi,hasRegisterButton:!!(this.modalApi&&this.modalApi.registerButton)},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'A'})}).catch(()=>{});
-            // #endregion
             if (this.modalApi) {
-                // #region agent log
-                fetch('http://127.0.0.1:7243/ingest/6397d191-f6f2-43f4-b4da-44a3482bedec',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'perplexity-settings.js:registerButton',message:'registering cancel button',data:{hasChanges:this.hasChanges,isValid:this.isValid},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'B'})}).catch(()=>{});
-                // #endregion
                 // Кнопка "Отмена" только в footer
                 this.modalApi.registerButton('cancel', {
                     locations: ['footer'],
@@ -242,9 +296,6 @@ window.perplexitySettings = {
                     classesAdd: { root: 'me-auto' },
                     onClick: () => this.handleCancel()
                 });
-                // #region agent log
-                fetch('http://127.0.0.1:7243/ingest/6397d191-f6f2-43f4-b4da-44a3482bedec',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'perplexity-settings.js:registerButton',message:'registering save button',data:{hasChanges:this.hasChanges,isValid:this.isValid,disabled:!this.hasChanges||!this.isValid},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'B'})}).catch(()=>{});
-                // #endregion
                 // Кнопка "Сохранить" только в footer
                 this.modalApi.registerButton('save', {
                     locations: ['footer'],
@@ -253,13 +304,8 @@ window.perplexitySettings = {
                     disabled: !this.hasChanges || !this.isValid,
                     onClick: () => this.saveSettings()
                 });
-                // #region agent log
-                fetch('http://127.0.0.1:7243/ingest/6397d191-f6f2-43f4-b4da-44a3482bedec',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'perplexity-settings.js:registerButton',message:'both buttons registered',data:{},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'B'})}).catch(()=>{});
-                // #endregion
-            } else {
-                // #region agent log
-                fetch('http://127.0.0.1:7243/ingest/6397d191-f6f2-43f4-b4da-44a3482bedec',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'perplexity-settings.js:$nextTick',message:'modalApi is null/undefined',data:{},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'A'})}).catch(()=>{});
-                // #endregion
+                // Инициализируем состояние кнопки
+                this.updateSaveButton();
             }
         });
     },

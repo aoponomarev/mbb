@@ -34,10 +34,14 @@
  * - formatValueMobile() — форматирование значения для мобильной версии (округление до десятых долей, кроме FR)
  * - loadPerplexitySettings() — загрузка настроек Perplexity из кэша
  * - fetchSingleCryptoNews(index) — запрос одной новости крипты через Perplexity AI (с переводом, по индексу 0-4)
- * - parseSingleNews(response) — парсинг одной новости с переводом по явным маркерам
+ * - parseSingleNews(response) — парсинг одной новости с переводом по явным маркерам (---NEWS---, ---TRANSLATION---, ---END---)
+ * - cleanMarkdown(text) — очистка текста от markdown-разметки и артефактов (цифры-сноски после точек)
+ * - cleanTranslation(text) — очистка перевода от артефактов (примеры из промпта, префиксы)
  * - saveCurrentNewsState() — сохранение индекса текущей новости в кэш
  * - loadNewsState() — загрузка индекса последней новости из кэша
  * - switchToNextNews() — переключение на следующую (менее значимую) новость (асинхронно, загружает по требованию)
+ * - loadTranslationLanguage() — загрузка языка перевода из кэша
+ * - updateTranslationLanguage(language) — обновление языка перевода и перезагрузка новости с новым переводом
  *
  * СОБЫТИЯ:
  * - open-timezone-modal — эмитируется при клике на время в футере для открытия модального окна выбора таймзоны
@@ -70,7 +74,7 @@ window.appFooter = {
             lsrValue: null,
 
             // Время
-            timezone: 'Europe/Moscow', // Таймзона по умолчанию
+            timezone: window.appConfig?.get('defaults.timezone', 'Europe/Moscow'),
             timeDisplay: 'MCK --:--',
 
             // Таймеры
@@ -82,7 +86,8 @@ window.appFooter = {
             currentNews: '', // Текущая отображаемая новость
             currentNewsTranslated: '', // Перевод текущей новости для tooltip
             perplexityApiKey: '', // API ключ Perplexity
-            perplexityModel: 'sonar-pro' // Модель Perplexity
+            perplexityModel: window.appConfig?.get('defaults.perplexity.model', 'sonar-pro'),
+            translationLanguage: window.appConfig?.get('defaults.translationLanguage', 'ru')
         };
     },
 
@@ -157,18 +162,7 @@ window.appFooter = {
 
         // Получение аббревиатуры таймзоны
         getTimezoneAbbr() {
-            const tzMap = {
-                'Europe/Moscow': 'MCK',
-                'Europe/London': 'LON',
-                'America/New_York': 'NYC',
-                'America/Los_Angeles': 'LAX',
-                'Asia/Tokyo': 'TYO',
-                'Asia/Shanghai': 'SHA',
-                'Europe/Berlin': 'BER',
-                'America/Chicago': 'CHI',
-                'UTC': 'UTC'
-            };
-            return tzMap[this.timezone] || this.timezone.split('/').pop().substring(0, 3).toUpperCase();
+            return window.appConfig?.getTimezoneAbbr ? window.appConfig.getTimezoneAbbr(this.timezone) : (this.timezone.split('/').pop().substring(0, 3).toUpperCase());
         },
 
         // Обновление времени
@@ -201,6 +195,39 @@ window.appFooter = {
             this.updateTime();
         },
 
+        // Обновление языка перевода (вызывается извне после сохранения в кэш)
+        updateTranslationLanguage(language) {
+            this.translationLanguage = language;
+            // Если есть текущая новость, перезагружаем её с новым языком
+            if (this.currentNews) {
+                this.fetchSingleCryptoNews(this.currentNewsIndex).then(newsItem => {
+                    if (newsItem) {
+                        this.currentNews = newsItem.news;
+                        this.currentNewsTranslated = newsItem.translation;
+                    }
+                });
+            }
+        },
+
+        // Загрузка языка перевода из кэша
+        async loadTranslationLanguage() {
+            try {
+                if (window.cacheManager) {
+                    const savedLanguage = await window.cacheManager.get('translation-language');
+                    if (savedLanguage && typeof savedLanguage === 'string') {
+                        this.translationLanguage = savedLanguage;
+                    }
+                } else {
+                    const savedLanguage = localStorage.getItem('translation-language');
+                    if (savedLanguage) {
+                        this.translationLanguage = savedLanguage;
+                    }
+                }
+            } catch (error) {
+                console.error('Failed to load translation language:', error);
+            }
+        },
+
         // Открытие модального окна выбора таймзоны
         openTimezoneModal() {
             this.$emit('open-timezone-modal');
@@ -208,13 +235,14 @@ window.appFooter = {
 
         // Расчет следующего времени обновления (09:00, 12:00, 18:00 МСК)
         getNextUpdateTime() {
-            const updateHours = [9, 12, 18]; // МСК
+            const updateHours = window.appConfig?.get('defaults.marketUpdates.times', [9, 12, 18]);
             const now = new Date();
 
             try {
                 // Получаем текущее время в МСК через Intl.DateTimeFormat
+                const defaultTimezone = window.appConfig?.get('defaults.timezone', 'Europe/Moscow');
                 const mskFormatter = new Intl.DateTimeFormat('en-US', {
-                    timeZone: 'Europe/Moscow',
+                    timeZone: defaultTimezone,
                     year: 'numeric',
                     month: '2-digit',
                     day: '2-digit',
@@ -244,10 +272,12 @@ window.appFooter = {
                 const minutesDiff = (nextDay - mskDay) * 24 * 60 + (nextMSKTime - currentMSKTime);
                 const delay = minutesDiff * 60 * 1000; // Конвертируем в миллисекунды
 
-                return delay > 0 ? delay : delay + 24 * 60 * 60 * 1000; // Если отрицательно, добавляем сутки
+                const maxDelay = window.cacheConfig?.getTTL('market-update-delay-max') || 24 * 60 * 60 * 1000;
+                return delay > 0 ? delay : delay + maxDelay; // Если отрицательно, добавляем сутки
             } catch (error) {
                 // Fallback: обновление через 3 часа
-                return 3 * 60 * 60 * 1000;
+                const fallbackTTL = window.cacheConfig?.getTTL('market-update-fallback') || 3 * 60 * 60 * 1000;
+                return fallbackTTL;
             }
         },
 
@@ -329,6 +359,22 @@ window.appFooter = {
 
             try {
                 const priority = ['most important', 'second most important', 'third most important', 'fourth most important', 'fifth most important'];
+
+                // Получаем название языка для промпта
+                const languageNames = {
+                    'ru': 'Russian',
+                    'en': 'English',
+                    'es': 'Spanish',
+                    'fr': 'French',
+                    'de': 'German',
+                    'it': 'Italian',
+                    'pt': 'Portuguese',
+                    'zh': 'Chinese',
+                    'ja': 'Japanese',
+                    'ko': 'Korean'
+                };
+                const targetLanguage = languageNames[this.translationLanguage] || 'Russian';
+
                 const prompt = `What is the ${priority[index]} cryptocurrency news today? Provide exactly one news item with the following structure:
 - One headline sentence (concise summary)
 - Two sentences that explain the details and context
@@ -337,7 +383,7 @@ Format the response as follows:
 ---NEWS---
 [Headline sentence. Detail sentence 1. Detail sentence 2.]
 ---TRANSLATION---
-[Russian translation: Заголовочное предложение. Первое предложение с деталями. Второе предложение с деталями.]
+[${targetLanguage} translation]
 ---END---`;
 
                 const response = await window.perplexityAPI.sendPerplexityRequest(
@@ -381,9 +427,12 @@ Format the response as follows:
                 .trim();
 
             // Извлекаем перевод
-            const translationText = endIndex !== -1
+            let translationText = endIndex !== -1
                 ? response.substring(translationIndex + '---TRANSLATION---'.length, endIndex).trim()
                 : response.substring(translationIndex + '---TRANSLATION---'.length).trim();
+
+            // Убираем артефакты из перевода
+            translationText = this.cleanTranslation(translationText);
 
             if (!newsText || !translationText) {
                 return null;
@@ -393,6 +442,19 @@ Format the response as follows:
                 news: this.cleanMarkdown(newsText),
                 translation: this.cleanMarkdown(translationText)
             };
+        },
+
+        // Очистка артефактов из перевода
+        cleanTranslation(text) {
+            if (!text) return '';
+            return text
+                // Убираем пример из промпта
+                .replace(/^Заголовочное предложение\.\s*Первое предложение с деталями\.\s*Второе предложение с деталями\.\s*/i, '')
+                // Убираем префикс "Российский перевод: " или "Russian translation: "
+                .replace(/^(Российский перевод|Russian translation):\s*/i, '')
+                // Убираем перевод строки в начале
+                .replace(/^\s*[\r\n]+/, '')
+                .trim();
         },
 
         // Очистка микроразметки из новости
@@ -446,7 +508,7 @@ Format the response as follows:
                 // Проверяем, что состояние не старше 24 часов
                 if (savedData && typeof savedData.index === 'number') {
                     const age = Date.now() - (savedData.timestamp || 0);
-                    const maxAge = 24 * 60 * 60 * 1000; // 24 часа
+                    const maxAge = window.cacheConfig?.getTTL('crypto-news-cache-max-age') || 24 * 60 * 60 * 1000;
 
                     if (age < maxAge) {
                         return savedData.index;
@@ -481,6 +543,9 @@ Format the response as follows:
     async mounted() {
         // Загрузка таймзоны из кэша
         await this.loadTimezone();
+
+        // Загрузка языка перевода из кэша
+        await this.loadTranslationLanguage();
 
         // Загрузка настроек Perplexity
         await this.loadPerplexitySettings();

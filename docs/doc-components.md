@@ -39,3 +39,45 @@ Vue-обёртка над Bootstrap `input-group` + `dropdown` с поддерж
 Vue-обёртка над Bootstrap `.btn-group` с поддержкой трёх типов кнопок: `button`, `checkbox` и `radio`. Детальная информация о компоненте (API, особенности реализации, примеры использования) находится в шапках файлов:
 - Компонент: `shared/components/button-group.js`
 - Шаблон: `shared/templates/button-group-template.js`
+
+## Компонент modal
+
+Vue-обёртка над Bootstrap Modal с полной проницаемостью для Bootstrap API. Поддерживает систему управления кнопками через provide/inject, автоматическое получение заголовка из modals-config.js. Детальная информация о компоненте (API, особенности реализации, примеры использования) находится в шапках файлов:
+- Компонент: `shared/components/modal.js`
+- Шаблон: `shared/templates/modal-template.js`
+- Компонент кнопок: `shared/components/modal-buttons.js`
+
+## Компонент modal-buttons
+
+Компонент для рендеринга динамических кнопок модального окна в header и footer. Использует систему управления кнопками через modalApi. Детальная информация о компоненте находится в шапках файлов:
+- Компонент: `shared/components/modal-buttons.js`
+- Шаблон: `shared/templates/modal-buttons-template.js`
+
+## Компонент timezone-selector
+
+Компонент для выбора таймзоны с поддержкой поиска. Детальная информация о компоненте находится в шапках файлов:
+- Компонент: `shared/components/timezone-selector.js`
+- Шаблон: `shared/templates/timezone-selector-template.js`
+
+## Компонент timezone-modal-body
+
+Компонент body модального окна для выбора таймзоны и языка перевода. Интегрирует timezone-selector с системой управления кнопками модального окна. Детальная информация о компоненте находится в шапках файлов:
+- Компонент: `app/components/timezone-modal-body.js`
+
+## Компонент perplexity-settings
+
+Компонент настроек Perplexity AI (API ключ и модель) для модального окна. Использует систему управления кнопками модального окна. Детальная информация о компоненте находится в шапках файлов:
+- Компонент: `app/components/perplexity-settings.js`
+- Шаблон: `app/templates/perplexity-settings-template.js`
+
+## Компонент app-header
+
+Компонент хедера приложения с кнопками меню и настроек. Детальная информация о компоненте находится в шапках файлов:
+- Компонент: `app/components/app-header.js`
+- Шаблон: `app/templates/app-header-template.js`
+
+## Компонент app-footer
+
+Компонент футера приложения с метриками рынка, временем в выбранной таймзоне и новостями крипты через Perplexity AI. Детальная информация о компоненте находится в шапках файлов:
+- Компонент: `app/components/app-footer.js`
+- Шаблон: `app/templates/app-footer-template.js`

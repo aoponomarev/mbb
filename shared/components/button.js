@@ -346,14 +346,69 @@ window.cmpButton = {
         }
     },
 
-    methods: {
+    watch: {
+        // Отслеживаем изменения tooltip props и обновляем Bootstrap tooltips
+        tooltipIcon(newVal) {
+            this.updateTouchTooltips('icon', newVal);
+        },
+        tooltipText(newVal) {
+            this.updateTouchTooltips('text', newVal);
+        },
+        tooltipSuffix(newVal) {
+            this.updateTouchTooltips('suffix', newVal);
+        },
+        // Отслеживаем изменения suffix (может быть массивом)
+        suffix: {
+            handler(newVal) {
+                if (this._touchTooltips) {
+                    this.$nextTick(() => {
+                        // Обновляем tooltips для элементов суффикса
+                        this._touchTooltips.forEach(({ element, tooltip, elementType }) => {
+                            if (elementType === 'suffix' && tooltip) {
+                                // Для суффикса нужно найти соответствующий элемент в массиве
+                                const suffixArray = Array.isArray(newVal) ? newVal : (newVal ? [newVal] : []);
+                                const dataOriginalTitle = element.getAttribute('data-original-title') || '';
+                                const suffixItem = suffixArray.find(item => {
+                                    const itemTooltip = item?.tooltip || '';
+                                    return dataOriginalTitle.includes(itemTooltip) || itemTooltip.includes(dataOriginalTitle);
+                                });
+                                const newTitle = suffixItem?.tooltip || this.tooltipSuffix;
+                                if (newTitle && newTitle !== dataOriginalTitle) {
+                                    try {
+                                        tooltip.setContent({ '.tooltip-inner': newTitle });
+                                        element.setAttribute('data-original-title', newTitle);
+                                    } catch (error) {
+                                        console.error('watch suffix: ошибка обновления tooltip', error, element);
+                                    }
+                                }
+                            }
+                        });
+                    });
+                }
+            },
+            deep: true
+        }
     },
 
-    mounted() {
-        // Компонент смонтирован, Vue автоматически применит классы через :class в шаблоне
-    },
-
     methods: {
+        // Обновить Bootstrap tooltips для указанного типа элемента
+        updateTouchTooltips(elementType, newTitle) {
+            if (!this._touchTooltips || !newTitle) return;
+
+            this.$nextTick(() => {
+                this._touchTooltips.forEach(({ element, tooltip, elementType: storedType }) => {
+                    if (storedType === elementType && tooltip) {
+                        try {
+                            tooltip.setContent({ '.tooltip-inner': newTitle });
+                            element.setAttribute('data-original-title', newTitle);
+                        } catch (error) {
+                            console.error('updateTouchTooltips: ошибка обновления tooltip', error, element);
+                        }
+                    }
+                });
+            });
+        },
+
         // Получить родительский контекст (класс avto-* или ID родителя)
         // Вызывается из computed, поэтому $el может быть еще не доступен
         getParentContext() {
@@ -416,11 +471,243 @@ window.cmpButton = {
             if (this.disabled || this.loading) return;
             this.$emit('click', event);
             this.$emit('click-suffix', event, item);
+        },
+
+        /**
+         * Инициализация Bootstrap tooltips с поддержкой long press на touch-устройствах
+         * Заменяет нативные tooltips (title) на Bootstrap tooltips с manual trigger
+         */
+        initTouchTooltips() {
+            // Определение touch-устройства: проверяем несколько способов
+            const hasTouchSupport = 'ontouchstart' in window || navigator.maxTouchPoints > 0;
+            // Проверка через media query (для DevTools эмуляции)
+            const isSmallScreen = window.matchMedia('(max-width: 768px)').matches;
+            // Комбинированная проверка: touch support ИЛИ маленький экран (для тестирования в DevTools)
+            const isTouch = hasTouchSupport || isSmallScreen;
+
+            if (!isTouch || !window.bootstrap || !window.bootstrap.Tooltip) {
+                return;
+            }
+
+            const LONG_PRESS_DURATION = 500; // 500ms для long press
+            const tooltipElements = [];
+
+            // Находим все элементы с title (иконка, текст, суффикс)
+            const elements = this.$el.querySelectorAll('[title]');
+
+            elements.forEach(element => {
+                const title = element.getAttribute('title');
+                if (!title) return;
+
+                // Сохраняем title в data-атрибут для восстановления при необходимости
+                element.setAttribute('data-original-title', title);
+                // Убираем title, чтобы не показывался нативный tooltip
+                element.removeAttribute('title');
+
+                // Определяем тип элемента для связи с props
+                let elementType = null;
+                if (element.classList.contains('icon')) {
+                    elementType = 'icon';
+                } else if (element.classList.contains('text-nowrap') || element.classList.contains('label')) {
+                    elementType = 'text';
+                } else if (element.classList.contains('badge') || element.classList.contains('suffix-container') || element.closest('.suffix-container')) {
+                    elementType = 'suffix';
+                }
+
+                let tooltip = null;
+                try {
+                    // Создаём Bootstrap tooltip с manual trigger
+                    tooltip = new window.bootstrap.Tooltip(element, {
+                        title: title,
+                        trigger: 'manual'
+                    });
+
+                    tooltipElements.push({ element, tooltip, elementType });
+                } catch (error) {
+                    console.error('initTouchTooltips: ошибка создания tooltip', error);
+                    // Восстанавливаем title при ошибке
+                    element.setAttribute('title', title);
+                    element.removeAttribute('data-original-title');
+                    return; // Пропускаем этот элемент, если не удалось создать tooltip
+                }
+
+                // Long press обработчики
+                let longPressTimer = null;
+                let tooltipShown = false; // Флаг, что tooltip был показан
+
+                const handleTouchStart = (e) => {
+                    if (!tooltip) {
+                        return;
+                    }
+                    tooltipShown = false; // Сбрасываем флаг при новом touchstart
+                    longPressTimer = setTimeout(() => {
+                        try {
+                            tooltip.show();
+                            tooltipShown = true; // Устанавливаем флаг, что tooltip был показан
+                        } catch (error) {
+                            console.error('initTouchTooltips: ошибка показа tooltip', error);
+                        }
+                    }, LONG_PRESS_DURATION);
+                };
+
+                const handleTouchEnd = () => {
+                    if (longPressTimer) {
+                        clearTimeout(longPressTimer);
+                        longPressTimer = null;
+                    }
+                    // Скрываем tooltip при touchend только если он НЕ был показан (не было long press)
+                    // Если tooltip был показан, он останется видимым до клика вне элемента
+                    if (tooltip && !tooltipShown) {
+                        tooltip.hide();
+                    }
+                };
+
+                const handleTouchCancel = () => {
+                    if (longPressTimer) {
+                        clearTimeout(longPressTimer);
+                        longPressTimer = null;
+                    }
+                    if (tooltip) {
+                        tooltip.hide();
+                    }
+                };
+
+                const handleClick = () => {
+                    if (tooltip) {
+                        tooltip.hide();
+                    }
+                };
+
+                element.addEventListener('touchstart', handleTouchStart, { passive: true });
+                element.addEventListener('touchend', handleTouchEnd, { passive: true });
+                element.addEventListener('touchcancel', handleTouchCancel, { passive: true });
+                element.addEventListener('click', handleClick);
+
+                // Сохраняем обработчики для очистки
+                element._touchTooltipHandlers = {
+                    touchstart: handleTouchStart,
+                    touchend: handleTouchEnd,
+                    touchcancel: handleTouchCancel,
+                    click: handleClick
+                };
+            });
+
+            // Сохраняем ссылки для очистки
+            this._touchTooltips = tooltipElements;
+
+
+            // Обработчик клика на document для скрытия всех tooltips при клике вне элемента
+            if (tooltipElements.length > 0 && !this._documentClickHandler) {
+                this._documentClickHandler = (e) => {
+                    // Проверяем, был ли клик вне всех элементов с tooltips
+                    const clickedInside = tooltipElements.some(({ element }) => {
+                        return element.contains(e.target) || element === e.target;
+                    });
+
+                    if (!clickedInside) {
+                        // Скрываем все tooltips
+                        tooltipElements.forEach(({ tooltip }) => {
+                            if (tooltip) {
+                                tooltip.hide();
+                            }
+                        });
+                    }
+                };
+
+                // Используем capture phase для более раннего перехвата
+                document.addEventListener('click', this._documentClickHandler, true);
+                document.addEventListener('touchend', this._documentClickHandler, true);
+            }
         }
     },
 
+    mounted() {
+        // Инициализация touch tooltips на мобильных устройствах
+        this.$nextTick(() => {
+            this.initTouchTooltips();
+        });
+    },
 
-    // Примечание: подсказки реализованы через нативный атрибут title браузера,
-    // не требуют инициализации и уничтожения
+    updated() {
+        // Обновляем Bootstrap tooltips при изменении title (например, при смене языка)
+        if (this._touchTooltips && this._touchTooltips.length > 0) {
+            this.$nextTick(() => {
+                this._touchTooltips.forEach(({ element, tooltip, elementType }) => {
+                    if (!tooltip) return;
+
+                    // Получаем текущий title из props (Vue обновляет title реактивно)
+                    let currentTitle = null;
+                    if (elementType === 'icon') {
+                        currentTitle = this.tooltipIcon;
+                    } else if (elementType === 'text') {
+                        currentTitle = this.tooltipText;
+                    } else if (elementType === 'suffix') {
+                        // Для суффикса проверяем suffix prop
+                        if (Array.isArray(this.suffix)) {
+                            const suffixItem = this.suffix.find(item => {
+                                const itemTooltip = item?.tooltip || '';
+                                const dataOriginalTitle = element.getAttribute('data-original-title') || '';
+                                return dataOriginalTitle.includes(itemTooltip) || itemTooltip.includes(dataOriginalTitle);
+                            });
+                            currentTitle = suffixItem?.tooltip || this.tooltipSuffix;
+                        } else if (this.suffix) {
+                            currentTitle = this.suffix.tooltip || this.tooltipSuffix;
+                        } else {
+                            currentTitle = this.tooltipSuffix;
+                        }
+                    }
+
+                    // Обновляем tooltip, если title изменился
+                    if (currentTitle) {
+                        const dataOriginalTitle = element.getAttribute('data-original-title') || '';
+                        if (currentTitle !== dataOriginalTitle) {
+                            try {
+                                tooltip.setContent({ '.tooltip-inner': currentTitle });
+                                element.setAttribute('data-original-title', currentTitle);
+                            } catch (error) {
+                                console.error('updated: ошибка обновления tooltip', error);
+                            }
+                        }
+                    }
+                });
+            });
+        }
+    },
+
+    beforeUnmount() {
+        // Удаляем обработчик клика на document
+        if (this._documentClickHandler) {
+            document.removeEventListener('click', this._documentClickHandler, true);
+            document.removeEventListener('touchend', this._documentClickHandler, true);
+            this._documentClickHandler = null;
+        }
+
+        // Очистка touch tooltips
+        if (this._touchTooltips) {
+            this._touchTooltips.forEach(({ element, tooltip }) => {
+                // Удаляем обработчики событий
+                if (element._touchTooltipHandlers) {
+                    element.removeEventListener('touchstart', element._touchTooltipHandlers.touchstart);
+                    element.removeEventListener('touchend', element._touchTooltipHandlers.touchend);
+                    element.removeEventListener('touchcancel', element._touchTooltipHandlers.touchcancel);
+                    element.removeEventListener('click', element._touchTooltipHandlers.click);
+                    delete element._touchTooltipHandlers;
+                }
+
+                // Восстанавливаем title из data-original-title
+                const originalTitle = element.getAttribute('data-original-title');
+                if (originalTitle) {
+                    element.setAttribute('title', originalTitle);
+                    element.removeAttribute('data-original-title');
+                }
+
+                // Уничтожаем Bootstrap tooltip
+                if (tooltip) {
+                    tooltip.dispose();
+                }
+            });
+            this._touchTooltips = null;
+        }
+    }
 };
 

@@ -9,6 +9,13 @@
  * - Все TTL в одном месте
  * - Версионирование схем данных
  * - Стратегии кэширования по типам данных
+ * - Единый источник правды для всех значений TTL (запрещено дублировать в компонентах)
+ *
+ * ИСТОРИЯ ИЗМЕНЕНИЙ:
+ * - Добавлены TTL для новостей и обновления метрик (вынесены из app-footer.js):
+ *   - crypto-news-cache-max-age: 24 часа
+ *   - market-update-fallback: 3 часа
+ *   - market-update-delay-max: 24 часа
  *
  * ССЫЛКА: Принципы кэширования описаны в docs/doc-architect.md
  */
@@ -32,7 +39,11 @@
         'favorites': null,                        // Без TTL
         'ui-state': null,                         // Без TTL
         'perplexity-api-key': null,               // Без TTL (чувствительные данные)
-        'perplexity-model': null                  // Без TTL
+        'perplexity-model': null,                 // Без TTL
+        'translation-language': null,              // Без TTL
+        'crypto-news-cache-max-age': 24 * 60 * 60 * 1000,  // 24 часа - максимальный возраст кэша новостей
+        'market-update-fallback': 3 * 60 * 60 * 1000,        // 3 часа - fallback при ошибке расчета времени обновления
+        'market-update-delay-max': 24 * 60 * 60 * 1000      // 24 часа - максимальная задержка обновления метрик
     };
 
     // Версии схем данных
@@ -51,7 +62,7 @@
         'cache-first': ['icons-cache', 'coins-list'],
         'network-first': ['market-metrics', 'api-cache'],
         'stale-while-revalidate': ['time-series', 'history'],
-        'cache-only': ['portfolios', 'strategies', 'settings', 'theme', 'timezone', 'favorites', 'ui-state', 'perplexity-api-key', 'perplexity-model']
+        'cache-only': ['portfolios', 'strategies', 'settings', 'theme', 'timezone', 'favorites', 'ui-state', 'perplexity-api-key', 'perplexity-model', 'translation-language']
     };
 
     /**

@@ -54,8 +54,10 @@
     ref="modalElement">
     <div :class="dialogClasses">
         <div class="modal-content">
-            <div class="modal-header" v-if="$slots.header || hasHeaderButtons">
-                <slot name="header"></slot>
+            <div class="modal-header" v-if="$slots.header || hasHeaderButtons || modalTitle">
+                <slot name="header">
+                    <h5 v-if="modalTitle && !$slots.header" class="modal-title" :id="computedTitleId">{{ modalTitle }}</h5>
+                </slot>
                 <cmp-modal-buttons location="header" v-if="hasHeaderButtons"></cmp-modal-buttons>
             </div>
             <div class="modal-body" v-if="$slots.body">
