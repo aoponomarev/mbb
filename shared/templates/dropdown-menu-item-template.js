@@ -37,7 +37,8 @@
  * Адаптивность:
  * - Адаптивность через классы .icon, .subtitle (управляется CSS)
  * События:
- * - Раздельные события кликов по зонам (иконка, текст, суффикс) через @click.stop
+ * - Раздельные события кликов по зонам (иконка, текст, суффикс) через @mouseup.stop
+ * - Закрытие dropdown при отпускании кнопки мыши (@mouseup вместо @click)
  * Подсказки (tooltips):
  * - Поддержка нативных и Bootstrap tooltips через условные атрибуты (data-bs-toggle, data-bs-title, title)
  * Анимация chevron:
@@ -54,7 +55,7 @@
     const TEMPLATE = `<li class="dropdown-item p-0"
     :class="[itemClasses, { 'active': active, 'disabled': disabled }]"
     :style="disabled ? {} : { cursor: 'pointer' }"
-    @click="handleClick">
+    @mouseup="handleClick">
     <div class="d-flex align-items-start px-2 py-2">
         <!-- Левая иконка -->
         <span v-if="icon"
@@ -63,7 +64,7 @@
               :data-bs-toggle="tooltipIconBootstrap && tooltipIcon ? 'tooltip' : null"
               :data-bs-title="tooltipIconBootstrap && tooltipIcon ? tooltipIcon : null"
               :title="!tooltipIconBootstrap && tooltipIcon ? tooltipIcon : null"
-              @click.stop="handleIconClick">
+              @mouseup.stop="handleIconClick">
             <i :class="icon"></i>
         </span>
 
@@ -73,7 +74,7 @@
              :data-bs-toggle="tooltipTextBootstrap && tooltipText ? 'tooltip' : null"
              :data-bs-title="tooltipTextBootstrap && tooltipText ? tooltipText : null"
              :title="!tooltipTextBootstrap && tooltipText ? tooltipText : null"
-             @click.stop="handleTextClick">
+             @mouseup.stop="handleTextClick">
             <div class="lh-sm text-wrap">{{ title }}</div>
             <small v-if="subtitle"
                    :class="subtitleClasses"
@@ -86,7 +87,7 @@
               :data-bs-toggle="tooltipSuffixBootstrap && suffixTooltip ? 'tooltip' : null"
               :data-bs-title="tooltipSuffixBootstrap && suffixTooltip ? suffixTooltip : null"
               :title="!tooltipSuffixBootstrap && suffixTooltip ? suffixTooltip : null"
-              @click.stop="handleSuffixClick">
+              @mouseup.stop="handleSuffixClick">
             <!-- Badge -->
             <span v-if="suffix.type === 'badge'"
                   :class="['badge', \`bg-\${suffix.variant || 'secondary'}\`]">

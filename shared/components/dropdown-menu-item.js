@@ -67,6 +67,8 @@
 // - По умолчанию все зоны (иконка, текст, суффикс) эмитят общее событие 'click'
 // - Раздельные события (click-icon, click-text, click-suffix) эмитятся всегда при клике на соответствующую зону
 // - Обработчики событий используют .stop для предотвращения всплытия
+// - Используется @mouseup вместо @click для закрытия dropdown при отпускании кнопки мыши
+// - При отпускании кнопки мыши автоматически закрывается родительский dropdown через Bootstrap API
 // Использование нативного Bootstrap dropdown-menu:
 // - Кастомный компонент dropdown-menu (контейнер выпадающего меню) не создаётся
 // - Используется нативный Bootstrap dropdown-menu через классы и JavaScript API
@@ -296,15 +298,41 @@ window.cmpDropdownMenuItem = {
             return 'root';
         },
 
+        // Закрытие родительского dropdown при отпускании кнопки мыши
+        closeParentDropdown() {
+            // Находим ближайший родительский элемент с классом .dropdown
+            let parent = this.$el.closest('.dropdown');
+            if (!parent) return;
+
+            // Получаем Bootstrap Dropdown instance
+            if (window.bootstrap && window.bootstrap.Dropdown) {
+                const dropdownElement = parent.querySelector('[data-bs-toggle="dropdown"]');
+                if (dropdownElement) {
+                    const dropdownInstance = window.bootstrap.Dropdown.getInstance(dropdownElement);
+                    if (dropdownInstance) {
+                        dropdownInstance.hide();
+                    }
+                }
+            }
+        },
+
         // Обработчик клика по всему пункту меню
         handleClick(event) {
             if (this.disabled) return;
+
+            // Закрываем dropdown при отпускании кнопки мыши
+            this.closeParentDropdown();
+
             this.$emit('click', event);
         },
 
         // Обработчик клика по иконке
         handleIconClick(event) {
             if (this.disabled) return;
+
+            // Закрываем dropdown при отпускании кнопки мыши
+            this.closeParentDropdown();
+
             // По умолчанию все зоны эмитят общий click (как будто клик по title)
             this.$emit('click', event);
             // Раздельное событие эмитится всегда (если обработчик не назначен, Vue его не вызовет)
@@ -314,6 +342,10 @@ window.cmpDropdownMenuItem = {
         // Обработчик клика по тексту
         handleTextClick(event) {
             if (this.disabled) return;
+
+            // Закрываем dropdown при отпускании кнопки мыши
+            this.closeParentDropdown();
+
             // По умолчанию все зоны эмитят общий click (как будто клик по title)
             this.$emit('click', event);
             // Раздельное событие эмитится всегда (если обработчик не назначен, Vue его не вызовет)
@@ -323,6 +355,10 @@ window.cmpDropdownMenuItem = {
         // Обработчик клика по суффиксу
         handleSuffixClick(event) {
             if (this.disabled) return;
+
+            // Закрываем dropdown при отпускании кнопки мыши
+            this.closeParentDropdown();
+
             // По умолчанию все зоны эмитят общий click (как будто клик по title)
             this.$emit('click', event);
             // Раздельное событие эмитится всегда (если обработчик не назначен, Vue его не вызовет)
