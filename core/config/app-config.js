@@ -88,7 +88,9 @@
                 models: [
                     { value: 'gpt://b1gv03a122le5a934cqj/yandexgpt-lite/latest', label: 'YandexGPT Lite' },
                     { value: 'gpt://b1gv03a122le5a934cqj/yandexgpt/latest', label: 'YandexGPT' }
-                ]
+                ],
+                // URL прокси-сервера для обхода CORS (Yandex Cloud Functions)
+                proxyUrl: 'https://functions.yandexcloud.net/d4erd8d1pttbufsl26s1'
             },
             marketUpdates: {
                 times: [9, 12, 18], // Часы обновления метрик (МСК)

@@ -314,6 +314,76 @@
                         </div>
                     </div>
 
+                    <!-- ВРЕМЕННЫЙ ПРИМЕР: Тестирование Yandex API -->
+                    <div class="mb-4 p-3 border rounded bg-light">
+                        <h2 class="mb-3">Тестирование Yandex API</h2>
+                        <p class="text-muted small mb-3">
+                            Проверка работы YandexGPT API через aiProviderManager.
+                            Введите свой запрос или используйте случайный.
+                        </p>
+                        <div class="row g-3">
+                            <!-- Левая колонка: запрос и кнопка -->
+                            <div class="col-md-6">
+                                <div class="d-flex flex-column h-100">
+                                    <label for="yandex-test-query" class="form-label mb-2">
+                                        <strong>Запрос:</strong>
+                                    </label>
+                                    <textarea
+                                        id="yandex-test-query"
+                                        class="form-control flex-grow-1 mb-3"
+                                        v-model="yandexTestInputQuery"
+                                        placeholder="Введите ваш запрос или оставьте пустым для случайного запроса"
+                                        rows="8"
+                                        :disabled="yandexTestLoading"
+                                        style="resize: vertical; min-height: 150px;">
+                                    </textarea>
+                                    <div class="d-flex gap-2">
+                                        <cmp-button
+                                            label="Отправить"
+                                            icon="fas fa-paper-plane"
+                                            variant="primary"
+                                            :disabled="yandexTestLoading"
+                                            @click="testYandexAPI(false)">
+                                        </cmp-button>
+                                        <cmp-button
+                                            label="Случайный"
+                                            icon="fas fa-dice"
+                                            variant="outline-secondary"
+                                            :disabled="yandexTestLoading"
+                                            @click="testYandexAPI(true)">
+                                        </cmp-button>
+                                    </div>
+                                    <div v-if="yandexTestLoading" class="mt-3 p-2 bg-info bg-opacity-10 rounded border border-info">
+                                        <div class="d-flex align-items-center">
+                                            <div class="spinner-border spinner-border-sm text-primary me-2" role="status">
+                                                <span class="visually-hidden">Загрузка...</span>
+                                            </div>
+                                            <span class="small">Отправка запроса...</span>
+                                        </div>
+                                    </div>
+                                    <div v-if="yandexTestError" class="mt-3 p-2 bg-danger bg-opacity-10 rounded border border-danger">
+                                        <small class="text-danger d-block mb-1"><strong>Ошибка:</strong></small>
+                                        <div class="text-break text-danger small">{{ yandexTestError }}</div>
+                                    </div>
+                                </div>
+                            </div>
+                            <!-- Правая колонка: ответ -->
+                            <div class="col-md-6">
+                                <div class="d-flex flex-column h-100">
+                                    <label class="form-label mb-2">
+                                        <strong>Ответ:</strong>
+                                    </label>
+                                    <div class="flex-grow-1 p-3 bg-white rounded border" style="min-height: 200px; max-height: 500px; overflow-y: auto;">
+                                        <div v-if="!yandexTestResponse && !yandexTestLoading && !yandexTestError" class="text-muted text-center d-flex align-items-center justify-content-center h-100">
+                                            <small>Ответ появится здесь после отправки запроса</small>
+                                        </div>
+                                        <div v-if="yandexTestResponse" class="text-break" style="white-space: pre-wrap;">{{ yandexTestResponse }}</div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
                     <!-- Тестовая секция для визуального контроля высоты -->
                     <div class="mb-4 p-3 border rounded">
                         <h2 class="mb-4">Визуальный контроль высоты элементов</h2>

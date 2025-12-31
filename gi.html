@@ -1,0 +1,268 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>GigaChat API Test</title>
+</head>
+<body>
+
+    <h1>GigaChat API Test</h1>
+
+    <!-- Поле для API ключа -->
+    <div style="margin-bottom: 10px;">
+        <label for="api-key-input">Authorization Key (GigaChat, Base64):</label><br>
+        <input type="password" id="api-key-input" style="width: 400px;" placeholder="Введите Authorization Key (Base64)">
+        <button id="toggle-api-key-visibility" style="margin-left: 5px;">👁️</button>
+        <button id="save-api-key" style="margin-left: 5px;">💾 Сохранить</button>
+    </div>
+
+    <!-- Поле для запроса и ответа -->
+    <textarea id="response-textarea" rows="10" cols="80" readonly></textarea><br>
+    <input type="text" id="query-input" placeholder="Введите запрос">
+    <button id="send-button">Отправить</button>
+
+    <script>
+        // Константы для GigaChat API
+        const GIGACHAT_OAUTH_URL = 'https://ngw.devices.sberbank.ru:9443/api/v2/oauth';
+        const GIGACHAT_PROXY_URL = 'https://gigachat-api-proxy.ponomarev-ux.workers.dev';
+        const STORAGE_KEY = 'gigachat-api-key';
+
+        // Функция для получения API ключа из поля ввода или localStorage
+        function getApiKey() {
+            const apiKeyInput = document.getElementById('api-key-input');
+            const apiKey = apiKeyInput.value.trim();
+
+            if (apiKey) {
+                return apiKey;
+            }
+
+            const savedKey = localStorage.getItem(STORAGE_KEY);
+            if (savedKey) {
+                apiKeyInput.value = savedKey;
+                return savedKey;
+            }
+
+            return null;
+        }
+
+        // Функция для сохранения API ключа
+        function saveApiKey() {
+            const apiKeyInput = document.getElementById('api-key-input');
+            const apiKey = apiKeyInput.value.trim();
+
+            if (apiKey) {
+                localStorage.setItem(STORAGE_KEY, apiKey);
+                alert('Authorization Key сохранен!');
+            } else {
+                alert('Пожалуйста, введите Authorization Key перед сохранением');
+            }
+        }
+
+        // Загружаем сохраненный ключ при загрузке страницы
+        window.addEventListener('DOMContentLoaded', function() {
+            const savedKey = localStorage.getItem(STORAGE_KEY);
+            if (savedKey) {
+                document.getElementById('api-key-input').value = savedKey;
+            }
+        });
+
+        // Обработчик кнопки сохранения
+        document.getElementById('save-api-key').addEventListener('click', saveApiKey);
+
+        // Переключение видимости API ключа
+        document.getElementById('toggle-api-key-visibility').addEventListener('click', function() {
+            const apiKeyInput = document.getElementById('api-key-input');
+            if (apiKeyInput.type === 'password') {
+                apiKeyInput.type = 'text';
+                this.textContent = '🙈';
+            } else {
+                apiKeyInput.type = 'password';
+                this.textContent = '👁️';
+            }
+        });
+
+        // Дебаг-логирование
+        const logs = [];
+        function log(message, data = null) {
+            const entry = {
+                time: new Date().toISOString(),
+                message,
+                data: data ? JSON.parse(JSON.stringify(data)) : null
+            };
+            logs.push(entry);
+            console.log(`[${entry.time}] ${message}`, data || '');
+
+            const logText = logs.map(l =>
+                `[${l.time}] ${l.message}${l.data ? '\n' + JSON.stringify(l.data, null, 2) : ''}`
+            ).join('\n\n');
+            document.getElementById('response-textarea').value = logText;
+        }
+
+        // Обработчик отправки запроса
+        document.getElementById('send-button').addEventListener('click', async function() {
+            log('Button clicked');
+
+            const query = document.getElementById('query-input').value || 'Привет';
+            log('Query value read', { query });
+
+            await sendGigaChatRequest(query);
+        });
+
+        // Функция для отправки запроса к GigaChat API
+        async function sendGigaChatRequest(query) {
+            log('Starting GigaChat API request');
+
+            const authKey = getApiKey();
+            if (!authKey) {
+                log('❌ Authorization Key не введен', {
+                    message: 'Пожалуйста, введите Authorization Key (Base64) перед отправкой запроса'
+                });
+                return;
+            }
+
+            try {
+                // Шаг 1: Получение токена доступа через OAuth (прямой запрос из браузера)
+                log('Шаг 1: Получение токена доступа через OAuth', {
+                    oauthUrl: GIGACHAT_OAUTH_URL,
+                    method: 'direct browser request'
+                });
+
+                // Генерируем уникальный RqUID для трейсинга запроса
+                const rqUID = crypto.randomUUID();
+
+                // #region agent log
+                fetch('http://127.0.0.1:7243/ingest/6397d191-f6f2-43f4-b4da-44a3482bedec',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'api.html:125',message:'Before OAuth fetch',data:{oauthUrl:GIGACHAT_OAUTH_URL,authKeyPrefix:authKey.substring(0,10),rqUID:rqUID},timestamp:Date.now(),sessionId:'debug-session',runId:'run2',hypothesisId:'C'})}).catch(()=>{});
+                // #endregion
+
+                // Прямой запрос к OAuth endpoint из браузера (обход проблемы с SSL в Worker)
+                let oauthResponse;
+                try {
+                    oauthResponse = await fetch(GIGACHAT_OAUTH_URL, {
+                        method: 'POST',
+                        headers: {
+                            'Authorization': `Basic ${authKey}`,
+                            'Content-Type': 'application/x-www-form-urlencoded',
+                            'Accept': 'application/json',
+                            'RqUID': rqUID,
+                        },
+                        body: 'scope=GIGACHAT_API_PERS'
+                    });
+                } catch (fetchError) {
+                    // #region agent log
+                    fetch('http://127.0.0.1:7243/ingest/6397d191-f6f2-43f4-b4da-44a3482bedec',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'api.html:139',message:'OAuth fetch exception',data:{error:fetchError.message,name:fetchError.name,stack:fetchError.stack?.substring(0,500)},timestamp:Date.now(),sessionId:'debug-session',runId:'run3',hypothesisId:'D'})}).catch(()=>{});
+                    // #endregion
+
+                    log('❌ Ошибка при запросе к OAuth endpoint', {
+                        error: fetchError.message,
+                        name: fetchError.name,
+                        details: 'Возможно, проблема с CORS или SSL сертификатом'
+                    });
+                    return;
+                }
+
+                // #region agent log
+                fetch('http://127.0.0.1:7243/ingest/6397d191-f6f2-43f4-b4da-44a3482bedec',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'api.html:155',message:'After OAuth fetch',data:{status:oauthResponse.status,statusText:oauthResponse.statusText,ok:oauthResponse.ok},timestamp:Date.now(),sessionId:'debug-session',runId:'run3',hypothesisId:'C'})}).catch(()=>{});
+                // #endregion
+
+                if (!oauthResponse.ok) {
+                    const errorText = await oauthResponse.text();
+
+                    // #region agent log
+                    fetch('http://127.0.0.1:7243/ingest/6397d191-f6f2-43f4-b4da-44a3482bedec',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'api.html:162',message:'OAuth error response',data:{status:oauthResponse.status,errorText:errorText.substring(0,500)},timestamp:Date.now(),sessionId:'debug-session',runId:'run3',hypothesisId:'C'})}).catch(()=>{});
+                    // #endregion
+
+                    log('❌ Ошибка получения токена', {
+                        status: oauthResponse.status,
+                        error: errorText
+                    });
+                    return;
+                }
+
+                const oauthData = await oauthResponse.json();
+                const accessToken = oauthData.access_token;
+
+                if (!accessToken) {
+                    log('❌ Токен доступа не получен');
+                    return;
+                }
+
+                log('✅ Токен доступа получен', {
+                    tokenPrefix: accessToken.substring(0, 10) + '...',
+                    expiresIn: oauthData?.expires_in
+                });
+
+                // Шаг 2: Отправка запроса к GigaChat API
+                log('Шаг 2: Отправка запроса к GigaChat API', {
+                    proxyUrl: GIGACHAT_PROXY_URL
+                });
+
+                const chatRequestBody = {
+                    model: 'GigaChat',
+                    messages: [
+                        {
+                            role: 'user',
+                            content: query
+                        }
+                    ],
+                    temperature: 0.6,
+                    max_tokens: 2000
+                };
+
+                log('Request body prepared', {
+                    body: chatRequestBody
+                });
+
+                const chatResponse = await fetch(`${GIGACHAT_PROXY_URL}/chat`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        accessToken: accessToken,
+                        ...chatRequestBody
+                    })
+                });
+
+                log('Chat response received', {
+                    status: chatResponse.status,
+                    statusText: chatResponse.statusText,
+                    ok: chatResponse.ok
+                });
+
+                const chatResponseText = await chatResponse.text();
+                log('Chat response body (raw)', {
+                    text: chatResponseText,
+                    length: chatResponseText.length
+                });
+
+                if (!chatResponse.ok) {
+                    log('❌ GigaChat API вернул ошибку', {
+                        status: chatResponse.status,
+                        error: chatResponseText
+                    });
+                    return;
+                }
+
+                const chatData = JSON.parse(chatResponseText);
+                log('Chat response body (parsed)', { data: chatData });
+
+                if (chatData.choices && chatData.choices.length > 0) {
+                    const answer = chatData.choices[0].message.content;
+                    log('✅ Успешный ответ от GigaChat API', { answer });
+                } else {
+                    log('⚠️ Неожиданный формат ответа', { data: chatData });
+                }
+
+            } catch (error) {
+                log('❌ Ошибка при запросе к GigaChat API', {
+                    error: error.message,
+                    name: error.name,
+                    stack: error.stack
+                });
+            }
+        }
+    </script>
+
+</body>
+</html>

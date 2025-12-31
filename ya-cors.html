@@ -1,0 +1,403 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>YandexGPT CORS Test</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 1200px;
+            margin: 20px auto;
+            padding: 20px;
+        }
+        .field-group {
+            margin-bottom: 15px;
+        }
+        label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: bold;
+        }
+        input[type="text"],
+        input[type="password"],
+        textarea {
+            width: 100%;
+            padding: 8px;
+            box-sizing: border-box;
+        }
+        textarea {
+            font-family: monospace;
+            resize: vertical;
+        }
+        button {
+            padding: 8px 16px;
+            margin-right: 10px;
+            cursor: pointer;
+        }
+        .button-group {
+            margin: 10px 0;
+        }
+        .info {
+            background: #e3f2fd;
+            padding: 10px;
+            border-radius: 4px;
+            margin-bottom: 15px;
+        }
+        .error {
+            color: #d32f2f;
+        }
+        .success {
+            color: #388e3c;
+        }
+        .log-entry {
+            margin: 5px 0;
+            padding: 5px;
+            border-left: 3px solid #ccc;
+            padding-left: 10px;
+        }
+        .log-entry.error {
+            border-left-color: #d32f2f;
+        }
+        .log-entry.success {
+            border-left-color: #388e3c;
+        }
+    </style>
+</head>
+<body>
+
+    <h1>YandexGPT CORS Test</h1>
+    <p>Тестирование работы YandexGPT API через прокси Yandex Cloud Functions</p>
+
+    <div class="info">
+        <strong>Инструкция:</strong><br>
+        1. Введите URL прокси Cloud Function (если еще не создан - будет добавлен позже)<br>
+        2. Введите API ключ Yandex Cloud (или оставьте пустым, если хранится в env функции)<br>
+        3. Введите запрос для YandexGPT<br>
+        4. Нажмите "Отправить запрос" и проверьте результаты
+    </div>
+
+    <!-- Поле для URL прокси -->
+    <div class="field-group">
+        <label for="proxy-url-input">URL прокси Cloud Function:</label>
+        <input type="text" id="proxy-url-input" placeholder="https://functions.yandexcloud.net/your-function-id" value="">
+        <button id="save-proxy-url">💾 Сохранить URL</button>
+    </div>
+
+    <!-- Поле для API ключа -->
+    <div class="field-group">
+        <label for="api-key-input">API ключ Yandex Cloud (опционально, если хранится в env функции):</label>
+        <div style="display: flex; align-items: center; gap: 5px;">
+            <input type="password" id="api-key-input" style="flex: 1;" placeholder="AQVN...">
+            <button id="toggle-api-key-visibility">👁️</button>
+            <button id="save-api-key">💾 Сохранить</button>
+        </div>
+    </div>
+
+    <!-- Поле для Folder ID и модели -->
+    <div class="field-group">
+        <label for="folder-id-input">Folder ID:</label>
+        <input type="text" id="folder-id-input" placeholder="b1gv03a122le5a934cqj" value="b1gv03a122le5a934cqj">
+    </div>
+
+    <div class="field-group">
+        <label for="model-select">Модель:</label>
+        <select id="model-select" style="width: 100%; padding: 8px;">
+            <option value="yandexgpt-lite">YandexGPT Lite</option>
+            <option value="yandexgpt">YandexGPT</option>
+        </select>
+    </div>
+
+    <!-- Поле для запроса -->
+    <div class="field-group">
+        <label for="query-input">Запрос к YandexGPT:</label>
+        <input type="text" id="query-input" placeholder="Привет, как дела?" value="Привет! Расскажи о себе.">
+    </div>
+
+    <!-- Кнопка отправки -->
+    <div class="button-group">
+        <button id="send-button" style="background: #2196f3; color: white; font-weight: bold;">Отправить запрос</button>
+        <button id="clear-button">Очистить логи</button>
+    </div>
+
+    <!-- Область для логов -->
+    <div class="field-group">
+        <label for="log-textarea">Логи запросов:</label>
+        <textarea id="log-textarea" rows="20" readonly style="font-size: 12px;"></textarea>
+    </div>
+
+    <script>
+        // Ключи для localStorage
+        const STORAGE_KEYS = {
+            proxyUrl: 'ya-cors-proxy-url',
+            apiKey: 'ya-cors-api-key',
+            folderId: 'ya-cors-folder-id'
+        };
+
+        // Загрузка сохраненных значений при загрузке страницы
+        window.addEventListener('DOMContentLoaded', function() {
+            const savedProxyUrl = localStorage.getItem(STORAGE_KEYS.proxyUrl);
+            const savedApiKey = localStorage.getItem(STORAGE_KEYS.apiKey);
+            const savedFolderId = localStorage.getItem(STORAGE_KEYS.folderId);
+
+            if (savedProxyUrl) {
+                document.getElementById('proxy-url-input').value = savedProxyUrl;
+            }
+            if (savedApiKey) {
+                document.getElementById('api-key-input').value = savedApiKey;
+            }
+            if (savedFolderId) {
+                document.getElementById('folder-id-input').value = savedFolderId;
+            }
+        });
+
+        // Сохранение URL прокси
+        document.getElementById('save-proxy-url').addEventListener('click', function() {
+            const proxyUrl = document.getElementById('proxy-url-input').value.trim();
+            if (proxyUrl) {
+                localStorage.setItem(STORAGE_KEYS.proxyUrl, proxyUrl);
+                log('✅ URL прокси сохранен', { url: proxyUrl });
+            } else {
+                log('❌ Введите URL прокси перед сохранением');
+            }
+        });
+
+        // Сохранение API ключа
+        document.getElementById('save-api-key').addEventListener('click', function() {
+            const apiKey = document.getElementById('api-key-input').value.trim();
+            if (apiKey) {
+                localStorage.setItem(STORAGE_KEYS.apiKey, apiKey);
+                log('✅ API ключ сохранен');
+            } else {
+                log('⚠️ API ключ очищен (будет использоваться из env функции, если настроен)');
+                localStorage.removeItem(STORAGE_KEYS.apiKey);
+            }
+        });
+
+        // Переключение видимости API ключа
+        document.getElementById('toggle-api-key-visibility').addEventListener('click', function() {
+            const apiKeyInput = document.getElementById('api-key-input');
+            if (apiKeyInput.type === 'password') {
+                apiKeyInput.type = 'text';
+                this.textContent = '🙈';
+            } else {
+                apiKeyInput.type = 'password';
+                this.textContent = '👁️';
+            }
+        });
+
+        // Очистка логов
+        document.getElementById('clear-button').addEventListener('click', function() {
+            document.getElementById('log-textarea').value = '';
+            logs.length = 0;
+        });
+
+        // Логирование
+        const logs = [];
+        function log(message, data = null) {
+            const timestamp = new Date().toLocaleTimeString('ru-RU');
+            const entry = {
+                time: timestamp,
+                message,
+                data
+            };
+            logs.push(entry);
+
+            const logText = logs.map(l => {
+                let line = `[${l.time}] ${l.message}`;
+                if (l.data) {
+                    line += '\n' + JSON.stringify(l.data, null, 2);
+                }
+                return line;
+            }).join('\n\n');
+
+            document.getElementById('log-textarea').value = logText;
+            document.getElementById('log-textarea').scrollTop = document.getElementById('log-textarea').scrollHeight;
+
+            console.log(`[${timestamp}] ${message}`, data || '');
+        }
+
+        // Отправка запроса
+        document.getElementById('send-button').addEventListener('click', async function() {
+            const proxyUrl = document.getElementById('proxy-url-input').value.trim();
+            const apiKey = document.getElementById('api-key-input').value.trim();
+            const folderId = document.getElementById('folder-id-input').value.trim();
+            const model = document.getElementById('model-select').value;
+            const query = document.getElementById('query-input').value.trim() || 'Привет!';
+
+            if (!proxyUrl) {
+                log('❌ Ошибка: URL прокси не указан', { error: 'Введите URL прокси Cloud Function' });
+                return;
+            }
+
+            if (!folderId) {
+                log('❌ Ошибка: Folder ID не указан');
+                return;
+            }
+
+            log('🚀 Начало запроса к YandexGPT', {
+                proxyUrl,
+                hasApiKey: !!apiKey,
+                folderId,
+                model,
+                query
+            });
+
+            try {
+                // Формируем modelUri
+                const modelUri = `gpt://${folderId}/${model}/latest`;
+
+                // Формируем тело запроса для прокси
+                const requestBody = {
+                    modelUri: modelUri,
+                    messages: [
+                        {
+                            role: 'user',
+                            text: query
+                        }
+                    ],
+                    completionOptions: {
+                        temperature: 0.6,
+                        maxTokens: 2000
+                    }
+                };
+
+                // Если API ключ указан, добавляем его в запрос
+                // (иначе должен использоваться из env функции)
+                if (apiKey) {
+                    requestBody.apiKey = apiKey;
+                }
+
+                log('📤 Отправка запроса к прокси', {
+                    url: proxyUrl,
+                    method: 'POST',
+                    body: {
+                        ...requestBody,
+                        apiKey: apiKey ? apiKey.substring(0, 10) + '...' : '(из env)'
+                    }
+                });
+
+                const startTime = Date.now();
+
+                // Отправляем запрос к прокси
+                const response = await fetch(proxyUrl, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(requestBody)
+                });
+
+                const endTime = Date.now();
+                const duration = endTime - startTime;
+
+                log('📥 Ответ получен', {
+                    status: response.status,
+                    statusText: response.statusText,
+                    ok: response.ok,
+                    duration: `${duration}ms`,
+                    headers: {
+                        'content-type': response.headers.get('content-type'),
+                        'access-control-allow-origin': response.headers.get('access-control-allow-origin'),
+                        'access-control-allow-methods': response.headers.get('access-control-allow-methods')
+                    }
+                });
+
+                // Проверяем CORS заголовки
+                const corsHeaders = {
+                    'Access-Control-Allow-Origin': response.headers.get('access-control-allow-origin'),
+                    'Access-Control-Allow-Methods': response.headers.get('access-control-allow-methods'),
+                    'Access-Control-Allow-Headers': response.headers.get('access-control-allow-headers')
+                };
+
+                const hasCorsHeaders = corsHeaders['Access-Control-Allow-Origin'] !== null;
+                if (hasCorsHeaders) {
+                    log('✅ CORS заголовки присутствуют', corsHeaders);
+                } else {
+                    log('⚠️ CORS заголовки отсутствуют в ответе', { note: 'Это может вызвать ошибки CORS в браузере' });
+                }
+
+                const responseText = await response.text();
+
+                log('📄 Тело ответа (raw)', {
+                    length: responseText.length,
+                    preview: responseText.substring(0, 200)
+                });
+
+                if (!response.ok) {
+                    log('❌ Ошибка HTTP', {
+                        status: response.status,
+                        statusText: response.statusText,
+                        body: responseText
+                    });
+                    return;
+                }
+
+                // Парсим JSON ответ
+                let data;
+                try {
+                    data = JSON.parse(responseText);
+                } catch (parseError) {
+                    log('❌ Ошибка парсинга JSON', {
+                        error: parseError.message,
+                        responseText: responseText.substring(0, 500)
+                    });
+                    return;
+                }
+
+                log('✅ Ответ успешно распарсен', {
+                    hasResult: !!data.result,
+                    hasAlternatives: !!(data.result && data.result.alternatives),
+                    alternativesCount: data.result?.alternatives?.length || 0
+                });
+
+                // Проверяем наличие ошибки в ответе от API
+                if (data.error) {
+                    log('❌ Ошибка от Yandex API', {
+                        error: data.error.message || 'Неизвестная ошибка',
+                        httpCode: data.error.httpCode,
+                        grpcCode: data.error.grpcCode
+                    });
+                    return;
+                }
+
+                // Извлекаем ответ
+                if (data.result && data.result.alternatives && data.result.alternatives.length > 0) {
+                    const answer = data.result.alternatives[0].message.text;
+                    const usage = data.result.usage;
+
+                    log('✅ Успешный ответ от YandexGPT', {
+                        answer: answer,
+                        usage: usage,
+                        tokens: {
+                            input: usage?.inputTextTokens,
+                            output: usage?.completionTokens,
+                            total: usage?.totalTokens
+                        }
+                    });
+                } else {
+                    log('⚠️ Неожиданный формат ответа', { data });
+                }
+
+            } catch (error) {
+                log('❌ Ошибка при запросе', {
+                    error: error.message,
+                    name: error.name,
+                    stack: error.stack?.split('\n').slice(0, 5).join('\n')
+                });
+
+                // Проверяем CORS ошибку
+                if (error.message === 'Failed to fetch' ||
+                    (error.name === 'TypeError' && error.message?.includes('fetch'))) {
+                    log('⚠️ Возможная CORS ошибка', {
+                        note: 'Запрос заблокирован браузером. Проверьте CORS заголовки в ответе прокси.',
+                        origin: window.location.origin,
+                        protocol: window.location.protocol
+                    });
+                }
+            }
+        });
+    </script>
+
+</body>
+</html>
