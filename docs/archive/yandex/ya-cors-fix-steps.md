@@ -24,7 +24,7 @@ https://functions.yandexcloud.net/d4erd8d1pttbufs126s1
 
 ### Шаг 2: Проверить код функции
 
-Убедитесь, что код функции правильный (из `docs/ya-cloud-function-code.md`):
+Убедитесь, что код функции правильный (из `ya-cloud-function-code.md`):
 
 **Важные моменты:**
 - ✅ Обработка OPTIONS запросов (preflight)
@@ -38,10 +38,10 @@ https://functions.yandexcloud.net/d4erd8d1pttbufs126s1
 
 ### Шаг 3: Обновить код функции (если нужно)
 
-Если в функции еще нет кода с логированием из `docs/ya-cloud-function-code.md`:
+Если в функции еще нет кода с логированием из `ya-cloud-function-code.md`:
 
 1. Откройте **"Редактор"** функции
-2. Скопируйте код из `docs/ya-cloud-function-code.md` (весь код, начиная с `exports.handler = ...`)
+2. Скопируйте код из `ya-cloud-function-code.md` (весь код, начиная с `exports.handler = ...`)
 3. Вставьте в редактор, заменив старый код
 4. Нажмите **"Создать версию"** (или "Сохранить")
 
@@ -83,6 +83,6 @@ https://functions.yandexcloud.net/d4erd8d1pttbufs126s1
 
 ## ССЫЛКИ
 
-- Код функции: `docs/ya-cloud-function-code.md`
-- Руководство по отладке: `docs/ya-cors-debug-guide.md`
+- Код функции: `ya-cloud-function-code.md`
+- Руководство по отладке: `ya-cors-debug-guide.md`
 - Тестовая страница: `ya-cors.html`

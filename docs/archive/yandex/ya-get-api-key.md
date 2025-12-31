@@ -60,5 +60,5 @@
 
 ## ССЫЛКИ
 
-- План интеграции: `docs/integration-mbb-ya-plan.md`
-- Пошаговое руководство: `docs/ya-cloud-function-steps-guide.md`
+- План интеграции: `ya-integration-mbb-plan.md`
+- Пошаговое руководство: `ya-cloud-function-steps-guide.md`

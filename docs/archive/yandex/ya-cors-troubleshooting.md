@@ -99,5 +99,5 @@ curl -X POST https://functions.yandexcloud.net/d4eu3vt3fa6sssm0o244 \
 
 ## ССЫЛКИ
 
-- Код функции: `docs/ya-cloud-function-code.md`
-- План интеграции: `docs/integration-mbb-ya-plan.md`
+- Код функции: `ya-cloud-function-code.md`
+- План интеграции: `ya-integration-mbb-plan.md`

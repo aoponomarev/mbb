@@ -45,5 +45,5 @@ curl -X POST https://functions.yandexcloud.net/d4erd8d1pttbufsl26s1 \
 
 ## ССЫЛКИ
 
-- Код функции: `docs/ya-cloud-function-code.md`
+- Код функции: `ya-cloud-function-code.md`
 - Тестовая страница: `ya-cors.html`

@@ -154,5 +154,5 @@ yc resource-manager folder list-access-bindings b1gv03a122le5a934cqj
 ## ССЫЛКИ
 
 - Документация Yandex Cloud IAM: https://yandex.cloud/ru/docs/iam/
-- План интеграции: `docs/integration-mbb-ya-plan.md`
-- Задание для ИИ-ассистента: `docs/ya-cloud-function-task.md`
+- План интеграции: `ya-integration-mbb-plan.md`
+- Задание для ИИ-ассистента: `ya-cloud-function-task.md`

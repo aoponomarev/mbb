@@ -1,6 +1,6 @@
 # План интеграции MBB с Yandex Cloud
 
-> Оглавление `docs/integration-mbb-ya-plan.md`
+> Оглавление `ya-integration-mbb-plan.md`
 - § Подготовка — подготовительные шаги, включая настройку прав доступа
 - § Создание Cloud Function — создание прокси-функции в Yandex Cloud
 - § Настройка проекта — обновление конфигурации проекта
@@ -132,7 +132,7 @@ yc resource-manager folder list-access-bindings b1gv03a122le5a934cqj
 - [ ] Добавить обработку ошибок
 - [ ] Добавить логирование (опционально)
 
-**⚠️ ВАЖНО**: Используйте исправленный код из `docs/ya-cloud-function-code.md`!
+**⚠️ ВАЖНО**: Используйте исправленный код из `ya-cloud-function-code.md`!
 - В Node.js 18+ `fetch` доступен глобально, не требуется `require('node-fetch')`
 - Код, предоставленный ИИ-ассистентом, может содержать эту строку - удалите её, если она есть
 
@@ -313,14 +313,14 @@ yandex: {
 
 ## Документация
 
-- [ ] Документация обновлена (`integration-mbb-ya.md`)
+- [ ] Документация обновлена (`ya-integration-mbb.md`)
 - [ ] План миграции выполнен
 - [ ] Результаты тестирования задокументированы
 
 ## ССЫЛКИ
 
-- Документация интеграции: `docs/integration-mbb-ya.md`
-- Исправленный код функции: `docs/ya-cloud-function-code.md` ⚠️ **Используйте этот код!**
+- Документация интеграции: `ya-integration-mbb.md`
+- Исправленный код функции: `ya-cloud-function-code.md` ⚠️ **Используйте этот код!**
 - Тестовая страница CORS: `ya-cors.html`
 - Документация Cloud Functions: https://yandex.cloud/ru/docs/functions/
 - Провайдер YandexGPT: `core/api/ai-providers/yandex-provider.js`

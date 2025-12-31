@@ -234,6 +234,6 @@ exports.handler = async (event, context) => {
 
 ## ССЫЛКИ
 
-- План интеграции: `docs/integration-mbb-ya-plan.md`
-- Задание для ИИ-ассистента: `docs/ya-cloud-function-task.md`
+- План интеграции: `ya-integration-mbb-plan.md`
+- Задание для ИИ-ассистента: `ya-cloud-function-task.md`
 - Тестовая страница: `ya-cors.html`
