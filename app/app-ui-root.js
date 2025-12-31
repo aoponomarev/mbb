@@ -193,6 +193,26 @@
                     yandexTestError: null
                 };
             },
+            watch: {
+                // Реактивное обновление tooltips при изменении языка
+                currentTranslationLanguage: {
+                    async handler(newLanguage, oldLanguage) {
+                        if (newLanguage && newLanguage !== oldLanguage) {
+                            // Обновляем tooltips для нового языка
+                            if (window.tooltipsConfig && typeof window.tooltipsConfig.init === 'function') {
+                                try {
+                                    await window.tooltipsConfig.init(newLanguage);
+                                    // Обновляем реактивные tooltips после инициализации
+                                    this.updateTooltips();
+                                } catch (error) {
+                                    console.error('app-ui-root: ошибка обновления tooltips при смене языка (watch):', error);
+                                }
+                            }
+                        }
+                    },
+                    immediate: false
+                }
+            },
             methods: {
                 /**
                  * Обновить реактивные tooltips из tooltipsConfig
@@ -258,14 +278,7 @@
                  * Тестирование Yandex API: отправка запроса (из поля ввода или случайный)
                  */
                 async testYandexAPI(useRandom = false) {
-                    // #region agent log
-                    fetch('http://127.0.0.1:7243/ingest/6397d191-f6f2-43f4-b4da-44a3482bedec',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'app-ui-root.js:260',message:'testYandexAPI entry',data:{useRandom,hasAiProviderManager:!!window.aiProviderManager},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'B'})}).catch(()=>{});
-                    // #endregion
-
                     if (!window.aiProviderManager) {
-                        // #region agent log
-                        fetch('http://127.0.0.1:7243/ingest/6397d191-f6f2-43f4-b4da-44a3482bedec',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'app-ui-root.js:263',message:'aiProviderManager not available',data:{},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'B'})}).catch(()=>{});
-                        // #endregion
                         this.yandexTestError = 'AI Provider Manager не загружен';
                         return;
                     }
@@ -291,10 +304,6 @@
                         query = this.yandexTestInputQuery.trim();
                     }
 
-                    // #region agent log
-                    fetch('http://127.0.0.1:7243/ingest/6397d191-f6f2-43f4-b4da-44a3482bedec',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'app-ui-root.js:287',message:'query prepared',data:{query,useRandom,hasInputQuery:!!this.yandexTestInputQuery.trim()},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'C'})}).catch(()=>{});
-                    // #endregion
-
                     this.yandexTestQuery = query;
                     this.yandexTestResponse = '';
                     this.yandexTestError = null;
@@ -302,38 +311,21 @@
 
                     try {
                         const providerName = await window.aiProviderManager.getCurrentProviderName();
-                        // #region agent log
-                        fetch('http://127.0.0.1:7243/ingest/6397d191-f6f2-43f4-b4da-44a3482bedec',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'app-ui-root.js:293',message:'providerName obtained',data:{providerName},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'B'})}).catch(()=>{});
-                        // #endregion
-
                         const apiKey = await window.aiProviderManager.getApiKey(providerName);
-                        // #region agent log
-                        fetch('http://127.0.0.1:7243/ingest/6397d191-f6f2-43f4-b4da-44a3482bedec',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'app-ui-root.js:294',message:'apiKey obtained',data:{providerName,hasApiKey:!!apiKey,apiKeyLength:apiKey?apiKey.length:0},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'A'})}).catch(()=>{});
-                        // #endregion
 
                         if (!apiKey) {
                             throw new Error(`API ключ для ${providerName} не настроен. Откройте настройки "AI API" для настройки.`);
                         }
 
                         const model = await window.aiProviderManager.getModel(providerName);
-                        // #region agent log
-                        fetch('http://127.0.0.1:7243/ingest/6397d191-f6f2-43f4-b4da-44a3482bedec',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'app-ui-root.js:300',message:'model obtained, sending request',data:{providerName,model,messages:[{role:'user',content:query}]},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'C'})}).catch(()=>{});
-                        // #endregion
 
                         // Отправляем запрос через aiProviderManager
                         const response = await window.aiProviderManager.sendRequest(
                             [{ role: 'user', content: query }]
                         );
 
-                        // #region agent log
-                        fetch('http://127.0.0.1:7243/ingest/6397d191-f6f2-43f4-b4da-44a3482bedec',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'app-ui-root.js:305',message:'response received',data:{responseLength:response?response.length:0,hasResponse:!!response},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'E'})}).catch(()=>{});
-                        // #endregion
-
                         this.yandexTestResponse = response;
                     } catch (error) {
-                        // #region agent log
-                        fetch('http://127.0.0.1:7243/ingest/6397d191-f6f2-43f4-b4da-44a3482bedec',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'app-ui-root.js:307',message:'error caught',data:{errorMessage:error.message,errorName:error.name,errorStack:error.stack?.substring(0,200)},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'D'})}).catch(()=>{});
-                        // #endregion
                         console.error('testYandexAPI: ошибка запроса:', error);
                         this.yandexTestError = error.message || 'Неизвестная ошибка';
                         this.yandexTestResponse = '';

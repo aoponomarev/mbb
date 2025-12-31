@@ -12,6 +12,7 @@
  * - Кэширование переводов в localStorage с ключом tooltips-{provider}-{versionHash}-{language}
  * - Версионирование кэша (при смене версии старые ключи удаляются)
  * - Отдельное кэширование для каждого провайдера
+ * - Автоматическое переключение между провайдерами через aiProviderManager
  *
  * ИСПОЛЬЗОВАНИЕ:
  * await window.tooltipsTranslator.translateAllTooltips('en');
@@ -47,14 +48,14 @@
     }
 
     /**
-     * Распарсить ответ от Perplexity с переводами tooltips
+     * Распарсить ответ от AI провайдера с переводами tooltips
      * Формат ответа:
      * ---TOOLTIP:ключ---
      * переведённый текст
      * ---TOOLTIP:следующий_ключ---
      * следующий переведённый текст
      * ---END---
-     * @param {string} response - ответ от Perplexity
+     * @param {string} response - ответ от AI провайдера
      * @returns {Object} - объект с переводами { ключ: переведённый_текст }
      */
     function parseTooltipsResponse(response) {
@@ -102,10 +103,10 @@
 
     /**
      * Перевести все tooltips на указанный язык
-     * Отправляет единый запрос к Perplexity со всеми tooltips и парсит ответ
+     * Отправляет единый запрос к текущему AI провайдеру (через aiProviderManager) со всеми tooltips и парсит ответ
      * @param {string} language - код языка ('en', 'es', 'fr', etc.)
      * @returns {Promise<Object>} - объект с переводами { ключ: переведённый_текст }
-     * @throws {Error} При ошибке запроса или отсутствии настроек Perplexity
+     * @throws {Error} При ошибке запроса или отсутствии настроек провайдера
      */
     async function translateAllTooltips(language) {
         if (!window.tooltipsConfig || !window.tooltipsConfig.TOOLTIPS) {

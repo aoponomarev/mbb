@@ -131,10 +131,6 @@
                 // Генерируем уникальный RqUID для трейсинга запроса
                 const rqUID = crypto.randomUUID();
 
-                // #region agent log
-                fetch('http://127.0.0.1:7243/ingest/6397d191-f6f2-43f4-b4da-44a3482bedec',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'api.html:125',message:'Before OAuth fetch',data:{oauthUrl:GIGACHAT_OAUTH_URL,authKeyPrefix:authKey.substring(0,10),rqUID:rqUID},timestamp:Date.now(),sessionId:'debug-session',runId:'run2',hypothesisId:'C'})}).catch(()=>{});
-                // #endregion
-
                 // Прямой запрос к OAuth endpoint из браузера (обход проблемы с SSL в Worker)
                 let oauthResponse;
                 try {
@@ -149,10 +145,6 @@
                         body: 'scope=GIGACHAT_API_PERS'
                     });
                 } catch (fetchError) {
-                    // #region agent log
-                    fetch('http://127.0.0.1:7243/ingest/6397d191-f6f2-43f4-b4da-44a3482bedec',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'api.html:139',message:'OAuth fetch exception',data:{error:fetchError.message,name:fetchError.name,stack:fetchError.stack?.substring(0,500)},timestamp:Date.now(),sessionId:'debug-session',runId:'run3',hypothesisId:'D'})}).catch(()=>{});
-                    // #endregion
-
                     log('❌ Ошибка при запросе к OAuth endpoint', {
                         error: fetchError.message,
                         name: fetchError.name,
@@ -161,16 +153,8 @@
                     return;
                 }
 
-                // #region agent log
-                fetch('http://127.0.0.1:7243/ingest/6397d191-f6f2-43f4-b4da-44a3482bedec',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'api.html:155',message:'After OAuth fetch',data:{status:oauthResponse.status,statusText:oauthResponse.statusText,ok:oauthResponse.ok},timestamp:Date.now(),sessionId:'debug-session',runId:'run3',hypothesisId:'C'})}).catch(()=>{});
-                // #endregion
-
                 if (!oauthResponse.ok) {
                     const errorText = await oauthResponse.text();
-
-                    // #region agent log
-                    fetch('http://127.0.0.1:7243/ingest/6397d191-f6f2-43f4-b4da-44a3482bedec',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'api.html:162',message:'OAuth error response',data:{status:oauthResponse.status,errorText:errorText.substring(0,500)},timestamp:Date.now(),sessionId:'debug-session',runId:'run3',hypothesisId:'C'})}).catch(()=>{});
-                    // #endregion
 
                     log('❌ Ошибка получения токена', {
                         status: oauthResponse.status,

@@ -69,6 +69,7 @@ window.aiApiSettings = {
             { value: 'gpt://b1gv03a122le5a934cqj/yandexgpt-lite/latest', label: 'YandexGPT Lite' },
             { value: 'gpt://b1gv03a122le5a934cqj/yandexgpt/latest', label: 'YandexGPT' }
         ]);
+        const defaultYandexFolderId = window.appConfig?.get('defaults.yandex.folderId', 'b1gv03a122le5a934cqj');
         const defaultPerplexityModel = window.appConfig?.get('defaults.perplexity.model', 'sonar-pro');
         const defaultPerplexityModels = window.appConfig?.get('defaults.perplexity.models', [
             { value: 'sonar-pro', label: 'sonar-pro' },
@@ -79,11 +80,13 @@ window.aiApiSettings = {
         return {
             provider: defaultProvider,
             yandexApiKey: '',
+            yandexFolderId: defaultYandexFolderId,
             yandexModel: defaultYandexModel,
             perplexityApiKey: '',
             perplexityModel: defaultPerplexityModel,
             initialProvider: defaultProvider,
             initialYandexApiKey: '',
+            initialYandexFolderId: defaultYandexFolderId,
             initialYandexModel: defaultYandexModel,
             initialPerplexityApiKey: '',
             initialPerplexityModel: defaultPerplexityModel,
@@ -99,6 +102,7 @@ window.aiApiSettings = {
         hasChanges() {
             return this.provider !== this.initialProvider ||
                    this.yandexApiKey !== this.initialYandexApiKey ||
+                   this.yandexFolderId !== this.initialYandexFolderId ||
                    this.yandexModel !== this.initialYandexModel ||
                    this.perplexityApiKey !== this.initialPerplexityApiKey ||
                    this.perplexityModel !== this.initialPerplexityModel;
@@ -126,6 +130,11 @@ window.aiApiSettings = {
             });
         },
         yandexModel() {
+            this.$nextTick(() => {
+                this.onFieldChange();
+            });
+        },
+        yandexFolderId() {
             this.$nextTick(() => {
                 this.onFieldChange();
             });
@@ -160,7 +169,14 @@ window.aiApiSettings = {
                         label: 'Сохранить',
                         variant: 'primary',
                         disabled: !this.hasChanges || !this.isValid,
-                        onClick: () => this.saveSettings()
+                        onClick: () => {
+                            // Если уже сохранено - закрываем окно (кнопка "Сохранено, закрыть?")
+                            if (this.isSaved) {
+                                this.handleCancel();
+                            } else {
+                                this.saveSettings();
+                            }
+                        }
                     });
                 }
             });
@@ -213,6 +229,17 @@ window.aiApiSettings = {
                         this.initialYandexModel = savedYandexModel;
                     }
 
+                    const savedYandexFolderId = await window.cacheManager.get('yandex-folder-id');
+                    if (savedYandexFolderId) {
+                        this.yandexFolderId = savedYandexFolderId;
+                        this.initialYandexFolderId = savedYandexFolderId;
+                    } else {
+                        // Дефолтное значение из конфига, если не сохранено
+                        const defaultFolderId = window.appConfig?.get('defaults.yandex.folderId', 'b1gv03a122le5a934cqj');
+                        this.yandexFolderId = defaultFolderId;
+                        this.initialYandexFolderId = defaultFolderId;
+                    }
+
                     // Загружаем настройки Perplexity
                     const savedPerplexityApiKey = await window.cacheManager.get('perplexity-api-key');
                     if (savedPerplexityApiKey) {
@@ -246,6 +273,7 @@ window.aiApiSettings = {
 
                 // Сохраняем настройки Yandex
                 await window.cacheManager.set('yandex-api-key', this.yandexApiKey);
+                await window.cacheManager.set('yandex-folder-id', this.yandexFolderId);
                 await window.cacheManager.set('yandex-model', this.yandexModel);
 
                 // Сохраняем настройки Perplexity
@@ -260,6 +288,7 @@ window.aiApiSettings = {
                 // Обновляем исходные значения
                 this.initialProvider = this.provider;
                 this.initialYandexApiKey = this.yandexApiKey;
+                this.initialYandexFolderId = this.yandexFolderId;
                 this.initialYandexModel = this.yandexModel;
                 this.initialPerplexityApiKey = this.perplexityApiKey;
                 this.initialPerplexityModel = this.perplexityModel;
@@ -285,6 +314,7 @@ window.aiApiSettings = {
                 // Восстанавливаем исходные значения
                 this.provider = this.initialProvider;
                 this.yandexApiKey = this.initialYandexApiKey;
+                this.yandexFolderId = this.initialYandexFolderId;
                 this.yandexModel = this.initialYandexModel;
                 this.perplexityApiKey = this.initialPerplexityApiKey;
                 this.perplexityModel = this.initialPerplexityModel;

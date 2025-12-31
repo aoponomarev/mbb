@@ -75,6 +75,16 @@
             </div>
         </div>
         <div class="mb-3">
+            <label for="yandex-folder-id" class="form-label">Folder ID</label>
+            <input
+                class="form-control"
+                id="yandex-folder-id"
+                v-model="yandexFolderId"
+                type="text"
+                placeholder="b1gv03a122le5a934cqj">
+            <small class="form-text text-muted">ID папки в Yandex Cloud</small>
+        </div>
+        <div class="mb-3">
             <label for="yandex-model" class="form-label">Модель YandexGPT</label>
             <select
                 class="form-select"

@@ -9,9 +9,9 @@
  * ПРИНЦИПЫ:
  * - Все tooltips хранятся в одном месте
  * - Исходные тексты на русском (базовый язык)
- * - При смене языка на другой (en, es, fr и т.д.) - перевод через Perplexity
+ * - При смене языка на другой (en, es, fr и т.д.) - перевод через текущий AI провайдер (через aiProviderManager)
  * - При языке 'ru' - используются исходные тексты без перевода
- * - Переводы кэшируются в localStorage с ключом tooltips-{versionHash}-{language}
+ * - Переводы кэшируются в localStorage с ключом tooltips-{provider}-{versionHash}-{language}
  *
  * СТРУКТУРА КЛЮЧЕЙ:
  * - button.{action}.{type} - tooltips для кнопок (icon, text, suffix.{variant})

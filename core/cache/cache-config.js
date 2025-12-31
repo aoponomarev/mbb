@@ -42,6 +42,7 @@
         'perplexity-api-key': null,               // Без TTL (чувствительные данные)
         'perplexity-model': null,                 // Без TTL
         'yandex-api-key': null,                   // Без TTL (чувствительные данные)
+        'yandex-folder-id': null,                 // Без TTL
         'yandex-model': null,                     // Без TTL
         'translation-language': null,              // Без TTL
         'crypto-news-cache-max-age': 24 * 60 * 60 * 1000,  // 24 часа - максимальный возраст кэша новостей
@@ -65,7 +66,7 @@
         'cache-first': ['icons-cache', 'coins-list'],
         'network-first': ['market-metrics', 'api-cache'],
         'stale-while-revalidate': ['time-series', 'history'],
-        'cache-only': ['portfolios', 'strategies', 'settings', 'theme', 'timezone', 'favorites', 'ui-state', 'ai-provider', 'perplexity-api-key', 'perplexity-model', 'yandex-api-key', 'yandex-model', 'translation-language']
+        'cache-only': ['portfolios', 'strategies', 'settings', 'theme', 'timezone', 'favorites', 'ui-state', 'ai-provider', 'perplexity-api-key', 'perplexity-model', 'yandex-api-key', 'yandex-folder-id', 'yandex-model', 'translation-language']
     };
 
     /**

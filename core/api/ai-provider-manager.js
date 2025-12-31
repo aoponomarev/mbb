@@ -104,38 +104,18 @@
          * @throws {Error} При ошибке запроса или отсутствии настроек
          */
         async sendRequest(messages, options = {}) {
-            // #region agent log
-            fetch('http://127.0.0.1:7243/ingest/6397d191-f6f2-43f4-b4da-44a3482bedec',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'ai-provider-manager.js:106',message:'sendRequest entry',data:{messagesCount:messages.length,hasOptions:!!options},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'C'})}).catch(()=>{});
-            // #endregion
-
             const provider = await this.getCurrentProvider();
             const providerName = await this.getCurrentProviderName();
-
-            // #region agent log
-            fetch('http://127.0.0.1:7243/ingest/6397d191-f6f2-43f4-b4da-44a3482bedec',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'ai-provider-manager.js:108',message:'provider obtained',data:{providerName,hasProvider:!!provider,providerType:provider?.constructor?.name},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'B'})}).catch(()=>{});
-            // #endregion
 
             // Получаем API ключ и модель для текущего провайдера
             const apiKey = await this.getApiKey(providerName);
             const model = await this.getModel(providerName);
 
-            // #region agent log
-            fetch('http://127.0.0.1:7243/ingest/6397d191-f6f2-43f4-b4da-44a3482bedec',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'ai-provider-manager.js:113',message:'apiKey and model obtained',data:{providerName,hasApiKey:!!apiKey,apiKeyLength:apiKey?apiKey.length:0,model},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'A'})}).catch(()=>{});
-            // #endregion
-
             if (!apiKey) {
                 throw new Error(`API ключ для ${providerName} не настроен`);
             }
 
-            // #region agent log
-            fetch('http://127.0.0.1:7243/ingest/6397d191-f6f2-43f4-b4da-44a3482bedec',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'ai-provider-manager.js:118',message:'calling provider.sendRequest',data:{providerName,model,messagesCount:messages.length},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'C'})}).catch(()=>{});
-            // #endregion
-
             const result = await provider.sendRequest(apiKey, model, messages, options);
-
-            // #region agent log
-            fetch('http://127.0.0.1:7243/ingest/6397d191-f6f2-43f4-b4da-44a3482bedec',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'ai-provider-manager.js:120',message:'provider.sendRequest completed',data:{providerName,resultLength:result?result.length:0,hasResult:!!result},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'E'})}).catch(()=>{});
-            // #endregion
 
             return result;
         }

@@ -83,7 +83,32 @@
                 get: async (key) => {
                     try {
                         const item = localStorage.getItem(key);
-                        return item ? JSON.parse(item) : null;
+                        if (!item) return null;
+
+                        // Пытаемся распарсить как JSON
+                        try {
+                            const parsed = JSON.parse(item);
+                            // Если это объект с полями data/version/timestamp - это новый формат cacheManager
+                            // Если это строка или примитив - это старое значение, нужно обернуть
+                            if (parsed && typeof parsed === 'object' && (parsed.data !== undefined || parsed.version !== undefined)) {
+                                return parsed;
+                            }
+                            // Старое значение (строка или примитив) - оборачиваем в новый формат
+                            return {
+                                data: parsed,
+                                version: '1.0.0',
+                                timestamp: Date.now(),
+                                expiresAt: null
+                            };
+                        } catch (parseError) {
+                            // Если не JSON - это старая строка, оборачиваем
+                            return {
+                                data: item,
+                                version: '1.0.0',
+                                timestamp: Date.now(),
+                                expiresAt: null
+                            };
+                        }
                     } catch (error) {
                         console.error(`localStorage.get(${key}):`, error);
                         return null;
