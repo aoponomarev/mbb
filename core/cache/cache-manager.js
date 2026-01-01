@@ -3,29 +3,40 @@
  * CACHE MANAGER - Единый интерфейс для работы с кэшем
  * ================================================================================================
  *
- * ЦЕЛЬ: Предоставить единую точку доступа к кэшу для всех компонентов приложения.
- * Абстракция над localStorage и IndexedDB, скрывающая детали реализации.
- *
- * ПРИНЦИПЫ:
- * - Единый интерфейс для всех типов данных
- * - Автоматическое определение слоя хранения (hot/warm/cold)
- * - Версионирование данных и автоматические миграции
- * - Версионирование приложения и автоматическая инвалидация кэша при обновлении
- * - Обработка ошибок с fallback на загрузку из сети
- * - Поддержка TTL и автоматической инвалидации
+ * ЦЕЛЬ: Единая точка доступа к кэшу для всех компонентов. Абстракция над localStorage и IndexedDB.
  *
  * ВЕРСИОНИРОВАНИЕ ПРИЛОЖЕНИЯ:
- * - Ключи кэша, зависящие от структуры данных, автоматически версионируются префиксом v:{hash}:{key}
- * - При смене версии приложения старые ключи автоматически удаляются через clearOldVersions()
- * - Версионируемые ключи: icons-cache, coins-list, api-cache, market-metrics, crypto-news-state
- * - Невersionируемые ключи: settings, portfolios, strategies (пользовательские данные)
+ * Ключи версионируются префиксом v:{hash}:{key} для автоматической инвалидации при обновлении.
  *
- * ИСПОЛЬЗОВАНИЕ:
- * window.cacheManager.get('coins-list', { strategy: 'cache-first' })
- * window.cacheManager.set('coins-list', data, { ttl: 3600000 })
- * window.cacheManager.has('coins-list')
- * window.cacheManager.delete('coins-list')
- * window.cacheManager.clearOldVersions() // Очистить кэш старых версий
+ * Алгоритм getVersionedKey():
+ * - Автоматически версионирует ключи из массива versionedKeys (данные из внешних API)
+ * - Пользовательские данные не версионируются (settings, portfolios, strategies)
+ * - Версия генерируется из CONFIG.version через appConfig.getVersionHash()
+ *
+ * Версионируемые ключи (автоматически):
+ * - icons-cache, coins-list, api-cache, market-metrics, crypto-news-state
+ * Причина: структура данных зависит от внешних API, изменения формата вызовут ошибки парсинга.
+ *
+ * НЕ версионируются:
+ * - settings, portfolios, strategies, time-series, history — пользовательские данные
+ * - theme, timezone, favorites, ui-state — настройки и состояние UI
+ * - yandex-api-key, perplexity-api-key, ai-provider — настройки провайдеров
+ * Причина: должны сохраняться между обновлениями, используют миграции схем при необходимости.
+ *
+ * МЕТОДЫ:
+ * - get(key, options) — получить значение из кэша с проверкой TTL и миграциями
+ * - set(key, value, options) — сохранить значение с автоматическим определением слоя
+ * - has(key, options) — проверить наличие ключа в кэше
+ * - delete(key, options) — удалить ключ из кэша
+ * - clearOldVersions() — удалить ключи всех версий кроме текущей
+ * - getVersionedKey(key, useVersioning) — получить версионированный ключ (для внутреннего использования)
+ *
+ * ПРИМЕРЫ:
+ * await cacheManager.get('coins-list')
+ * await cacheManager.set('coins-list', data, { ttl: 86400000 })
+ * await cacheManager.clearOldVersions()
+ *
+ * ССЫЛКА: Общие принципы кэширования: docs/doc-cache.md
  */
 
 (function() {

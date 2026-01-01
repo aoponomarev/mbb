@@ -34,8 +34,7 @@
 
     const TEMPLATE = `<div>
     <!-- Выбор провайдера -->
-    <div class="mb-4">
-        <label class="form-label">AI провайдер</label>
+    <div class="mb-4 d-flex justify-content-center">
         <div class="btn-group" role="group" aria-label="Выбор AI провайдера">
             <input
                 type="radio"
@@ -74,24 +73,26 @@
                 </button>
             </div>
         </div>
-        <div class="mb-3">
-            <label for="yandex-folder-id" class="form-label">Folder ID</label>
-            <input
-                class="form-control"
-                id="yandex-folder-id"
-                v-model="yandexFolderId"
-                type="text"
-                placeholder="b1gv03a122le5a934cqj">
-            <small class="form-text text-muted">ID папки в Yandex Cloud</small>
-        </div>
-        <div class="mb-3">
-            <label for="yandex-model" class="form-label">Модель YandexGPT</label>
-            <select
-                class="form-select"
-                id="yandex-model"
-                v-model="yandexModel">
-                <option v-for="m in yandexModels" :key="m.value" :value="m.value">{{ m.label }}</option>
-            </select>
+        <div class="row g-3 mb-3">
+            <div class="col-md-6">
+                <label for="yandex-folder-id" class="form-label">Folder ID</label>
+                <input
+                    class="form-control"
+                    id="yandex-folder-id"
+                    v-model="yandexFolderId"
+                    type="text"
+                    placeholder="b1gv03a122le5a934cqj">
+                <small class="form-text text-muted">ID папки в Yandex Cloud</small>
+            </div>
+            <div class="col-md-6">
+                <label for="yandex-model" class="form-label">Модель YandexGPT</label>
+                <select
+                    class="form-select"
+                    id="yandex-model"
+                    v-model="yandexModel">
+                    <option v-for="m in yandexModels" :key="m.value" :value="m.value">{{ m.label }}</option>
+                </select>
+            </div>
         </div>
     </div>
 

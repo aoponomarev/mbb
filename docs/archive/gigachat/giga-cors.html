@@ -1,0 +1,381 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>GigaChat CORS Test</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 1200px;
+            margin: 20px auto;
+            padding: 20px;
+        }
+        .field-group {
+            margin-bottom: 15px;
+        }
+        label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: bold;
+        }
+        input[type="text"],
+        input[type="password"],
+        textarea {
+            width: 100%;
+            padding: 8px;
+            box-sizing: border-box;
+        }
+        textarea {
+            font-family: monospace;
+            resize: vertical;
+        }
+        button {
+            padding: 8px 16px;
+            margin-right: 10px;
+            cursor: pointer;
+        }
+        .button-group {
+            margin: 10px 0;
+        }
+        .info {
+            background: #e3f2fd;
+            padding: 10px;
+            border-radius: 4px;
+            margin-bottom: 15px;
+        }
+        .error {
+            color: #d32f2f;
+        }
+        .success {
+            color: #388e3c;
+        }
+        .log-entry {
+            margin: 5px 0;
+            padding: 5px;
+            border-left: 3px solid #ccc;
+            padding-left: 10px;
+        }
+        .log-entry.error {
+            border-left-color: #d32f2f;
+        }
+        .log-entry.success {
+            border-left-color: #388e3c;
+        }
+    </style>
+</head>
+<body>
+
+    <h1>GigaChat CORS Test</h1>
+    <p>Тестирование работы GigaChat API через прокси</p>
+
+    <div class="info">
+        <strong>Инструкция:</strong><br>
+        1. Введите URL прокси (Cloudflare Workers, Yandex Cloud Functions или другой)<br>
+        2. Введите Authorization Key GigaChat (Base64, опционально, если хранится в env прокси)<br>
+        3. Введите запрос для GigaChat<br>
+        4. Нажмите "Отправить запрос" и проверьте результаты
+    </div>
+
+    <!-- Поле для URL прокси -->
+    <div class="field-group">
+        <label for="proxy-url-input">URL прокси:</label>
+        <input type="text" id="proxy-url-input" placeholder="https://your-proxy-url.com" value="">
+        <button id="save-proxy-url">💾 Сохранить URL</button>
+    </div>
+
+    <!-- Поле для Authorization Key -->
+    <div class="field-group">
+        <label for="auth-key-input">Authorization Key GigaChat (Base64, опционально, если хранится в env прокси):</label>
+        <div style="display: flex; align-items: center; gap: 5px;">
+            <input type="password" id="auth-key-input" style="flex: 1;" placeholder="Base64 строка...">
+            <button id="toggle-auth-key-visibility">👁️</button>
+            <button id="save-auth-key">💾 Сохранить</button>
+        </div>
+    </div>
+
+    <!-- Поле для модели -->
+    <div class="field-group">
+        <label for="model-select">Модель:</label>
+        <select id="model-select" style="width: 100%; padding: 8px;">
+            <option value="GigaChat">GigaChat</option>
+            <option value="GigaChat-Pro">GigaChat-Pro</option>
+            <option value="GigaChat-Max">GigaChat-Max</option>
+        </select>
+    </div>
+
+    <!-- Поле для запроса -->
+    <div class="field-group">
+        <label for="query-input">Запрос к GigaChat:</label>
+        <input type="text" id="query-input" placeholder="Привет, как дела?" value="Привет! Расскажи о себе.">
+    </div>
+
+    <!-- Кнопка отправки -->
+    <div class="button-group">
+        <button id="send-button" style="background: #2196f3; color: white; font-weight: bold;">Отправить запрос</button>
+        <button id="clear-button">Очистить логи</button>
+    </div>
+
+    <!-- Область для логов -->
+    <div class="field-group">
+        <label for="log-textarea">Логи запросов:</label>
+        <textarea id="log-textarea" rows="20" readonly style="font-size: 12px;"></textarea>
+    </div>
+
+    <script>
+        // Ключи для localStorage
+        const STORAGE_KEYS = {
+            proxyUrl: 'giga-cors-proxy-url',
+            authKey: 'giga-cors-auth-key'
+        };
+
+        // Загрузка сохраненных значений при загрузке страницы
+        window.addEventListener('DOMContentLoaded', function() {
+            const savedProxyUrl = localStorage.getItem(STORAGE_KEYS.proxyUrl);
+            const savedAuthKey = localStorage.getItem(STORAGE_KEYS.authKey);
+
+            if (savedProxyUrl) {
+                document.getElementById('proxy-url-input').value = savedProxyUrl;
+            }
+            if (savedAuthKey) {
+                document.getElementById('auth-key-input').value = savedAuthKey;
+            }
+        });
+
+        // Сохранение URL прокси
+        document.getElementById('save-proxy-url').addEventListener('click', function() {
+            const proxyUrl = document.getElementById('proxy-url-input').value.trim();
+            if (proxyUrl) {
+                localStorage.setItem(STORAGE_KEYS.proxyUrl, proxyUrl);
+                log('✅ URL прокси сохранен', { url: proxyUrl });
+            } else {
+                log('❌ Введите URL прокси перед сохранением');
+            }
+        });
+
+        // Сохранение Authorization Key
+        document.getElementById('save-auth-key').addEventListener('click', function() {
+            const authKey = document.getElementById('auth-key-input').value.trim();
+            if (authKey) {
+                localStorage.setItem(STORAGE_KEYS.authKey, authKey);
+                log('✅ Authorization Key сохранен');
+            } else {
+                log('⚠️ Authorization Key очищен (будет использоваться из env прокси, если настроен)');
+                localStorage.removeItem(STORAGE_KEYS.authKey);
+            }
+        });
+
+        // Переключение видимости Authorization Key
+        document.getElementById('toggle-auth-key-visibility').addEventListener('click', function() {
+            const authKeyInput = document.getElementById('auth-key-input');
+            if (authKeyInput.type === 'password') {
+                authKeyInput.type = 'text';
+                this.textContent = '🙈';
+            } else {
+                authKeyInput.type = 'password';
+                this.textContent = '👁️';
+            }
+        });
+
+        // Очистка логов
+        document.getElementById('clear-button').addEventListener('click', function() {
+            document.getElementById('log-textarea').value = '';
+            logs.length = 0;
+        });
+
+        // Логирование
+        const logs = [];
+        function log(message, data = null) {
+            const timestamp = new Date().toLocaleTimeString('ru-RU');
+            const entry = {
+                time: timestamp,
+                message,
+                data
+            };
+            logs.push(entry);
+
+            const logText = logs.map(l => {
+                let line = `[${l.time}] ${l.message}`;
+                if (l.data) {
+                    line += '\n' + JSON.stringify(l.data, null, 2);
+                }
+                return line;
+            }).join('\n\n');
+
+            document.getElementById('log-textarea').value = logText;
+            document.getElementById('log-textarea').scrollTop = document.getElementById('log-textarea').scrollHeight;
+
+            console.log(`[${timestamp}] ${message}`, data || '');
+        }
+
+        // Отправка запроса
+        document.getElementById('send-button').addEventListener('click', async function() {
+            const proxyUrl = document.getElementById('proxy-url-input').value.trim();
+            const authKey = document.getElementById('auth-key-input').value.trim();
+            const model = document.getElementById('model-select').value;
+            const query = document.getElementById('query-input').value.trim() || 'Привет!';
+
+            if (!proxyUrl) {
+                log('❌ Ошибка: URL прокси не указан', { error: 'Введите URL прокси' });
+                return;
+            }
+
+            log('🚀 Начало запроса к GigaChat', {
+                proxyUrl,
+                hasAuthKey: !!authKey,
+                model,
+                query
+            });
+
+            try {
+                // Формируем тело запроса для прокси
+                const requestBody = {
+                    model: model,
+                    messages: [
+                        {
+                            role: 'user',
+                            content: query
+                        }
+                    ],
+                    temperature: 0.6,
+                    max_tokens: 500 // Уменьшено для предотвращения таймаутов GigaChat API (~60 сек)
+                };
+
+                // Если Authorization Key указан, добавляем его в запрос
+                // (иначе должен использоваться из env прокси)
+                if (authKey) {
+                    requestBody.authKey = authKey;
+                }
+
+                log('📤 Отправка запроса к прокси', {
+                    url: proxyUrl,
+                    method: 'POST',
+                    body: {
+                        ...requestBody,
+                        authKey: authKey ? authKey.substring(0, 10) + '...' : '(из env)'
+                    }
+                });
+
+                const startTime = Date.now();
+
+                // Отправляем запрос к прокси
+                const response = await fetch(proxyUrl, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(requestBody)
+                });
+
+                const endTime = Date.now();
+                const duration = endTime - startTime;
+
+                log('📥 Ответ получен', {
+                    status: response.status,
+                    statusText: response.statusText,
+                    ok: response.ok,
+                    duration: `${duration}ms`,
+                    headers: {
+                        'content-type': response.headers.get('content-type'),
+                        'access-control-allow-origin': response.headers.get('access-control-allow-origin'),
+                        'access-control-allow-methods': response.headers.get('access-control-allow-methods')
+                    }
+                });
+
+                // Проверяем CORS заголовки
+                const corsHeaders = {
+                    'Access-Control-Allow-Origin': response.headers.get('access-control-allow-origin'),
+                    'Access-Control-Allow-Methods': response.headers.get('access-control-allow-methods'),
+                    'Access-Control-Allow-Headers': response.headers.get('access-control-allow-headers')
+                };
+
+                const hasCorsHeaders = corsHeaders['Access-Control-Allow-Origin'] !== null;
+                if (hasCorsHeaders) {
+                    log('✅ CORS заголовки присутствуют', corsHeaders);
+                } else {
+                    log('⚠️ CORS заголовки отсутствуют в ответе', { note: 'Это может вызвать ошибки CORS в браузере' });
+                }
+
+                const responseText = await response.text();
+
+                log('📄 Тело ответа (raw)', {
+                    length: responseText.length,
+                    preview: responseText.substring(0, 200)
+                });
+
+                if (!response.ok) {
+                    log('❌ Ошибка HTTP', {
+                        status: response.status,
+                        statusText: response.statusText,
+                        body: responseText
+                    });
+                    return;
+                }
+
+                // Парсим JSON ответ
+                let data;
+                try {
+                    data = JSON.parse(responseText);
+                } catch (parseError) {
+                    log('❌ Ошибка парсинга JSON', {
+                        error: parseError.message,
+                        responseText: responseText.substring(0, 500)
+                    });
+                    return;
+                }
+
+                log('✅ Ответ успешно распарсен', {
+                    hasChoices: !!data.choices,
+                    choicesCount: data.choices?.length || 0,
+                    hasUsage: !!data.usage
+                });
+
+                // Проверяем наличие ошибки в ответе от API
+                if (data.error) {
+                    log('❌ Ошибка от GigaChat API', {
+                        error: data.error.message || 'Неизвестная ошибка',
+                        code: data.error.code
+                    });
+                    return;
+                }
+
+                // Извлекаем ответ
+                if (data.choices && data.choices.length > 0) {
+                    const answer = data.choices[0].message.content;
+                    const usage = data.usage;
+
+                    log('✅ Успешный ответ от GigaChat', {
+                        answer: answer,
+                        usage: usage,
+                        tokens: {
+                            prompt: usage?.prompt_tokens,
+                            completion: usage?.completion_tokens,
+                            total: usage?.total_tokens
+                        }
+                    });
+                } else {
+                    log('⚠️ Неожиданный формат ответа', { data });
+                }
+
+            } catch (error) {
+                log('❌ Ошибка при запросе', {
+                    error: error.message,
+                    name: error.name,
+                    stack: error.stack?.split('\n').slice(0, 5).join('\n')
+                });
+
+                // Проверяем CORS ошибку
+                if (error.message === 'Failed to fetch' ||
+                    (error.name === 'TypeError' && error.message?.includes('fetch'))) {
+                    log('⚠️ Возможная CORS ошибка', {
+                        note: 'Запрос заблокирован браузером. Проверьте CORS заголовки в ответе прокси.',
+                        origin: window.location.origin,
+                        protocol: window.location.protocol
+                    });
+                }
+            }
+        });
+    </script>
+
+</body>
+</html>

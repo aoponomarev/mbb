@@ -35,7 +35,7 @@
             description: 'Настройка таймзоны и языка перевода новостей'
         },
         'aiApiModal': {
-            title: 'AI API',
+            title: 'AI провайдеры',
             icon: 'fas fa-robot',
             description: 'Настройки AI провайдеров (YandexGPT, Perplexity) для получения новостей и переводов'
         }

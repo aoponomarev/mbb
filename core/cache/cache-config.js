@@ -3,21 +3,42 @@
  * CACHE CONFIG - Конфигурация кэширования
  * ================================================================================================
  *
- * ЦЕЛЬ: Централизованное управление TTL, версиями и стратегиями кэширования.
+ * ЦЕЛЬ: Централизованное управление TTL, версиями схем и стратегиями кэширования.
+ * Единый источник правды — запрещено дублировать значения TTL в компонентах.
  *
- * ПРИНЦИПЫ:
- * - Все TTL в одном месте
- * - Версионирование схем данных
- * - Стратегии кэширования по типам данных
- * - Единый источник правды для всех значений TTL (запрещено дублировать в компонентах)
+ * TTL (Time To Live) — объяснение значений:
+ * - icons-cache: 1 час — иконки меняются редко, но могут обновиться (новые монеты, обновление дизайна)
+ * - coins-list: 1 день — список монет стабилен, обновляется раз в день через API
+ * - market-metrics: 1 час — метрики обновляются часто (цены меняются постоянно)
+ * - api-cache: 5 минут — кэш API-ответов, быстрое устаревание для актуальности
+ * - time-series: 1 час — временные ряды обновляются регулярно, час — баланс актуальности/производительности
+ * - history: 1 день — история изменяется реже, день достаточен
+ * - crypto-news-cache-max-age: 24 часа — максимальный возраст состояния новостей (не самих новостей)
+ * - market-update-fallback: 3 часа — fallback при ошибке расчета времени обновления
+ * - market-update-delay-max: 24 часа — максимальная задержка обновления метрик
  *
- * ИСТОРИЯ ИЗМЕНЕНИЙ:
- * - Добавлены TTL для новостей и обновления метрик (вынесены из app-footer.js):
- *   - crypto-news-cache-max-age: 24 часа
- *   - market-update-fallback: 3 часа
- *   - market-update-delay-max: 24 часа
+ * Без TTL (null) — постоянное хранение:
+ * - Пользовательские данные (portfolios, strategies) — должны сохраняться
+ * - Настройки (settings, theme, timezone) — пользователь не должен терять настройки
+ * - API ключи и провайдеры — чувствительные данные, хранятся без срока
  *
- * ССЫЛКА: Принципы кэширования описаны в docs/doc-architect.md
+ * СТРАТЕГИИ КЭШИРОВАНИЯ:
+ * - cache-first: icons-cache, coins-list — данные стабильны, важна скорость доступа
+ * - network-first: market-metrics, api-cache — актуальность критична, сначала запрос к сети
+ * - stale-while-revalidate: time-series, history — показываем кэш, обновляем в фоне
+ * - cache-only: portfolios, strategies, settings, API ключи — только локальные данные, нет источника обновления
+ *
+ * ВЕРСИИ СХЕМ:
+ * Версионирование структуры данных пользовательских ключей (portfolios, strategies и т.д.).
+ * При изменении структуры создается миграция в cache-migrations.js.
+ * Версионирование схем отличается от версионирования приложения (префикс v:{hash}:).
+ *
+ * ИСПОЛЬЗОВАНИЕ:
+ * cacheConfig.getTTL('coins-list') // 86400000 (1 день)
+ * cacheConfig.getStrategy('icons-cache') // 'cache-first'
+ * cacheConfig.getVersion('portfolios') // '1.0.0'
+ *
+ * ССЫЛКА: Общие принципы кэширования: docs/doc-cache.md
  */
 
 (function() {
@@ -44,6 +65,7 @@
         'yandex-api-key': null,                   // Без TTL (чувствительные данные)
         'yandex-folder-id': null,                 // Без TTL
         'yandex-model': null,                     // Без TTL
+        'yandex-proxy-type': null,                // Без TTL (тип прокси для YandexGPT: 'yandex' и т.д.)
         'translation-language': null,              // Без TTL
         'crypto-news-cache-max-age': 24 * 60 * 60 * 1000,  // 24 часа - максимальный возраст кэша новостей
         'market-update-fallback': 3 * 60 * 60 * 1000,        // 3 часа - fallback при ошибке расчета времени обновления
@@ -66,7 +88,7 @@
         'cache-first': ['icons-cache', 'coins-list'],
         'network-first': ['market-metrics', 'api-cache'],
         'stale-while-revalidate': ['time-series', 'history'],
-        'cache-only': ['portfolios', 'strategies', 'settings', 'theme', 'timezone', 'favorites', 'ui-state', 'ai-provider', 'perplexity-api-key', 'perplexity-model', 'yandex-api-key', 'yandex-folder-id', 'yandex-model', 'translation-language']
+        'cache-only': ['portfolios', 'strategies', 'settings', 'theme', 'timezone', 'favorites', 'ui-state', 'ai-provider', 'perplexity-api-key', 'perplexity-model', 'yandex-api-key', 'yandex-folder-id', 'yandex-model', 'yandex-proxy-type', 'translation-language']
     };
 
     /**

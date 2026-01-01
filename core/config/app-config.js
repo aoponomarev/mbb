@@ -89,8 +89,19 @@
                     { value: 'gpt://b1gv03a122le5a934cqj/yandexgpt-lite/latest', label: 'YandexGPT Lite' },
                     { value: 'gpt://b1gv03a122le5a934cqj/yandexgpt/latest', label: 'YandexGPT' }
                 ],
-                // URL прокси-сервера для обхода CORS (Yandex Cloud Functions)
-                proxyUrl: 'https://functions.yandexcloud.net/d4erd8d1pttbufsl26s1'
+                // Прокси для YandexGPT (использует Yandex Cloud Functions)
+                // Для обратной совместимости оставляем proxyUrl, но приоритет у proxyType
+                proxyUrl: 'https://functions.yandexcloud.net/d4erd8d1pttbufsl26s1',
+                proxyType: 'yandex', // Тип прокси по умолчанию для YandexGPT
+                // Доступные прокси для YandexGPT (единый источник правды)
+                proxies: {
+                    yandex: {
+                        url: 'https://functions.yandexcloud.net/d4erd8d1pttbufsl26s1',
+                        label: 'Yandex Cloud Functions',
+                        description: 'Единая платформа с YandexGPT'
+                    }
+                    // Можно добавить другие прокси (например, Cloudflare Workers)
+                }
             },
             marketUpdates: {
                 times: [9, 12, 18], // Часы обновления метрик (МСК)
@@ -209,6 +220,54 @@
         return CONFIG.features[featureName] === true;
     }
 
+    /**
+     * Получить URL прокси для AI провайдера
+     * Единый источник правды для прокси URL
+     * @param {string} providerName - имя провайдера ('yandex')
+     * @param {string} proxyType - тип прокси ('cloudflare' | 'yandex' и т.д.)
+     * @returns {string|null} URL прокси или null, если не найден
+     */
+    function getProxyUrl(providerName, proxyType = null) {
+        const providerConfig = CONFIG.defaults[providerName];
+        if (!providerConfig) return null;
+
+        // Если proxyType не указан, используем дефолтный
+        if (!proxyType) {
+            proxyType = providerConfig.proxyType;
+        }
+
+        // Получаем URL из списка прокси
+        if (providerConfig.proxies && providerConfig.proxies[proxyType]) {
+            return providerConfig.proxies[proxyType].url || null;
+        }
+
+        // Fallback: для обратной совместимости с proxyUrl
+        if (providerConfig.proxyUrl) {
+            return providerConfig.proxyUrl;
+        }
+
+        return null;
+    }
+
+    /**
+     * Получить список доступных прокси для AI провайдера
+     * @param {string} providerName - имя провайдера ('yandex')
+     * @returns {Array<Object>} Массив объектов прокси с полями {type, url, label, description}
+     */
+    function getAvailableProxies(providerName) {
+        const providerConfig = CONFIG.defaults[providerName];
+        if (!providerConfig || !providerConfig.proxies) {
+            return [];
+        }
+
+        return Object.entries(providerConfig.proxies).map(([type, config]) => ({
+            type,
+            url: config.url,
+            label: config.label,
+            description: config.description || ''
+        }));
+    }
+
     // Экспорт в глобальную область
     window.appConfig = {
         CONFIG,
@@ -217,7 +276,9 @@
         isFeatureEnabled,
         getTimezoneAbbr,
         getVersionHash,
-        getVersionClass
+        getVersionClass,
+        getProxyUrl,
+        getAvailableProxies
     };
 
     console.log('app-config.js: инициализирован');

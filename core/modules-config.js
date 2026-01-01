@@ -239,6 +239,14 @@
                 deps: [],
                 category: 'core'
             },
+            // Proxy utilities
+            {
+                id: 'proxy-health-check',
+                src: 'core/utils/proxy-health-check.js',
+                type: 'local',
+                deps: [],
+                category: 'core'
+            },
             {
                 id: 'modals-config',
                 src: 'core/config/modals-config.js',

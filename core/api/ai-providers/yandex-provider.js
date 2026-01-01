@@ -40,8 +40,46 @@
             super();
             this.endpoint = 'https://llm.api.cloud.yandex.net/foundationModels/v1/completion';
             this.defaultFolderId = 'b1gv03a122le5a934cqj';
-            // Получаем URL прокси из конфигурации (если указан)
-            this.proxyUrl = window.appConfig?.get('defaults.yandex.proxyUrl', null);
+            // Инициализация прокси (ленивая - при первом использовании)
+            // Для обратной совместимости используем синхронную загрузку из конфигурации
+            this.proxyUrl = null;
+            this._proxyInitialized = false;
+        }
+
+        /**
+         * Инициализация прокси (асинхронная загрузка из кэша)
+         * Вызывается при первом использовании
+         */
+        async initProxy() {
+            if (this._proxyInitialized) return;
+
+            try {
+                // Пытаемся получить тип прокси из настроек пользователя
+                let proxyType = null;
+                if (window.cacheManager) {
+                    proxyType = await window.cacheManager.get('yandex-proxy-type');
+                }
+
+                // Если не найден в кэше, используем дефолтный из конфигурации
+                if (!proxyType && window.appConfig) {
+                    proxyType = window.appConfig.get('defaults.yandex.proxyType', 'yandex');
+                }
+
+                // Получаем URL прокси из конфигурации через единый источник правды
+                if (window.appConfig && typeof window.appConfig.getProxyUrl === 'function') {
+                    this.proxyUrl = window.appConfig.getProxyUrl('yandex', proxyType);
+                } else {
+                    // Fallback: для обратной совместимости
+                    this.proxyUrl = window.appConfig?.get('defaults.yandex.proxyUrl', null);
+                }
+
+                this._proxyInitialized = true;
+            } catch (error) {
+                console.warn('yandex-provider: ошибка инициализации прокси, используется fallback:', error);
+                // Fallback: для обратной совместимости
+                this.proxyUrl = window.appConfig?.get('defaults.yandex.proxyUrl', null);
+                this._proxyInitialized = true;
+            }
         }
 
         /**
@@ -97,6 +135,9 @@
             }
 
             try {
+                // Инициализируем прокси при первом использовании
+                await this.initProxy();
+
                 // Если указан прокси, используем его (для обхода CORS)
                 if (this.proxyUrl) {
                     // Через прокси: передаем API ключ и тело запроса в теле запроса к прокси
