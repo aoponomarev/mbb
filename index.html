@@ -119,6 +119,27 @@
     - styles/<category>/<component-name>.css (wrappers, layout, custom)
     - features/<feature-name>/styles/<component-name>.css (feature-specific — зарезервировано)
 
+    ------------------------------------------------------------------------------------------------
+    5. ПРАВИЛА ОФОРМЛЕНИЯ КАРТОЧЕК И ПОЛЕЙ
+    ------------------------------------------------------------------------------------------------
+
+    ВАЖНО: При оформлении карточек и полей в них необходимо учитывать поддержку темной темы.
+
+    Запрещено использовать:
+    - bg-light, bg-white — эти классы не адаптируются к темной теме и портят внешний вид
+    - Любые фиксированные фоновые цвета без темо-зависимости
+
+    Рекомендуется:
+    - Избегать лишних фонов — использовать только border и padding для визуального разделения
+    - Если фон необходим, использовать темо-зависимые классы Bootstrap: bg-body, bg-body-secondary
+    - Для информационных блоков использовать bg-opacity-10 с border (например, bg-info bg-opacity-10)
+    - Приоритет: минимализм и использование нативных возможностей Bootstrap для темной темы
+
+    Примеры правильного оформления:
+    - Карточка: <div class="mb-4 p-3 border rounded"> (без bg-light/bg-white)
+    - Поле внутри карточки: <div class="p-2 border rounded"> (без bg-white)
+    - Информационный блок: <div class="p-2 bg-info bg-opacity-10 rounded border border-info">
+
     Утилиты:
     - core/api/<api-name>.js - чистые функции для API (не Vue)
     - shared/utils/<utility-name>.js - общие утилиты
@@ -238,6 +259,9 @@
     <div id="app" class="flex-grow-1 d-flex flex-column">
         <!-- Header приложения (фиксирован к верху) -->
         <app-header>
+            <template #auth-button>
+                <auth-button v-if="isAuthEnabled" @login-success="handleAuthLogin" @logout-success="handleAuthLogout"></auth-button>
+            </template>
             <template #menu-items>
                 <li><dropdown-menu-item title="Пункт меню 1" @click="handleClick"></dropdown-menu-item></li>
                 <li><dropdown-menu-item title="Пункт меню 2" @click="handleClick"></dropdown-menu-item></li>
@@ -255,181 +279,30 @@
             <main class="flex-grow-1 d-flex flex-column">
                 <!-- Контент приложения загружается через Vue компоненты -->
                 <div class="container flex-grow-1">
-                    <!-- ВРЕМЕННЫЙ ПРИМЕР: Тестирование системы перевода tooltips -->
-                    <div class="mb-4 p-3 border rounded bg-light">
-                        <h2 class="mb-3">Тестирование системы перевода tooltips</h2>
+                    <!-- ТЕСТИРОВАНИЕ ИНТЕГРАЦИИ GOOGLE-CLOUDFLARE -->
+                    <div class="mb-4 p-3 border rounded">
+                        <h2 class="mb-3">Тестирование интеграции Google-Cloudflare</h2>
                         <p class="text-muted small mb-3">
-                            Проверка работы tooltipsConfig.getTooltip() для разных типов tooltips.
-                            При смене языка перевода в настройках tooltips должны автоматически обновляться.
+                            Тестирование этапов интеграции Google OAuth + Cloudflare R2 + D1.
+                            Здесь будут тестироваться компоненты авторизации, работы с портфелями и датасетами.
                         </p>
-                        <div class="d-flex flex-wrap gap-2 mb-3">
-                            <cmp-button
-                                label="Сохранить"
-                                icon="fas fa-save"
-                                :tooltip-icon="tooltips['button.save.icon'] || 'Иконка: Сохранить'"
-                                :tooltip-text="tooltips['button.save.text'] || 'Основной текст: Сохранить изменения'"
-                                @click="handleClick">
-                            </cmp-button>
-                            <cmp-button
-                                label="Удалить"
-                                icon="fas fa-trash"
-                                variant="danger"
-                                :tooltip-icon="tooltips['button.delete.icon'] || 'Иконка: Удалить'"
-                                :tooltip-text="tooltips['button.delete.text'] || 'Основной текст: Удалить элемент'"
-                                @click="handleClick">
-                            </cmp-button>
-                            <cmp-button
-                                label="Загрузить"
-                                icon="fas fa-download"
-                                variant="success"
-                                :tooltip-icon="tooltips['button.load.icon'] || 'Иконка: Загрузить'"
-                                :tooltip-text="tooltips['button.load.text'] || 'Основной текст: Загрузить файл'"
-                                @click="handleClick">
-                            </cmp-button>
-                            <cmp-button
-                                label="Уведомления"
-                                icon="fas fa-bell"
-                                :tooltip-icon="tooltips['button.notifications.icon'] || 'Иконка: Уведомления'"
-                                :tooltip-text="tooltips['button.notifications.text'] || 'Основной текст: Просмотр уведомлений'"
-                                :suffix="{ type: 'badge', value: 5, variant: 'secondary', tooltip: tooltips['button.notifications.suffix.badge'] || 'Суффикс: 5 новых уведомлений' }"
-                                @click="handleClick">
-                            </cmp-button>
-                            <cmp-button
-                                label="Экспорт"
-                                icon="fas fa-download"
-                                :tooltip-icon="tooltips['button.export.icon'] || 'Иконка: Экспорт'"
-                                :tooltip-text="tooltips['button.export.text'] || 'Основной текст: Экспорт данных'"
-                                :suffix="{ type: 'icon', value: 'fas fa-external-link-alt', tooltip: tooltips['button.export.suffix.icon'] || 'Суффикс: Открыть в новой вкладке' }"
-                                @click="handleClick">
-                            </cmp-button>
-                            <cmp-button
-                                label="Справка"
-                                icon="fas fa-question-circle"
-                                :tooltip-icon="tooltips['button.help.icon'] || 'Иконка: Справка'"
-                                :tooltip-text="tooltips['button.help.text'] || 'Основной текст: Открыть справку'"
-                                :suffix="{ type: 'info', value: 'fas fa-info-circle text-info', tooltip: tooltips['button.help.suffix.info'] || 'Суффикс: Открыть справку' }"
-                                @click="handleClick">
-                            </cmp-button>
-                        </div>
-                        <div class="mt-3 p-2 bg-white rounded border">
-                            <small class="text-muted">
-                                <strong>Текущий язык:</strong> {{ currentTranslationLanguage || 'ru' }} |
-                                <strong>tooltipsConfig:</strong> {{ tooltipsConfig ? 'загружен' : 'не загружен' }}
+                        <div class="alert alert-info mb-3">
+                            <small>
+                                <strong>Статус:</strong> Интеграция в разработке. Компоненты будут добавляться по мере реализации этапов плана.
                             </small>
                         </div>
-                    </div>
-
-                    <!-- ВРЕМЕННЫЙ ПРИМЕР: Тестирование Yandex API -->
-                    <div class="mb-4 p-3 border rounded bg-light">
-                        <h2 class="mb-3">Тестирование Yandex API</h2>
-                        <p class="text-muted small mb-3">
-                            Проверка работы YandexGPT API через aiProviderManager.
-                            Введите свой запрос или используйте случайный.
-                        </p>
-                        <div class="row g-3">
-                            <!-- Левая колонка: запрос и кнопка -->
-                            <div class="col-md-6">
-                                <div class="d-flex flex-column h-100">
-                                    <label for="yandex-test-query" class="form-label mb-2">
-                                        <strong>Запрос:</strong>
-                                    </label>
-                                    <textarea
-                                        id="yandex-test-query"
-                                        name="yandex-test-query"
-                                        class="form-control flex-grow-1 mb-3"
-                                        v-model="yandexTestInputQuery"
-                                        placeholder="Введите ваш запрос или оставьте пустым для случайного запроса"
-                                        rows="8"
-                                        :disabled="yandexTestLoading"
-                                        style="resize: vertical; min-height: 150px;">
-                                    </textarea>
-                                    <div class="d-flex gap-2">
-                                        <cmp-button
-                                            label="Отправить"
-                                            icon="fas fa-paper-plane"
-                                            variant="primary"
-                                            :disabled="yandexTestLoading"
-                                            @click="testYandexAPI(false)">
-                                        </cmp-button>
-                                        <cmp-button
-                                            label="Случайный"
-                                            icon="fas fa-dice"
-                                            variant="outline-secondary"
-                                            :disabled="yandexTestLoading"
-                                            @click="testYandexAPI(true)">
-                                        </cmp-button>
-                                    </div>
-                                    <div v-if="yandexTestLoading" class="mt-3 p-2 bg-info bg-opacity-10 rounded border border-info">
-                                        <div class="d-flex align-items-center">
-                                            <div class="spinner-border spinner-border-sm text-primary me-2" role="status">
-                                                <span class="visually-hidden">Загрузка...</span>
-                                            </div>
-                                            <span class="small">Отправка запроса...</span>
-                                        </div>
-                                    </div>
-                                    <div v-show="yandexTestError && yandexTestError.trim() !== ''" class="mt-3 p-2 bg-danger bg-opacity-10 rounded border border-danger" v-cloak>
-                                        <small class="text-danger d-block mb-1"><strong>Ошибка:</strong></small>
-                                        <div class="text-break text-danger small" v-text="yandexTestError"></div>
-                                    </div>
-                                </div>
-                            </div>
-                            <!-- Правая колонка: ответ -->
-                            <div class="col-md-6">
-                                <div class="d-flex flex-column h-100">
-                                    <label class="form-label mb-2">
-                                        <strong>Ответ:</strong>
-                                    </label>
-                                    <div class="flex-grow-1 p-3 bg-white rounded border" style="min-height: 200px; max-height: 500px; overflow-y: auto;">
-                                        <div v-if="!yandexTestResponse && !yandexTestLoading && (!yandexTestError || yandexTestError === '')" class="text-muted text-center d-flex align-items-center justify-content-center h-100">
-                                            <small>Ответ появится здесь после отправки запроса</small>
-                                        </div>
-                                        <div v-if="yandexTestResponse" class="text-break" style="white-space: pre-wrap;">{{ yandexTestResponse }}</div>
-                                    </div>
-                                </div>
-                            </div>
+                        <!-- Компонент управления портфелями (условно) -->
+                        <portfolios-manager
+                            v-if="isPortfoliosEnabled"
+                            @portfolio-created="handlePortfolioCreated"
+                            @portfolio-updated="handlePortfolioUpdated"
+                            @portfolio-deleted="handlePortfolioDeleted"
+                        ></portfolios-manager>
+                        <div v-else class="alert alert-info">
+                            <small>
+                                <strong>Информация:</strong> Управление портфелями доступно только после авторизации и включения синхронизации с облаком.
+                            </small>
                         </div>
-                    </div>
-
-                    <!-- Тестовая секция для визуального контроля высоты -->
-                    <div class="mb-4 p-3 border rounded">
-                        <h2 class="mb-4">Визуальный контроль высоты элементов</h2>
-                        <div class="d-flex align-items-center" style="gap: 0;">
-                            <!-- Поле ввода -->
-                            <input type="text" class="form-control form-control-sm" placeholder="Поле" style="width: 100px; border-radius: 0.375rem 0 0 0.375rem; border-right: none;">
-                            <!-- Кнопка -->
-                            <cmp-button label="Кнопка" variant="primary" size="sm" :button-attributes="{ 'style': 'border-radius: 0; border-left: none; border-right: none;' }"></cmp-button>
-                            <!-- Группа радиокнопок -->
-                            <cmp-button-group
-                                size="sm"
-                                :buttons="[
-                                    { type: 'radio', label: 'Опция 1', variant: 'outline-primary' },
-                                    { type: 'radio', label: 'Опция 2', variant: 'outline-primary' }
-                                ]">
-                            </cmp-button-group>
-                            <!-- Dropdown -->
-                            <cmp-dropdown button-text="Меню" button-variant="primary" button-size="sm">
-                                <template #items>
-                                    <li><dropdown-menu-item title="Пункт 1" @click="handleClick"></dropdown-menu-item></li>
-                                    <li><dropdown-menu-item title="Пункт 2" @click="handleClick"></dropdown-menu-item></li>
-                                    <li><dropdown-menu-item title="Пункт 3" @click="handleClick"></dropdown-menu-item></li>
-                                </template>
-                            </cmp-dropdown>
-                        </div>
-                        <style>
-                            /* Убираем border-radius и промежуточные границы для элементов встык */
-                            .d-flex.align-items-center > input + cmp-button button,
-                            .d-flex.align-items-center > cmp-button + cmp-button-group .btn-group > .btn:first-child {
-                                border-radius: 0 !important;
-                                border-left: none !important;
-                            }
-                            .d-flex.align-items-center > cmp-button-group + cmp-dropdown .dropdown-responsive button {
-                                border-radius: 0 !important;
-                                border-left: none !important;
-                            }
-                            .d-flex.align-items-center > cmp-dropdown:last-child .dropdown-responsive button {
-                                border-radius: 0 0.375rem 0.375rem 0 !important;
-                            }
-                        </style>
                     </div>
 
                     <!-- Пример модального окна -->
@@ -513,6 +386,183 @@
                                 @click="openExampleModalNew">
                             </cmp-button>
                         </div>
+                    </div>
+
+                    <!-- ВРЕМЕННЫЙ ПРИМЕР: Тестирование системы перевода tooltips -->
+                    <div class="mb-4 p-3 border rounded">
+                        <h2 class="mb-3">Тестирование системы перевода tooltips</h2>
+                        <p class="text-muted small mb-3">
+                            Проверка работы tooltipsConfig.getTooltip() для разных типов tooltips.
+                            При смене языка перевода в настройках tooltips должны автоматически обновляться.
+                        </p>
+                        <div class="d-flex flex-wrap gap-2 mb-3">
+                            <cmp-button
+                                label="Сохранить"
+                                icon="fas fa-save"
+                                :tooltip-icon="tooltips['button.save.icon'] || 'Иконка: Сохранить'"
+                                :tooltip-text="tooltips['button.save.text'] || 'Основной текст: Сохранить изменения'"
+                                @click="handleClick">
+                            </cmp-button>
+                            <cmp-button
+                                label="Удалить"
+                                icon="fas fa-trash"
+                                variant="danger"
+                                :tooltip-icon="tooltips['button.delete.icon'] || 'Иконка: Удалить'"
+                                :tooltip-text="tooltips['button.delete.text'] || 'Основной текст: Удалить элемент'"
+                                @click="handleClick">
+                            </cmp-button>
+                            <cmp-button
+                                label="Загрузить"
+                                icon="fas fa-download"
+                                variant="success"
+                                :tooltip-icon="tooltips['button.load.icon'] || 'Иконка: Загрузить'"
+                                :tooltip-text="tooltips['button.load.text'] || 'Основной текст: Загрузить файл'"
+                                @click="handleClick">
+                            </cmp-button>
+                            <cmp-button
+                                label="Уведомления"
+                                icon="fas fa-bell"
+                                :tooltip-icon="tooltips['button.notifications.icon'] || 'Иконка: Уведомления'"
+                                :tooltip-text="tooltips['button.notifications.text'] || 'Основной текст: Просмотр уведомлений'"
+                                :suffix="{ type: 'badge', value: 5, variant: 'secondary', tooltip: tooltips['button.notifications.suffix.badge'] || 'Суффикс: 5 новых уведомлений' }"
+                                @click="handleClick">
+                            </cmp-button>
+                            <cmp-button
+                                label="Экспорт"
+                                icon="fas fa-download"
+                                :tooltip-icon="tooltips['button.export.icon'] || 'Иконка: Экспорт'"
+                                :tooltip-text="tooltips['button.export.text'] || 'Основной текст: Экспорт данных'"
+                                :suffix="{ type: 'icon', value: 'fas fa-external-link-alt', tooltip: tooltips['button.export.suffix.icon'] || 'Суффикс: Открыть в новой вкладке' }"
+                                @click="handleClick">
+                            </cmp-button>
+                            <cmp-button
+                                label="Справка"
+                                icon="fas fa-question-circle"
+                                :tooltip-icon="tooltips['button.help.icon'] || 'Иконка: Справка'"
+                                :tooltip-text="tooltips['button.help.text'] || 'Основной текст: Открыть справку'"
+                                :suffix="{ type: 'info', value: 'fas fa-info-circle text-info', tooltip: tooltips['button.help.suffix.info'] || 'Суффикс: Открыть справку' }"
+                                @click="handleClick">
+                            </cmp-button>
+                        </div>
+                        <div class="mt-3 p-2 border rounded">
+                            <small class="text-muted">
+                                <strong>Текущий язык:</strong> {{ currentTranslationLanguage || 'ru' }} |
+                                <strong>tooltipsConfig:</strong> {{ tooltipsConfig ? 'загружен' : 'не загружен' }}
+                            </small>
+                        </div>
+                    </div>
+
+                    <!-- ВРЕМЕННЫЙ ПРИМЕР: Тестирование Yandex API -->
+                    <div class="mb-4 p-3 border rounded">
+                        <h2 class="mb-3">Тестирование Yandex API</h2>
+                        <p class="text-muted small mb-3">
+                            Проверка работы YandexGPT API через aiProviderManager.
+                            Введите свой запрос или используйте случайный.
+                        </p>
+                        <div class="row g-3">
+                            <!-- Левая колонка: запрос и кнопка -->
+                            <div class="col-md-6">
+                                <div class="d-flex flex-column h-100">
+                                    <label for="yandex-test-query" class="form-label mb-2">
+                                        <strong>Запрос:</strong>
+                                    </label>
+                                    <textarea
+                                        id="yandex-test-query"
+                                        name="yandex-test-query"
+                                        class="form-control flex-grow-1 mb-3"
+                                        v-model="yandexTestInputQuery"
+                                        placeholder="Введите ваш запрос или оставьте пустым для случайного запроса"
+                                        rows="8"
+                                        :disabled="yandexTestLoading"
+                                        style="resize: vertical; min-height: 150px;">
+                                    </textarea>
+                                    <div class="d-flex gap-2">
+                                        <cmp-button
+                                            label="Отправить"
+                                            icon="fas fa-paper-plane"
+                                            variant="primary"
+                                            :disabled="yandexTestLoading"
+                                            @click="testYandexAPI(false)">
+                                        </cmp-button>
+                                        <cmp-button
+                                            label="Случайный"
+                                            icon="fas fa-dice"
+                                            variant="outline-secondary"
+                                            :disabled="yandexTestLoading"
+                                            @click="testYandexAPI(true)">
+                                        </cmp-button>
+                                    </div>
+                                    <div v-if="yandexTestLoading" class="mt-3 p-2 bg-info bg-opacity-10 rounded border border-info">
+                                        <div class="d-flex align-items-center">
+                                            <div class="spinner-border spinner-border-sm text-primary me-2" role="status">
+                                                <span class="visually-hidden">Загрузка...</span>
+                                            </div>
+                                            <span class="small">Отправка запроса...</span>
+                                        </div>
+                                    </div>
+                                    <div v-show="yandexTestError && yandexTestError.trim() !== ''" class="mt-3 p-2 bg-danger bg-opacity-10 rounded border border-danger" v-cloak>
+                                        <small class="text-danger d-block mb-1"><strong>Ошибка:</strong></small>
+                                        <div class="text-break text-danger small" v-text="yandexTestError"></div>
+                                    </div>
+                                </div>
+                            </div>
+                            <!-- Правая колонка: ответ -->
+                            <div class="col-md-6">
+                                <div class="d-flex flex-column h-100">
+                                    <label class="form-label mb-2">
+                                        <strong>Ответ:</strong>
+                                    </label>
+                                    <div class="flex-grow-1 p-3 border rounded" style="min-height: 200px; max-height: 500px; overflow-y: auto;">
+                                        <div v-if="!yandexTestResponse && !yandexTestLoading && (!yandexTestError || yandexTestError === '')" class="text-muted text-center d-flex align-items-center justify-content-center h-100">
+                                            <small>Ответ появится здесь после отправки запроса</small>
+                                        </div>
+                                        <div v-if="yandexTestResponse" class="text-break" style="white-space: pre-wrap;">{{ yandexTestResponse }}</div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Тестовая секция для визуального контроля высоты -->
+                    <div class="mb-4 p-3 border rounded">
+                        <h2 class="mb-4">Визуальный контроль высоты элементов</h2>
+                        <div class="d-flex align-items-center" style="gap: 0;">
+                            <!-- Поле ввода -->
+                            <input type="text" class="form-control form-control-sm" placeholder="Поле" style="width: 100px; border-radius: 0.375rem 0 0 0.375rem; border-right: none;">
+                            <!-- Кнопка -->
+                            <cmp-button label="Кнопка" variant="primary" size="sm" :button-attributes="{ 'style': 'border-radius: 0; border-left: none; border-right: none;' }"></cmp-button>
+                            <!-- Группа радиокнопок -->
+                            <cmp-button-group
+                                size="sm"
+                                :buttons="[
+                                    { type: 'radio', label: 'Опция 1', variant: 'outline-primary' },
+                                    { type: 'radio', label: 'Опция 2', variant: 'outline-primary' }
+                                ]">
+                            </cmp-button-group>
+                            <!-- Dropdown -->
+                            <cmp-dropdown button-text="Меню" button-variant="primary" button-size="sm">
+                                <template #items>
+                                    <li><dropdown-menu-item title="Пункт 1" @click="handleClick"></dropdown-menu-item></li>
+                                    <li><dropdown-menu-item title="Пункт 2" @click="handleClick"></dropdown-menu-item></li>
+                                    <li><dropdown-menu-item title="Пункт 3" @click="handleClick"></dropdown-menu-item></li>
+                                </template>
+                            </cmp-dropdown>
+                        </div>
+                        <style>
+                            /* Убираем border-radius и промежуточные границы для элементов встык */
+                            .d-flex.align-items-center > input + cmp-button button,
+                            .d-flex.align-items-center > cmp-button + cmp-button-group .btn-group > .btn:first-child {
+                                border-radius: 0 !important;
+                                border-left: none !important;
+                            }
+                            .d-flex.align-items-center > cmp-button-group + cmp-dropdown .dropdown-responsive button {
+                                border-radius: 0 !important;
+                                border-left: none !important;
+                            }
+                            .d-flex.align-items-center > cmp-dropdown:last-child .dropdown-responsive button {
+                                border-radius: 0 0.375rem 0.375rem 0 !important;
+                            }
+                        </style>
                     </div>
 
                     <h2 class="mb-4">Примеры компонента button-group</h2>

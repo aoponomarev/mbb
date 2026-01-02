@@ -46,9 +46,22 @@
             return;
         }
 
+        // Базовые компоненты (всегда должны быть загружены)
         if (!window.cmpDropdownMenuItem || !window.cmpButton || !window.cmpDropdown || !window.cmpCombobox || !window.cmpButtonGroup || !window.appHeader || !window.appFooter || !window.cmpModal || !window.cmpModalButtons || !window.cmpTimezoneSelector || !window.modalExampleBody || !window.aiApiSettings || !window.timezoneModalBody) {
-            console.error('app-ui-root: не все компоненты загружены');
+            console.error('app-ui-root: не все базовые компоненты загружены');
             return;
+        }
+
+        // Проверка feature flags для условной загрузки компонентов
+        const authEnabled = window.appConfig && window.appConfig.isFeatureEnabled('auth');
+        const portfoliosEnabled = window.appConfig && window.appConfig.isFeatureEnabled('portfolios') && window.appConfig.isFeatureEnabled('cloudSync');
+
+        if (authEnabled && !window.authButton) {
+            console.warn('app-ui-root: auth-button не загружен, хотя feature flag auth включен');
+        }
+
+        if (portfoliosEnabled && !window.portfoliosManager) {
+            console.warn('app-ui-root: portfolios-manager не загружен, хотя feature flags portfolios и cloudSync включены');
         }
 
         const { createApp } = Vue;
@@ -66,10 +79,17 @@
                 'timezone-modal-body': window.timezoneModalBody,
                 'modal-example-body': window.modalExampleBody,
                 'ai-api-settings': window.aiApiSettings,
+                // Условная регистрация компонентов авторизации и портфелей
+                ...(window.authButton ? { 'auth-button': window.authButton } : {}),
+                ...(window.portfoliosManager ? { 'portfolios-manager': window.portfoliosManager } : {}),
                 'app-header': window.appHeader,
                 'app-footer': window.appFooter
             },
             data() {
+                // Проверка feature flags
+                const authEnabled = window.appConfig && window.appConfig.isFeatureEnabled('auth');
+                const portfoliosEnabled = window.appConfig && window.appConfig.isFeatureEnabled('portfolios') && window.appConfig.isFeatureEnabled('cloudSync');
+
                 // Синхронная инициализация темы (читаем напрямую из localStorage для избежания мерцания)
                 let initialTheme = 'light';
                 try {
@@ -110,6 +130,9 @@
                 }
 
                 return {
+                    // Feature flags для условного отображения компонентов
+                    isAuthEnabled: authEnabled,
+                    isPortfoliosEnabled: portfoliosEnabled,
                     // Конфигурация модальных окон (для доступа в шаблоне)
                     modalsConfig: window.modalsConfig || null,
                     // Конфигурация tooltips (для доступа в шаблоне)
@@ -268,6 +291,23 @@
                     }
                 },
                 handleClick(event) {
+                },
+                /**
+                 * Обработка успешного входа через Google OAuth
+                 * @param {Object} tokenData - Данные токена и пользователя
+                 */
+                handleAuthLogin(tokenData) {
+                    console.log('app-ui-root: пользователь успешно авторизован', tokenData);
+                    // Можно добавить дополнительную логику при входе
+                    // Например, загрузку портфелей пользователя
+                },
+                /**
+                 * Обработка выхода из системы
+                 */
+                handleAuthLogout() {
+                    console.log('app-ui-root: пользователь вышел из системы');
+                    // Можно добавить дополнительную логику при выходе
+                    // Например, очистку данных пользователя
                 },
                 handleSuffixClick(event, item) {
                 },
@@ -506,6 +546,30 @@
                     if (this.$refs.aiApiModal) {
                         this.$refs.aiApiModal.show();
                     }
+                },
+                /**
+                 * Обработка создания портфеля
+                 * @param {Object} portfolio - Созданный портфель
+                 */
+                handlePortfolioCreated(portfolio) {
+                    console.log('app-ui-root: портфель создан', portfolio);
+                    // Можно добавить дополнительную логику при создании портфеля
+                },
+                /**
+                 * Обработка обновления портфеля
+                 * @param {Object} portfolio - Обновлённый портфель
+                 */
+                handlePortfolioUpdated(portfolio) {
+                    console.log('app-ui-root: портфель обновлён', portfolio);
+                    // Можно добавить дополнительную логику при обновлении портфеля
+                },
+                /**
+                 * Обработка удаления портфеля
+                 * @param {string|number} portfolioId - ID удалённого портфеля
+                 */
+                handlePortfolioDeleted(portfolioId) {
+                    console.log('app-ui-root: портфель удалён', portfolioId);
+                    // Можно добавить дополнительную логику при удалении портфеля
                 }
             },
 

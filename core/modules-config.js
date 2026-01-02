@@ -239,6 +239,46 @@
                 deps: [],
                 category: 'core'
             },
+            {
+                id: 'auth-config',
+                src: 'core/config/auth-config.js',
+                type: 'local',
+                deps: [],
+                category: 'core',
+                condition: () => window.appConfig && window.appConfig.isFeatureEnabled('auth')
+            },
+            {
+                id: 'cloudflare-config',
+                src: 'core/config/cloudflare-config.js',
+                type: 'local',
+                deps: [],
+                category: 'core',
+                condition: () => window.appConfig && window.appConfig.isFeatureEnabled('cloudSync')
+            },
+            {
+                id: 'auth-client',
+                src: 'core/api/cloudflare/auth-client.js',
+                type: 'local',
+                deps: ['auth-config', 'cloudflare-config', 'cache-manager', 'error-handler'],
+                category: 'core',
+                condition: () => window.appConfig && window.appConfig.isFeatureEnabled('auth')
+            },
+            {
+                id: 'portfolios-client',
+                src: 'core/api/cloudflare/portfolios-client.js',
+                type: 'local',
+                deps: ['cloudflare-config', 'auth-client', 'error-handler'],
+                category: 'core',
+                condition: () => window.appConfig && window.appConfig.isFeatureEnabled('cloudSync') && window.appConfig.isFeatureEnabled('portfolios')
+            },
+            {
+                id: 'datasets-client',
+                src: 'core/api/cloudflare/datasets-client.js',
+                type: 'local',
+                deps: ['cloudflare-config', 'auth-client', 'error-handler'],
+                category: 'core',
+                condition: () => window.appConfig && window.appConfig.isFeatureEnabled('cloudSync')
+            },
             // Proxy utilities
             {
                 id: 'proxy-health-check',
@@ -367,6 +407,22 @@
                 category: 'templates'
             },
             {
+                id: 'auth-button-template',
+                src: 'app/templates/auth-button-template.js',
+                type: 'local',
+                deps: [],
+                category: 'templates',
+                condition: () => window.appConfig && window.appConfig.isFeatureEnabled('auth')
+            },
+            {
+                id: 'portfolios-manager-template',
+                src: 'app/templates/portfolios-manager-template.js',
+                type: 'local',
+                deps: [],
+                category: 'templates',
+                condition: () => window.appConfig && window.appConfig.isFeatureEnabled('portfolios') && window.appConfig.isFeatureEnabled('cloudSync')
+            },
+            {
                 id: 'app-footer-template',
                 src: 'app/templates/app-footer-template.js',
                 type: 'local',
@@ -485,6 +541,22 @@
                 type: 'local',
                 deps: ['vue', 'modal', 'timezone-selector'],
                 category: 'components'
+            },
+            {
+                id: 'auth-button',
+                src: 'app/components/auth-button.js',
+                type: 'local',
+                deps: ['vue', 'button', 'dropdown', 'dropdown-menu-item', 'auth-client'],
+                category: 'components',
+                condition: () => window.appConfig && window.appConfig.isFeatureEnabled('auth')
+            },
+            {
+                id: 'portfolios-manager',
+                src: 'app/components/portfolios-manager.js',
+                type: 'local',
+                deps: ['vue', 'button', 'modal', 'modal-buttons', 'portfolios-client'],
+                category: 'components',
+                condition: () => window.appConfig && window.appConfig.isFeatureEnabled('portfolios') && window.appConfig.isFeatureEnabled('cloudSync')
             }
         ],
 

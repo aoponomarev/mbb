@@ -52,6 +52,10 @@
             <slot name="menu-items"></slot>
         </template>
     </cmp-dropdown>
+    <!-- Кнопка авторизации - справа, перед настройками -->
+    <div class="float-end py-3 pe-2">
+        <slot name="auth-button"></slot>
+    </div>
     <!-- Кнопка настроек (шестеренка) - справа -->
     <cmp-dropdown
         button-text=""

@@ -23,7 +23,11 @@
  *   - defaults.timezoneAbbreviations: объект с маппингом таймзон на аббревиатуры (MCK, LON, NYC и т.д.)
  *   - getTimezoneAbbr(timezone): функция для получения аббревиатуры таймзоны из конфигурации
  *
- * ССЫЛКА: Критически важные структуры описаны в docs/doc-architect.md
+ * ССЫЛКИ:
+ * - Критически важные структуры описаны в docs/doc-architect.md
+ * - Конфигурация авторизации: core/config/auth-config.js
+ * - Конфигурация Cloudflare Workers: core/config/cloudflare-config.js
+ * - План интеграции Cloudflare: docs/doc-cloudflare-integration-plan.md
  */
 
 (function() {
@@ -123,10 +127,12 @@
         // Feature flags
         features: {
             timeSeries: false,      // Временные ряды (пока не реализовано)
-            portfolios: false,      // Портфели (пока не реализовано)
+            portfolios: true,       // Портфели (реализовано через Cloudflare API)
             strategies: false,      // Стратегии (пока не реализовано)
             correlations: false,    // Корреляции (пока не реализовано)
-            offlineMode: false     // Офлайн-режим (пока не реализовано)
+            offlineMode: false,     // Офлайн-режим (пока не реализовано)
+            auth: true,             // Google OAuth авторизация (Cloudflare Workers) - активировано
+            cloudSync: true         // Синхронизация данных с Cloudflare (D1/R2) - активировано
         }
     };
 

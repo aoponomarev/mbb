@@ -38,6 +38,11 @@
             title: 'AI провайдеры',
             icon: 'fas fa-robot',
             description: 'Настройки AI провайдеров (YandexGPT, Perplexity) для получения новостей и переводов'
+        },
+        'portfolioModal': {
+            title: 'Портфель',
+            icon: 'fas fa-briefcase',
+            description: 'Создание или редактирование портфеля'
         }
     };
 
