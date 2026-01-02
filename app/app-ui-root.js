@@ -190,7 +190,7 @@
                     yandexTestInputQuery: '',
                     yandexTestResponse: '',
                     yandexTestLoading: false,
-                    yandexTestError: null
+                    yandexTestError: '' // Используем пустую строку вместо null для лучшей реактивности Vue
                 };
             },
             watch: {
@@ -211,7 +211,17 @@
                         }
                     },
                     immediate: false
+                },
+                // #region agent log
+                yandexTestError: {
+                    handler(newVal, oldVal) {
+                        // #region agent log
+                        fetch('http://127.0.0.1:7243/ingest/6397d191-f6f2-43f4-b4da-44a3482bedec',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'app-ui-root.js:watch-yandexTestError',message:'yandexTestError changed',data:{newVal,oldVal,typeNew:typeof newVal,typeOld:typeof oldVal},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'G'})}).catch(()=>{});
+                        // #endregion
+                    },
+                    immediate: false // Убираем immediate, чтобы избежать мелькания при инициализации
                 }
+                // #endregion
             },
             methods: {
                 /**
@@ -278,8 +288,18 @@
                  * Тестирование Yandex API: отправка запроса (из поля ввода или случайный)
                  */
                 async testYandexAPI(useRandom = false) {
+                    // #region agent log
+                    fetch('http://127.0.0.1:7243/ingest/6397d191-f6f2-43f4-b4da-44a3482bedec',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'app-ui-root.js:280',message:'testYandexAPI called',data:{useRandom,hasAiProviderManager:!!window.aiProviderManager,currentError:this.yandexTestError},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'A'})}).catch(()=>{});
+                    // #endregion
+
                     if (!window.aiProviderManager) {
+                        // #region agent log
+                        fetch('http://127.0.0.1:7243/ingest/6397d191-f6f2-43f4-b4da-44a3482bedec',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'app-ui-root.js:282',message:'Setting error: AI Provider Manager not loaded',data:{},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'B'})}).catch(()=>{});
+                        // #endregion
                         this.yandexTestError = 'AI Provider Manager не загружен';
+                        // #region agent log
+                        fetch('http://127.0.0.1:7243/ingest/6397d191-f6f2-43f4-b4da-44a3482bedec',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'app-ui-root.js:285',message:'Error set',data:{error:this.yandexTestError},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'B'})}).catch(()=>{});
+                        // #endregion
                         return;
                     }
 
@@ -306,7 +326,13 @@
 
                     this.yandexTestQuery = query;
                     this.yandexTestResponse = '';
-                    this.yandexTestError = null;
+                    // #region agent log
+                    fetch('http://127.0.0.1:7243/ingest/6397d191-f6f2-43f4-b4da-44a3482bedec',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'app-ui-root.js:309',message:'Clearing error before request',data:{errorBefore:this.yandexTestError},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'C'})}).catch(()=>{});
+                    // #endregion
+                    this.yandexTestError = ''; // Используем пустую строку вместо null
+                    // #region agent log
+                    fetch('http://127.0.0.1:7243/ingest/6397d191-f6f2-43f4-b4da-44a3482bedec',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'app-ui-root.js:311',message:'Error cleared',data:{errorAfter:this.yandexTestError},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'C'})}).catch(()=>{});
+                    // #endregion
                     this.yandexTestLoading = true;
 
                     try {
@@ -325,12 +351,28 @@
                         );
 
                         this.yandexTestResponse = response;
+                        // #region agent log
+                        fetch('http://127.0.0.1:7243/ingest/6397d191-f6f2-43f4-b4da-44a3482bedec',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'app-ui-root.js:327',message:'Request successful',data:{hasResponse:!!response},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'D'})}).catch(()=>{});
+                        // #endregion
                     } catch (error) {
                         console.error('testYandexAPI: ошибка запроса:', error);
-                        this.yandexTestError = error.message || 'Неизвестная ошибка';
+                        // #region agent log
+                        fetch('http://127.0.0.1:7243/ingest/6397d191-f6f2-43f4-b4da-44a3482bedec',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'app-ui-root.js:347',message:'Setting error from catch',data:{errorMessage:error.message,errorType:error.constructor.name},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'E'})}).catch(()=>{});
+                        // #endregion
+                        const errorMessage = error.message || 'Неизвестная ошибка';
+                        // Используем Vue.nextTick для гарантии обновления DOM
+                        this.$nextTick(() => {
+                            this.yandexTestError = errorMessage;
+                            // #region agent log
+                            fetch('http://127.0.0.1:7243/ingest/6397d191-f6f2-43f4-b4da-44a3482bedec',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'app-ui-root.js:352',message:'Error set in catch after nextTick',data:{error:this.yandexTestError},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'E'})}).catch(()=>{});
+                            // #endregion
+                        });
                         this.yandexTestResponse = '';
                     } finally {
                         this.yandexTestLoading = false;
+                        // #region agent log
+                        fetch('http://127.0.0.1:7243/ingest/6397d191-f6f2-43f4-b4da-44a3482bedec',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'app-ui-root.js:359',message:'Finally block',data:{loading:this.yandexTestLoading,error:this.yandexTestError},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'F'})}).catch(()=>{});
+                        // #endregion
                     }
                 },
                 customFilterFunction(items, query) {

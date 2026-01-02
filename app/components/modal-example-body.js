@@ -20,11 +20,12 @@ window.modalExampleBody = {
         <div>
             <p>Содержимое модального окна. Здесь может быть любой контент: текст, формы, изображения и т.д.</p>
             <div class="mb-3">
-                <label for="exampleInput" class="form-label">Пример поля ввода</label>
+                <label :for="formIdPrefix + '-exampleInput'" class="form-label">Пример поля ввода</label>
                 <input
                     type="text"
+                    name="exampleInput"
                     class="form-control"
-                    id="exampleInput"
+                    :id="formIdPrefix + '-exampleInput'"
                     v-model="formData.inputValue"
                     placeholder="Введите текст">
             </div>
@@ -32,9 +33,10 @@ window.modalExampleBody = {
                 <input
                     class="form-check-input"
                     type="checkbox"
-                    id="exampleCheck"
+                    name="exampleCheck"
+                    :id="formIdPrefix + '-exampleCheck'"
                     v-model="formData.checkboxValue">
-                <label class="form-check-label" for="exampleCheck">
+                <label class="form-check-label" :for="formIdPrefix + '-exampleCheck'">
                     Пример чекбокса
                 </label>
             </div>
@@ -42,6 +44,19 @@ window.modalExampleBody = {
     `,
 
     inject: ['modalApi'],
+
+    computed: {
+        // Уникальный префикс для ID элементов формы (избегаем дублирования при повторном открытии модального окна)
+        formIdPrefix() {
+            return `modal-example-${this._uid || Math.random().toString(36).substr(2, 9)}`;
+        },
+        hasChanges() {
+            return JSON.stringify(this.formData) !== JSON.stringify(this.initialData);
+        },
+        isValid() {
+            return this.formData.inputValue.length > 0;
+        }
+    },
 
     data() {
         return {

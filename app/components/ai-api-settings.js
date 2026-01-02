@@ -99,6 +99,10 @@ window.aiApiSettings = {
     },
 
     computed: {
+        // Уникальный префикс для ID элементов формы (избегаем дублирования при повторном открытии модального окна)
+        formIdPrefix() {
+            return `ai-api-settings-${this._uid || Math.random().toString(36).substr(2, 9)}`;
+        },
         hasChanges() {
             return this.provider !== this.initialProvider ||
                    this.yandexApiKey !== this.initialYandexApiKey ||

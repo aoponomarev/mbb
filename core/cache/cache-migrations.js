@@ -25,7 +25,7 @@
  * ПРИМЕР:
  * Если portfolios изменили структуру с v1.0.0 на v1.1.0:
  * 1. Обновить VERSIONS.portfolios = '1.1.0'
- * 2. Добавить миграцию: MIGRATIONS.portfolios['1.1.0'] = (data) => { /* преобразование */ }
+ * 2. Добавить миграцию: MIGRATIONS.portfolios['1.1.0'] = (data) => { return data; }
  *
  * ССЫЛКА: Общие принципы кэширования: docs/doc-cache.md
  */
@@ -139,4 +139,3 @@
 
     console.log('cache-migrations.js: инициализирован');
 })();
-

@@ -39,29 +39,32 @@
             <input
                 type="radio"
                 class="btn-check"
-                id="provider-yandex"
+                :id="formIdPrefix + '-provider-yandex'"
+                name="ai-provider"
                 value="yandex"
                 v-model="provider">
-            <label class="btn btn-outline-primary" for="provider-yandex">YandexGPT</label>
+            <label class="btn btn-outline-primary" :for="formIdPrefix + '-provider-yandex'">YandexGPT</label>
 
             <input
                 type="radio"
                 class="btn-check"
-                id="provider-perplexity"
+                :id="formIdPrefix + '-provider-perplexity'"
+                name="ai-provider"
                 value="perplexity"
                 v-model="provider">
-            <label class="btn btn-outline-primary" for="provider-perplexity">Perplexity AI</label>
+            <label class="btn btn-outline-primary" :for="formIdPrefix + '-provider-perplexity'">Perplexity AI</label>
         </div>
     </div>
 
     <!-- Настройки YandexGPT -->
     <div v-if="provider === 'yandex'">
         <div class="mb-3">
-            <label for="yandex-api-key" class="form-label">API ключ Yandex</label>
+            <label :for="formIdPrefix + '-yandex-api-key'" class="form-label">API ключ Yandex</label>
             <div class="input-group">
                 <input
                     class="form-control"
-                    id="yandex-api-key"
+                    :id="formIdPrefix + '-yandex-api-key'"
+                    name="yandex-api-key"
                     v-model="yandexApiKey"
                     :type="showYandexApiKey ? 'text' : 'password'"
                     placeholder="Введите API ключ Yandex">
@@ -75,20 +78,22 @@
         </div>
         <div class="row g-3 mb-3">
             <div class="col-md-6">
-                <label for="yandex-folder-id" class="form-label">Folder ID</label>
+                <label :for="formIdPrefix + '-yandex-folder-id'" class="form-label">Folder ID</label>
                 <input
                     class="form-control"
-                    id="yandex-folder-id"
+                    :id="formIdPrefix + '-yandex-folder-id'"
+                    name="yandex-folder-id"
                     v-model="yandexFolderId"
                     type="text"
                     placeholder="b1gv03a122le5a934cqj">
                 <small class="form-text text-muted">ID папки в Yandex Cloud</small>
             </div>
             <div class="col-md-6">
-                <label for="yandex-model" class="form-label">Модель YandexGPT</label>
+                <label :for="formIdPrefix + '-yandex-model'" class="form-label">Модель YandexGPT</label>
                 <select
                     class="form-select"
-                    id="yandex-model"
+                    :id="formIdPrefix + '-yandex-model'"
+                    name="yandex-model"
                     v-model="yandexModel">
                     <option v-for="m in yandexModels" :key="m.value" :value="m.value">{{ m.label }}</option>
                 </select>
@@ -99,11 +104,12 @@
     <!-- Настройки Perplexity -->
     <div v-if="provider === 'perplexity'">
         <div class="mb-3">
-            <label for="perplexity-api-key" class="form-label">API ключ Perplexity</label>
+            <label :for="formIdPrefix + '-perplexity-api-key'" class="form-label">API ключ Perplexity</label>
             <div class="input-group">
                 <input
                     class="form-control"
-                    id="perplexity-api-key"
+                    :id="formIdPrefix + '-perplexity-api-key'"
+                    name="perplexity-api-key"
                     v-model="perplexityApiKey"
                     :type="showPerplexityApiKey ? 'text' : 'password'"
                     placeholder="pplx-...">
@@ -116,10 +122,11 @@
             </div>
         </div>
         <div class="mb-3">
-            <label for="perplexity-model" class="form-label">Модель Perplexity</label>
+            <label :for="formIdPrefix + '-perplexity-model'" class="form-label">Модель Perplexity</label>
             <select
                 class="form-select"
-                id="perplexity-model"
+                :id="formIdPrefix + '-perplexity-model'"
+                name="perplexity-model"
                 v-model="perplexityModel">
                 <option v-for="m in perplexityModels" :key="m.value" :value="m.value">{{ m.label }}</option>
             </select>

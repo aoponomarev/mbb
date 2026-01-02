@@ -35,13 +35,14 @@ window.timezoneModalBody = {
     template: `
         <div class="row g-3">
             <div class="col-md-6">
-                <label for="timezone-select" class="form-label">Таймзона</label>
-                <cmp-timezone-selector v-model="selectedTimezone" id="timezone-select"></cmp-timezone-selector>
+                <label :for="formIdPrefix + '-timezone-select'" class="form-label">Таймзона</label>
+                <cmp-timezone-selector v-model="selectedTimezone" :id="formIdPrefix + '-timezone-select'"></cmp-timezone-selector>
             </div>
             <div class="col-md-6">
-                <label for="translation-language-select" class="form-label">Язык перевода</label>
+                <label :for="formIdPrefix + '-translation-language-select'" class="form-label">Язык перевода</label>
                 <select
-                    id="translation-language-select"
+                    :id="formIdPrefix + '-translation-language-select'"
+                    name="translation-language-select"
                     class="form-select"
                     v-model="selectedTranslationLanguage"
                     @change="$emit('update:translationLanguage', $event.target.value)">
@@ -131,6 +132,10 @@ window.timezoneModalBody = {
     },
 
     computed: {
+        // Уникальный префикс для ID элементов формы (избегаем дублирования при повторном открытии модального окна)
+        formIdPrefix() {
+            return `timezone-modal-${this._uid || Math.random().toString(36).substr(2, 9)}`;
+        },
         hasChanges() {
             return this.selectedTimezone !== this.initialValue ||
                    this.selectedTranslationLanguage !== this.initialTranslationLanguage;

@@ -230,6 +230,11 @@
 
 </head>
 <body class="min-vh-100 d-flex flex-column">
+    <style>
+        [v-cloak] {
+            display: none !important;
+        }
+    </style>
     <div id="app" class="flex-grow-1 d-flex flex-column">
         <!-- Header приложения (фиксирован к верху) -->
         <app-header>
@@ -330,6 +335,7 @@
                                     </label>
                                     <textarea
                                         id="yandex-test-query"
+                                        name="yandex-test-query"
                                         class="form-control flex-grow-1 mb-3"
                                         v-model="yandexTestInputQuery"
                                         placeholder="Введите ваш запрос или оставьте пустым для случайного запроса"
@@ -361,9 +367,9 @@
                                             <span class="small">Отправка запроса...</span>
                                         </div>
                                     </div>
-                                    <div v-if="yandexTestError" class="mt-3 p-2 bg-danger bg-opacity-10 rounded border border-danger">
+                                    <div v-show="yandexTestError && yandexTestError.trim() !== ''" class="mt-3 p-2 bg-danger bg-opacity-10 rounded border border-danger" v-cloak>
                                         <small class="text-danger d-block mb-1"><strong>Ошибка:</strong></small>
-                                        <div class="text-break text-danger small">{{ yandexTestError }}</div>
+                                        <div class="text-break text-danger small" v-text="yandexTestError"></div>
                                     </div>
                                 </div>
                             </div>
@@ -374,7 +380,7 @@
                                         <strong>Ответ:</strong>
                                     </label>
                                     <div class="flex-grow-1 p-3 bg-white rounded border" style="min-height: 200px; max-height: 500px; overflow-y: auto;">
-                                        <div v-if="!yandexTestResponse && !yandexTestLoading && !yandexTestError" class="text-muted text-center d-flex align-items-center justify-content-center h-100">
+                                        <div v-if="!yandexTestResponse && !yandexTestLoading && (!yandexTestError || yandexTestError === '')" class="text-muted text-center d-flex align-items-center justify-content-center h-100">
                                             <small>Ответ появится здесь после отправки запроса</small>
                                         </div>
                                         <div v-if="yandexTestResponse" class="text-break" style="white-space: pre-wrap;">{{ yandexTestResponse }}</div>

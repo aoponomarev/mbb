@@ -33,11 +33,12 @@
 
     const TEMPLATE = `<div>
     <div class="mb-3">
-        <label for="perplexity-api-key" class="form-label">API ключ</label>
+        <label for="perplexity-settings-api-key" class="form-label">API ключ</label>
         <div class="input-group">
             <input
                 class="form-control"
-                id="perplexity-api-key"
+                id="perplexity-settings-api-key"
+                name="perplexity-settings-api-key"
                 v-model="apiKey"
                 :type="showApiKey ? 'text' : 'password'"
                 placeholder="pplx-...">
@@ -50,10 +51,11 @@
         </div>
     </div>
     <div class="mb-3">
-        <label for="perplexity-model" class="form-label">Модель</label>
+        <label for="perplexity-settings-model" class="form-label">Модель</label>
         <select
             class="form-select"
-            id="perplexity-model"
+            id="perplexity-settings-model"
+            name="perplexity-settings-model"
             v-model="model">
             <option v-for="m in models" :key="m.value" :value="m.value">{{ m.label }}</option>
         </select>
