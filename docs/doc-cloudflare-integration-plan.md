@@ -169,12 +169,12 @@ UI компоненты используют только Bootstrap классы
 #### 1.7. Настройка Workers secrets
 - [x] ✅ Добавление `GOOGLE_CLIENT_SECRET` через Wrangler CLI
   - Команда: `wrangler secret put GOOGLE_CLIENT_SECRET` ✅ Выполнено
-  - Значение: `YOUR_GOOGLE_CLIENT_SECRET`
+  - Значение: `YOUR_GOOGLE_CLIENT_SECRET` (хранится только в Workers secrets)
 - [x] ✅ Добавление `JWT_SECRET` для подписи токенов
   - Команда: `wrangler secret put JWT_SECRET` ✅ Выполнено
   - Генерация секрета: `openssl rand -base64 32` ✅ Выполнено
-  - Значение: `YOUR_JWT_SECRET`
-  - Сохранено в: `do-overs/Secrets/jwt-secret.txt`
+  - Значение: `YOUR_JWT_SECRET` (хранится только в Workers secrets)
+  - Сохранено в: `do-overs/Secrets/jwt-secret.txt` (локальная резервная копия)
 
 #### 1.8. Создание документации
 - [x] ✅ Создание `docs/doc-cloudflare.md` с инструкциями

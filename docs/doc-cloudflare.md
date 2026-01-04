@@ -176,7 +176,7 @@ workers/
 **Статус проекта:** ✅ Создан
 
 **Client ID:** `YOUR_GOOGLE_CLIENT_ID.apps.googleusercontent.com`
-**Client Secret:** `YOUR_GOOGLE_CLIENT_SECRET` (сохранен в Workers secrets)
+**Client Secret:** `YOUR_GOOGLE_CLIENT_SECRET` (сохранен в Workers secrets, не хранить в коде!)
 **Redirect URI (локальный):** `http://localhost:8787/auth/callback` ✅ Настроен
 **Redirect URI (продакшен):** `https://mbb-api.ponomarev-ux.workers.dev/auth/callback` ✅ Настроен
 **Статус OAuth:** ✅ Client ID создан, в режиме тестирования
