@@ -15,14 +15,36 @@
   "files.exclude": {
     "**/.git": true,
     "**/.DS_Store": true,
-    "**/Thumbs.db": true
+    "**/Thumbs.db": true,
+    "**/node_modules": true,
+    "**/dist": true,
+    "**/build": true,
+    "**/*.min.js": true,
+    "**/*.min.css": true,
+    "**/*.map": true,
+    "**/package-lock.json": true,
+    "**/yarn.lock": true,
+    "**/.cache": true,
+    "**/.tmp": true,
+    "**/tmp": true,
+    "**/*.log": true,
+    "**/.vscode": false
   },
   // ============================================
   // Защита папки do-overs от записи
   // ============================================
   // Отключаем отслеживание изменений (снижает нагрузку, но НЕ блокирует запись)
+  // Также исключаем файлы для экономии токенов
   "files.watcherExclude": {
-    "**/do-overs/**": true
+    "**/do-overs/**": true,
+    "**/node_modules/**": true,
+    "**/dist/**": true,
+    "**/build/**": true,
+    "**/.git/**": true,
+    "**/.cache/**": true,
+    "**/.tmp/**": true,
+    "**/tmp/**": true,
+    "**/*.log": true
   },
   // ВАЖНО: VS Code/Cursor НЕ имеет системных настроек для полной блокировки записи
   // Защита обеспечивается через:
@@ -64,7 +86,7 @@
   "editor.acceptSuggestionOnCommitCharacter": true,
   "editor.acceptSuggestionOnEnter": "on",
   "editor.snippetSuggestions": "top",
-  "editor.wordBasedSuggestions": "allDocuments",
+  "editor.wordBasedSuggestions": "off",  // Отключено для экономии токенов (снижает индексацию всех документов)
   "editor.quickSuggestions": {
     "other": true,
     "comments": false,
@@ -94,6 +116,8 @@
   "git.confirmSync": false,
   "git.path": "C:\\Program Files\\Git\\bin\\git.exe",
   "git.ignoreLimitWarning": true,
+  "git.openRepositoryInParentFolders": "never",  // Не открывать репозитории автоматически
+  "git.autoRepositoryDetection": false,  // Отключить автоматическое обнаружение репозиториев
 
   // ============================================
   // Настройки поиска
@@ -103,12 +127,23 @@
     "**/bower_components": true,
     "**/.git": true,
     "**/dist": true,
-    "**/build": true
+    "**/build": true,
+    "**/*.min.js": true,
+    "**/*.min.css": true,
+    "**/*.map": true,
+    "**/package-lock.json": true,
+    "**/yarn.lock": true,
+    "**/.cache": true,
+    "**/.tmp": true,
+    "**/tmp": true,
+    "**/*.log": true
     // Примечание: do-overs/ НЕ исключена из поиска, так как должна быть доступна для чтения
   },
   "search.useIgnoreFiles": true,
   "search.smartCase": true,
   "explorer.autoReveal": false,  // Отключить автоматическое раскрытие файлов в проводнике при создании/изменении агентом
+  "explorer.confirmDelete": true,
+  "explorer.confirmDragAndDrop": true,
 
   // ============================================
   // Настройки интерфейса
@@ -119,6 +154,9 @@
   "workbench.editor.enablePreviewFromQuickOpen": false,
   "workbench.editor.closeOnFileDelete": false,
   "workbench.editor.restoreViewState": true,
+  "workbench.editor.revealIfOpen": false,  // Не открывать файлы автоматически при их изменении
+  "workbench.editor.focusRecentEditorAfterClose": false,  // Не фокусироваться на недавних файлах
+  "workbench.editor.highlightModifiedTabs": false,  // Не подсвечивать измененные вкладки (опционально)
   "workbench.startupEditor": "welcomePage",
   "workbench.sideBar.location": "left",
   "workbench.statusBar.visible": true,
@@ -129,7 +167,7 @@
   "workbench.editor.tabSizing": "shrink",
   "workbench.editor.tabSizingFixedMinWidth": 38,
   "workbench.editor.tabSizingFixedMaxWidth": 120,
-  "workbench.localHistory.enabled": true,
+  "workbench.localHistory.enabled": false,  // Отключено для экономии токенов (история может попадать в контекст)
   "workbench.localHistory.maxFileSize": 256,
 
   // ============================================
@@ -195,5 +233,12 @@
       "addWords": true
     }
   },
+
+  // ============================================
+  // Оптимизация для экономии токенов Cursor
+  // ============================================
+  // Исключения из индексации для снижения расхода токенов
+  // Эти настройки помогают уменьшить размер контекста, отправляемого в каждый запрос
+  // Основные исключения уже настроены выше в files.exclude, search.exclude и files.watcherExclude
 
 }
