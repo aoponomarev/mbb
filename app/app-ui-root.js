@@ -53,27 +53,19 @@
         }
 
         // Проверка feature flags для условной загрузки компонентов
-        // #region agent log
-        fetch('http://127.0.0.1:7243/ingest/6397d191-f6f2-43f4-b4da-44a3482bedec',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'app-ui-root.js:56',message:'Проверка feature flags в app-ui-root',data:{hasAppConfig:!!window.appConfig,hasAuthButton:!!window.authButton,hasPortfoliosManager:!!window.portfoliosManager},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'C'})}).catch(()=>{});
-        // #endregion
+        
         const authEnabled = window.appConfig && window.appConfig.isFeatureEnabled('auth');
         const portfoliosEnabled = window.appConfig && window.appConfig.isFeatureEnabled('portfolios') && window.appConfig.isFeatureEnabled('cloudSync');
-        // #region agent log
-        fetch('http://127.0.0.1:7243/ingest/6397d191-f6f2-43f4-b4da-44a3482bedec',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'app-ui-root.js:59',message:'Результаты проверки feature flags',data:{authEnabled:authEnabled,portfoliosEnabled:portfoliosEnabled},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'C'})}).catch(()=>{});
-        // #endregion
+        
 
         if (authEnabled && !window.authButton) {
             console.warn('app-ui-root: auth-button не загружен, хотя feature flag auth включен');
-            // #region agent log
-            fetch('http://127.0.0.1:7243/ingest/6397d191-f6f2-43f4-b4da-44a3482bedec',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'app-ui-root.js:62',message:'auth-button отсутствует',data:{authEnabled:authEnabled,hasAuthButton:!!window.authButton},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'C'})}).catch(()=>{});
-            // #endregion
+            
         }
 
         if (portfoliosEnabled && !window.portfoliosManager) {
             console.warn('app-ui-root: portfolios-manager не загружен, хотя feature flags portfolios и cloudSync включены');
-            // #region agent log
-            fetch('http://127.0.0.1:7243/ingest/6397d191-f6f2-43f4-b4da-44a3482bedec',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'app-ui-root.js:67',message:'portfolios-manager отсутствует',data:{portfoliosEnabled:portfoliosEnabled,hasPortfoliosManager:!!window.portfoliosManager},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'C'})}).catch(()=>{});
-            // #endregion
+            
         }
 
         const { createApp } = Vue;
@@ -255,12 +247,7 @@
                     },
                     immediate: false
                 },
-                // #region agent log
-                yandexTestError: {
-                    handler(newVal, oldVal) {
-                        // #region agent log
-                        fetch('http://127.0.0.1:7243/ingest/6397d191-f6f2-43f4-b4da-44a3482bedec',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'app-ui-root.js:watch-yandexTestError',message:'yandexTestError changed',data:{newVal,oldVal,typeNew:typeof newVal,typeOld:typeof oldVal},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'G'})}).catch(()=>{});
-                        // #endregion
+                
                     },
                     immediate: false // Убираем immediate, чтобы избежать мелькания при инициализации
                 },
@@ -268,9 +255,7 @@
                 // Watcher для отслеживания успешной авторизации через изменение testStep4Result
                 'testStep4Result.isAuthenticated': {
                     handler(newVal, oldVal) {
-                        // #region agent log
-                        fetch('http://127.0.0.1:7243/ingest/6397d191-f6f2-43f4-b4da-44a3482bedec',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'app-ui-root.js:watch-isAuthenticated',message:'isAuthenticated changed',data:{newVal,oldVal,hasUserData:!!this.testStep4Result?.userData},timestamp:Date.now(),sessionId:'debug-session',hypothesisId:'login-success'})}).catch(()=>{});
-                        // #endregion
+                        
 
                         // Если пользователь успешно авторизован, но testStep5Result еще не обновлен через handleAuthLogin
                         if (newVal === true && oldVal === false && this.testStep4Result && this.testStep4Result.userData) {
@@ -282,9 +267,7 @@
                                     success: true,
                                     message: `✓ Авторизация успешна! Пользователь ${userName} (${userEmail}) авторизован.`
                                 };
-                                // #region agent log
-                                fetch('http://127.0.0.1:7243/ingest/6397d191-f6f2-43f4-b4da-44a3482bedec',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'app-ui-root.js:watch-isAuthenticated',message:'testStep5Result updated via watcher',data:{userEmail,userName},timestamp:Date.now(),sessionId:'debug-session',hypothesisId:'login-success'})}).catch(()=>{});
-                                // #endregion
+                                
                             }
                         }
                     },
@@ -342,9 +325,7 @@
                  * @param {Object} tokenData - Данные токена и пользователя
                  */
                 handleAuthLogin(tokenData) {
-                    // #region agent log
-                    fetch('http://127.0.0.1:7243/ingest/6397d191-f6f2-43f4-b4da-44a3482bedec',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'app-ui-root.js:handleAuthLogin',message:'Login success event received',data:{hasTokenData:!!tokenData,hasAccessToken:!!tokenData?.access_token},timestamp:Date.now(),sessionId:'debug-session',hypothesisId:'login-success'})}).catch(()=>{});
-                    // #endregion
+                    
                     console.log('app-ui-root: пользователь успешно авторизован', tokenData);
 
                     // Обновляем testStep5Result для отображения успешной авторизации на тестовой карточке
@@ -355,9 +336,7 @@
                             success: true,
                             message: `✓ Авторизация успешна! Пользователь ${userName} (${userEmail}) авторизован. Токен сохранен.`
                         };
-                        // #region agent log
-                        fetch('http://127.0.0.1:7243/ingest/6397d191-f6f2-43f4-b4da-44a3482bedec',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'app-ui-root.js:handleAuthLogin',message:'testStep5Result updated',data:{userEmail,userName},timestamp:Date.now(),sessionId:'debug-session',hypothesisId:'login-success'})}).catch(()=>{});
-                        // #endregion
+                        
 
                         // Автоматически обновляем testStep4Result, чтобы отобразить информацию о пользователе
                         this.$nextTick(async () => {
@@ -395,18 +374,12 @@
                  * Тестирование Yandex API: отправка запроса (из поля ввода или случайный)
                  */
                 async testYandexAPI(useRandom = false) {
-                    // #region agent log
-                    fetch('http://127.0.0.1:7243/ingest/6397d191-f6f2-43f4-b4da-44a3482bedec',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'app-ui-root.js:280',message:'testYandexAPI called',data:{useRandom,hasAiProviderManager:!!window.aiProviderManager,currentError:this.yandexTestError},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'A'})}).catch(()=>{});
-                    // #endregion
+                    
 
                     if (!window.aiProviderManager) {
-                        // #region agent log
-                        fetch('http://127.0.0.1:7243/ingest/6397d191-f6f2-43f4-b4da-44a3482bedec',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'app-ui-root.js:282',message:'Setting error: AI Provider Manager not loaded',data:{},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'B'})}).catch(()=>{});
-                        // #endregion
+                        
                         this.yandexTestError = 'AI Provider Manager не загружен';
-                        // #region agent log
-                        fetch('http://127.0.0.1:7243/ingest/6397d191-f6f2-43f4-b4da-44a3482bedec',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'app-ui-root.js:285',message:'Error set',data:{error:this.yandexTestError},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'B'})}).catch(()=>{});
-                        // #endregion
+                        
                         return;
                     }
 
@@ -433,13 +406,9 @@
 
                     this.yandexTestQuery = query;
                     this.yandexTestResponse = '';
-                    // #region agent log
-                    fetch('http://127.0.0.1:7243/ingest/6397d191-f6f2-43f4-b4da-44a3482bedec',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'app-ui-root.js:309',message:'Clearing error before request',data:{errorBefore:this.yandexTestError},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'C'})}).catch(()=>{});
-                    // #endregion
+                    
                     this.yandexTestError = ''; // Используем пустую строку вместо null
-                    // #region agent log
-                    fetch('http://127.0.0.1:7243/ingest/6397d191-f6f2-43f4-b4da-44a3482bedec',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'app-ui-root.js:311',message:'Error cleared',data:{errorAfter:this.yandexTestError},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'C'})}).catch(()=>{});
-                    // #endregion
+                    
                     this.yandexTestLoading = true;
 
                     try {
@@ -458,28 +427,20 @@
                         );
 
                         this.yandexTestResponse = response;
-                        // #region agent log
-                        fetch('http://127.0.0.1:7243/ingest/6397d191-f6f2-43f4-b4da-44a3482bedec',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'app-ui-root.js:327',message:'Request successful',data:{hasResponse:!!response},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'D'})}).catch(()=>{});
-                        // #endregion
+                        
                     } catch (error) {
                         console.error('testYandexAPI: ошибка запроса:', error);
-                        // #region agent log
-                        fetch('http://127.0.0.1:7243/ingest/6397d191-f6f2-43f4-b4da-44a3482bedec',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'app-ui-root.js:347',message:'Setting error from catch',data:{errorMessage:error.message,errorType:error.constructor.name},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'E'})}).catch(()=>{});
-                        // #endregion
+                        
                         const errorMessage = error.message || 'Неизвестная ошибка';
                         // Используем Vue.nextTick для гарантии обновления DOM
                         this.$nextTick(() => {
                             this.yandexTestError = errorMessage;
-                            // #region agent log
-                            fetch('http://127.0.0.1:7243/ingest/6397d191-f6f2-43f4-b4da-44a3482bedec',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'app-ui-root.js:352',message:'Error set in catch after nextTick',data:{error:this.yandexTestError},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'E'})}).catch(()=>{});
-                            // #endregion
+                            
                         });
                         this.yandexTestResponse = '';
                     } finally {
                         this.yandexTestLoading = false;
-                        // #region agent log
-                        fetch('http://127.0.0.1:7243/ingest/6397d191-f6f2-43f4-b4da-44a3482bedec',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'app-ui-root.js:359',message:'Finally block',data:{loading:this.yandexTestLoading,error:this.yandexTestError},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'F'})}).catch(()=>{});
-                        // #endregion
+                        
                     }
                 },
                 customFilterFunction(items, query) {
@@ -643,9 +604,7 @@
                  * Шаг 1: Проверка загрузки модулей
                  */
                 testStep1_CheckModules() {
-                    // #region agent log
-                    fetch('http://127.0.0.1:7243/ingest/6397d191-f6f2-43f4-b4da-44a3482bedec',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'app-ui-root.js:testStep1',message:'Проверка загрузки модулей',data:{hasAuthClient:!!window.authClient,hasPortfoliosClient:!!window.portfoliosClient,hasAuthButton:!!window.authButton,hasPortfoliosManager:!!window.portfoliosManager},timestamp:Date.now(),sessionId:'debug-session',runId:'test-step1'})}).catch(()=>{});
-                    // #endregion
+                    
                     const checks = [];
                     if (window.authClient) checks.push('✓ auth-client загружен');
                     else checks.push('✗ auth-client НЕ загружен');
@@ -667,9 +626,7 @@
                  * Шаг 2: Проверка feature flags
                  */
                 testStep2_CheckFeatureFlags() {
-                    // #region agent log
-                    fetch('http://127.0.0.1:7243/ingest/6397d191-f6f2-43f4-b4da-44a3482bedec',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'app-ui-root.js:testStep2',message:'Проверка feature flags',data:{hasAppConfig:!!window.appConfig,authEnabled:window.appConfig?window.appConfig.isFeatureEnabled('auth'):false,cloudSyncEnabled:window.appConfig?window.appConfig.isFeatureEnabled('cloudSync'):false,portfoliosEnabled:window.appConfig?window.appConfig.isFeatureEnabled('portfolios'):false},timestamp:Date.now(),sessionId:'debug-session',runId:'test-step2'})}).catch(()=>{});
-                    // #endregion
+                    
                     if (!window.appConfig) {
                         this.testStep2Result = {
                             success: false,
@@ -697,9 +654,7 @@
                  * Шаг 3: Проверка компонента auth-button
                  */
                 testStep3_CheckAuthButton() {
-                    // #region agent log
-                    fetch('http://127.0.0.1:7243/ingest/6397d191-f6f2-43f4-b4da-44a3482bedec',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'app-ui-root.js:testStep3',message:'Проверка auth-button',data:{hasAuthButton:!!window.authButton,hasAuthClient:!!window.authClient},timestamp:Date.now(),sessionId:'debug-session',runId:'test-step3'})}).catch(()=>{});
-                    // #endregion
+                    
                     if (!window.authButton) {
                         this.testStep3Result = {
                             success: false,
@@ -727,9 +682,7 @@
                  * Шаг 4: Проверка состояния авторизации
                  */
                 async testStep4_CheckAuthStatus() {
-                    // #region agent log
-                    fetch('http://127.0.0.1:7243/ingest/6397d191-f6f2-43f4-b4da-44a3482bedec',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'app-ui-root.js:testStep4',message:'Начало проверки авторизации',data:{hasAuthClient:!!window.authClient},timestamp:Date.now(),sessionId:'debug-session',runId:'test-step4'})}).catch(()=>{});
-                    // #endregion
+                    
                     if (!window.authClient) {
                         this.testStep4Result = {
                             success: false,
@@ -739,15 +692,11 @@
                     }
                     try {
                         const isAuthenticated = await window.authClient.isAuthenticated();
-                        // #region agent log
-                        fetch('http://127.0.0.1:7243/ingest/6397d191-f6f2-43f4-b4da-44a3482bedec',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'app-ui-root.js:testStep4',message:'Результат isAuthenticated',data:{isAuthenticated:isAuthenticated},timestamp:Date.now(),sessionId:'debug-session',runId:'test-step4'})}).catch(()=>{});
-                        // #endregion
+                        
                         let userData = null;
                         if (isAuthenticated) {
                             userData = await window.authClient.getCurrentUser();
-                            // #region agent log
-                            fetch('http://127.0.0.1:7243/ingest/6397d191-f6f2-43f4-b4da-44a3482bedec',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'app-ui-root.js:testStep4',message:'Результат getCurrentUser',data:{hasUser:userData!==null,hasEmail:userData&&userData.email?true:false},timestamp:Date.now(),sessionId:'debug-session',runId:'test-step4'})}).catch(()=>{});
-                            // #endregion
+                            
                         }
                         this.testStep4Result = {
                             success: true,
@@ -769,9 +718,7 @@
                  * Шаг 5: Инициация входа через Google
                  */
                 testStep5_InitiateLogin() {
-                    // #region agent log
-                    fetch('http://127.0.0.1:7243/ingest/6397d191-f6f2-43f4-b4da-44a3482bedec',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'app-ui-root.js:testStep5',message:'Инициация входа через Google',data:{hasAuthClient:!!window.authClient},timestamp:Date.now(),sessionId:'debug-session',runId:'test-step5'})}).catch(()=>{});
-                    // #endregion
+                    
                     if (!window.authClient) {
                         this.testStep5Result = {
                             success: false,
@@ -797,9 +744,7 @@
                  * Шаг 6: Проверка компонента portfolios-manager
                  */
                 testStep6_CheckPortfoliosManager() {
-                    // #region agent log
-                    fetch('http://127.0.0.1:7243/ingest/6397d191-f6f2-43f4-b4da-44a3482bedec',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'app-ui-root.js:testStep6',message:'Проверка portfolios-manager',data:{hasPortfoliosManager:!!window.portfoliosManager,hasPortfoliosClient:!!window.portfoliosClient,isPortfoliosEnabled:this.isPortfoliosEnabled},timestamp:Date.now(),sessionId:'debug-session',runId:'test-step6'})}).catch(()=>{});
-                    // #endregion
+                    
                     if (!window.portfoliosManager) {
                         this.testStep6Result = {
                             success: false,

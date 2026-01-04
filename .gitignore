@@ -11,6 +11,3 @@ do-overs/
 
 # Кэш статистики проекта
 docs/.stats-cache.json
-
-# Резервная копия секретов (не коммитить!)
-secrets-backup.txt

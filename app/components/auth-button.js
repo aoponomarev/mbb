@@ -84,9 +84,7 @@ window.authButton = {
                 if (authenticated) {
                     // Получаем данные пользователя
                     const user = await window.authClient.getCurrentUser();
-                    // #region agent log
-                    fetch('http://127.0.0.1:7243/ingest/6397d191-f6f2-43f4-b4da-44a3482bedec',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'auth-button.js:79',message:'Проверка user после getCurrentUser',data:{authenticated:authenticated,userIsNull:user===null,hasEmail:user&&user.email?true:false},timestamp:Date.now(),sessionId:'debug-session',runId:'post-fix',hypothesisId:'bug1-fix'})}).catch(()=>{});
-                    // #endregion
+                    
                     // Устанавливаем isAuthenticated только если user получен успешно
                     // Это предотвращает рендеринг с null user
                     this.isAuthenticated = user !== null;
@@ -144,51 +142,35 @@ window.authButton = {
          * Обработка postMessage от popup окна OAuth callback
          */
         async handleOAuthMessage(event) {
-            // #region agent log
-            fetch('http://127.0.0.1:7243/ingest/6397d191-f6f2-43f4-b4da-44a3482bedec',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'auth-button.js:150',message:'postMessage received',data:{hasData:!!event.data,messageType:event.data?.type,hasSuccess:event.data?.success,origin:event.origin},timestamp:Date.now(),sessionId:'debug-session',hypothesisId:'postMessage'})}).catch(()=>{});
-            // #endregion
+            
 
             // Проверяем, что сообщение от нашего Worker callback
             // Принимаем сообщения с любым origin, так как при file:// точный origin неизвестен
             if (event.data && event.data.type === 'oauth-callback' && event.data.success) {
                 try {
                     const tokenData = event.data.token;
-                    // #region agent log
-                    fetch('http://127.0.0.1:7243/ingest/6397d191-f6f2-43f4-b4da-44a3482bedec',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'auth-button.js:158',message:'OAuth callback message processing',data:{hasToken:!!tokenData,hasAccessToken:!!tokenData?.access_token},timestamp:Date.now(),sessionId:'debug-session',hypothesisId:'postMessage'})}).catch(()=>{});
-                    // #endregion
+                    
 
                     if (tokenData && tokenData.access_token) {
                         // Сохраняем токен через auth-client
                         if (window.authClient && window.authClient.saveToken) {
-                            // #region agent log
-                            fetch('http://127.0.0.1:7243/ingest/6397d191-f6f2-43f4-b4da-44a3482bedec',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'auth-button.js:166',message:'Before saveToken',data:{},timestamp:Date.now(),sessionId:'debug-session',hypothesisId:'postMessage'})}).catch(()=>{});
-                            // #endregion
+                            
                             await window.authClient.saveToken(tokenData);
-                            // #region agent log
-                            fetch('http://127.0.0.1:7243/ingest/6397d191-f6f2-43f4-b4da-44a3482bedec',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'auth-button.js:170',message:'After saveToken',data:{},timestamp:Date.now(),sessionId:'debug-session',hypothesisId:'postMessage'})}).catch(()=>{});
-                            // #endregion
+                            
                         }
 
                         // Обновляем состояние авторизации
-                        // #region agent log
-                        fetch('http://127.0.0.1:7243/ingest/6397d191-f6f2-43f4-b4da-44a3482bedec',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'auth-button.js:175',message:'Before checkAuthStatus',data:{},timestamp:Date.now(),sessionId:'debug-session',hypothesisId:'postMessage'})}).catch(()=>{});
-                        // #endregion
+                        
                         await this.checkAuthStatus();
-                        // #region agent log
-                        fetch('http://127.0.0.1:7243/ingest/6397d191-f6f2-43f4-b4da-44a3482bedec',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'auth-button.js:178',message:'After checkAuthStatus',data:{isAuthenticated:this.isAuthenticated,hasUser:!!this.user},timestamp:Date.now(),sessionId:'debug-session',hypothesisId:'postMessage'})}).catch(()=>{});
-                        // #endregion
+                        
 
                         // Эмитируем событие успешного входа
                         this.$emit('login-success', tokenData);
-                        // #region agent log
-                        fetch('http://127.0.0.1:7243/ingest/6397d191-f6f2-43f4-b4da-44a3482bedec',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'auth-button.js:182',message:'Login success event emitted',data:{},timestamp:Date.now(),sessionId:'debug-session',hypothesisId:'postMessage'})}).catch(()=>{});
-                        // #endregion
+                        
                     }
                 } catch (error) {
                     console.error('auth-button.handleOAuthMessage error:', error);
-                    // #region agent log
-                    fetch('http://127.0.0.1:7243/ingest/6397d191-f6f2-43f4-b4da-44a3482bedec',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'auth-button.js:186',message:'postMessage error',data:{error:error.message},timestamp:Date.now(),sessionId:'debug-session',hypothesisId:'postMessage'})}).catch(()=>{});
-                    // #endregion
+                    
                     if (window.errorHandler) {
                         window.errorHandler.handleError(error, {
                             context: 'auth-button.handleOAuthMessage',

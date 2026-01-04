@@ -174,7 +174,7 @@ UI компоненты используют только Bootstrap классы
   - Команда: `wrangler secret put JWT_SECRET` ✅ Выполнено
   - Генерация секрета: `openssl rand -base64 32` ✅ Выполнено
   - Значение: `YOUR_JWT_SECRET` (хранится только в Workers secrets)
-  - Сохранено в: `do-overs/Secrets/jwt-secret.txt` (локальная резервная копия)
+  - Сохранено в: `do-overs/Secrets/jwt-secret.txt`
 
 #### 1.8. Создание документации
 - [x] ✅ Создание `docs/doc-cloudflare.md` с инструкциями

@@ -32,9 +32,7 @@ import { createUser, getUserByGoogleId, getUser } from './utils/d1-helpers.js';
  */
 async function handleCallback(request, env) {
   try {
-    // #region agent log
-    fetch('http://127.0.0.1:7243/ingest/6397d191-f6f2-43f4-b4da-44a3482bedec',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'auth.js:35',message:'handleCallback entry',data:{method:request.method,url:request.url},timestamp:Date.now(),sessionId:'debug-session',hypothesisId:'A,B,C,D,E'})}).catch(()=>{});
-    // #endregion
+    
     // Проверка наличия secrets
     if (!env.GOOGLE_CLIENT_SECRET) {
       console.error('auth.handleCallback: GOOGLE_CLIENT_SECRET не установлен');
@@ -70,9 +68,7 @@ async function handleCallback(request, env) {
         }
       }
 
-      // #region agent log
-      fetch('http://127.0.0.1:7243/ingest/6397d191-f6f2-43f4-b4da-44a3482bedec',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'auth.js:68',message:'GET params extracted',data:{hasCode:!!code,redirect_uri:'https://mbb-api.ponomarev-ux.workers.dev/auth/callback',clientUrl},timestamp:Date.now(),sessionId:'debug-session',hypothesisId:'E'})}).catch(()=>{});
-      // #endregion
+      
       // Используем тот же redirect_uri, который был использован для инициации OAuth
       // Это должен быть production URL, так как Google редиректит на production Worker
       redirect_uri = 'https://mbb-api.ponomarev-ux.workers.dev/auth/callback';
@@ -112,18 +108,12 @@ async function handleCallback(request, env) {
     }
 
     // Обмен code на access token от Google
-    // #region agent log
-    fetch('http://127.0.0.1:7243/ingest/6397d191-f6f2-43f4-b4da-44a3482bedec',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'auth.js:93',message:'Before exchangeCodeWithGoogle',data:{hasCode:!!code,hasClientSecret:!!env.GOOGLE_CLIENT_SECRET,redirect_uri},timestamp:Date.now(),sessionId:'debug-session',hypothesisId:'A'})}).catch(()=>{});
-    // #endregion
+    
     const googleTokenResponse = await exchangeCodeWithGoogle(code, redirect_uri, env.GOOGLE_CLIENT_SECRET);
-    // #region agent log
-    fetch('http://127.0.0.1:7243/ingest/6397d191-f6f2-43f4-b4da-44a3482bedec',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'auth.js:97',message:'After exchangeCodeWithGoogle',data:{hasAccessToken:!!googleTokenResponse.access_token,responseKeys:Object.keys(googleTokenResponse)},timestamp:Date.now(),sessionId:'debug-session',hypothesisId:'A'})}).catch(()=>{});
-    // #endregion
+    
 
     if (!googleTokenResponse.access_token) {
-      // #region agent log
-      fetch('http://127.0.0.1:7243/ingest/6397d191-f6f2-43f4-b4da-44a3482bedec',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'auth.js:102',message:'No access token from Google',data:{googleTokenResponse},timestamp:Date.now(),sessionId:'debug-session',hypothesisId:'A'})}).catch(()=>{});
-      // #endregion
+      
       return jsonResponse(
         { error: 'Failed to exchange code for token' },
         { status: 401 }
@@ -132,13 +122,9 @@ async function handleCallback(request, env) {
 
     // Получение данных пользователя от Google
     console.log('auth.handleCallback: получение данных пользователя от Google');
-    // #region agent log
-    fetch('http://127.0.0.1:7243/ingest/6397d191-f6f2-43f4-b4da-44a3482bedec',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'auth.js:115',message:'Before getUserInfoFromGoogle',data:{hasAccessToken:!!googleTokenResponse.access_token},timestamp:Date.now(),sessionId:'debug-session',hypothesisId:'C'})}).catch(()=>{});
-    // #endregion
+    
     const userInfo = await getUserInfoFromGoogle(googleTokenResponse.access_token);
-    // #region agent log
-    fetch('http://127.0.0.1:7243/ingest/6397d191-f6f2-43f4-b4da-44a3482bedec',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'auth.js:119',message:'After getUserInfoFromGoogle',data:{hasUserInfo:!!userInfo,userInfoKeys:userInfo?Object.keys(userInfo):[]},timestamp:Date.now(),sessionId:'debug-session',hypothesisId:'C'})}).catch(()=>{});
-    // #endregion
+    
     console.log('auth.handleCallback: получен userInfo', {
       hasUserInfo: !!userInfo,
       hasId: !!userInfo?.id,
@@ -159,31 +145,23 @@ async function handleCallback(request, env) {
 
     // Сохранение или обновление пользователя в D1
     console.log('auth.handleCallback: поиск пользователя в D1', { googleUserId });
-    // #region agent log
-    fetch('http://127.0.0.1:7243/ingest/6397d191-f6f2-43f4-b4da-44a3482bedec',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'auth.js:137',message:'Before getUserByGoogleId',data:{googleUserId,hasDB:!!env.DB},timestamp:Date.now(),sessionId:'debug-session',hypothesisId:'D'})}).catch(()=>{});
-    // #endregion
+    
     let user = await getUserByGoogleId(env.DB, googleUserId);
-    // #region agent log
-    fetch('http://127.0.0.1:7243/ingest/6397d191-f6f2-43f4-b4da-44a3482bedec',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'auth.js:141',message:'After getUserByGoogleId',data:{hasUser:!!user,userId:user?.id},timestamp:Date.now(),sessionId:'debug-session',hypothesisId:'D'})}).catch(()=>{});
-    // #endregion
+    
 
     if (!user) {
       console.log('auth.handleCallback: создание нового пользователя в D1', {
         google_id: googleUserId,
         email: userInfo.email
       });
-      // #region agent log
-      fetch('http://127.0.0.1:7243/ingest/6397d191-f6f2-43f4-b4da-44a3482bedec',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'auth.js:151',message:'Before createUser',data:{googleUserId,email:userInfo.email},timestamp:Date.now(),sessionId:'debug-session',hypothesisId:'D'})}).catch(()=>{});
-      // #endregion
+      
       user = await createUser(env.DB, {
         google_id: googleUserId,
         email: userInfo.email,
         name: userInfo.name || null,
         picture: userInfo.picture || null,
       });
-      // #region agent log
-      fetch('http://127.0.0.1:7243/ingest/6397d191-f6f2-43f4-b4da-44a3482bedec',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'auth.js:159',message:'After createUser',data:{hasUser:!!user,userId:user?.id},timestamp:Date.now(),sessionId:'debug-session',hypothesisId:'D'})}).catch(()=>{});
-      // #endregion
+      
       console.log('auth.handleCallback: пользователь создан', {
         userId: user?.id,
         success: !!user
@@ -205,9 +183,7 @@ async function handleCallback(request, env) {
       email: user.email,
       hasJWTSecret: !!env.JWT_SECRET
     });
-    // #region agent log
-    fetch('http://127.0.0.1:7243/ingest/6397d191-f6f2-43f4-b4da-44a3482bedec',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'auth.js:177',message:'Before createToken',data:{userId:user.id,hasJWTSecret:!!env.JWT_SECRET},timestamp:Date.now(),sessionId:'debug-session',hypothesisId:'B'})}).catch(()=>{});
-    // #endregion
+    
     const jwtToken = await createToken(
       {
         user_id: user.id,
@@ -217,9 +193,7 @@ async function handleCallback(request, env) {
       env.JWT_SECRET,
       3600 // 1 час
     );
-    // #region agent log
-    fetch('http://127.0.0.1:7243/ingest/6397d191-f6f2-43f4-b4da-44a3482bedec',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'auth.js:189',message:'After createToken',data:{hasToken:!!jwtToken,tokenLength:jwtToken?.length},timestamp:Date.now(),sessionId:'debug-session',hypothesisId:'B'})}).catch(()=>{});
-    // #endregion
+    
     console.log('auth.handleCallback: JWT токен создан', {
       hasToken: !!jwtToken,
       tokenLength: jwtToken?.length

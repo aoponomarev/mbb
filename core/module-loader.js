@@ -91,19 +91,13 @@
      * @returns {Promise<boolean>} - успех загрузки
      */
     function loadModule(module) {
-        // #region agent log
-        fetch('http://127.0.0.1:7243/ingest/6397d191-f6f2-43f4-b4da-44a3482bedec',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'module-loader.js:93',message:'Начало загрузки модуля',data:{moduleId:module.id,moduleSrc:module.src,isCached:loadedModulesCache.has(module.src)},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'D'})}).catch(()=>{});
-        // #endregion
+        
         // Используем асинхронную загрузку через <script> теги для всех протоколов
         // Это работает и с file://, и с http://
         return loadScriptAsync(module.src).then(() => {
-            // #region agent log
-            fetch('http://127.0.0.1:7243/ingest/6397d191-f6f2-43f4-b4da-44a3482bedec',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'module-loader.js:98',message:'Модуль загружен успешно',data:{moduleId:module.id,hasAuthButton:module.id==='auth-button'?!!window.authButton:undefined,hasPortfoliosManager:module.id==='portfolios-manager'?!!window.portfoliosManager:undefined},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'D'})}).catch(()=>{});
-            // #endregion
+            
         }).catch((error) => {
-            // #region agent log
-            fetch('http://127.0.0.1:7243/ingest/6397d191-f6f2-43f4-b4da-44a3482bedec',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'module-loader.js:102',message:'Ошибка загрузки модуля',data:{moduleId:module.id,moduleSrc:module.src,error:error.message},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'E'})}).catch(()=>{});
-            // #endregion
+            
             throw error;
         });
     }
@@ -126,24 +120,16 @@
                     // Проверяем условие загрузки (feature flag) только если указано
                     if (checkConditions && module.condition && typeof module.condition === 'function') {
                         try {
-                            // #region agent log
-                            fetch('http://127.0.0.1:7243/ingest/6397d191-f6f2-43f4-b4da-44a3482bedec',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'module-loader.js:114',message:'Проверка condition для модуля',data:{moduleId:module.id,hasAppConfig:!!window.appConfig,appConfigType:typeof window.appConfig},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'A'})}).catch(()=>{});
-                            // #endregion
+                            
                             const conditionResult = module.condition();
-                            // #region agent log
-                            fetch('http://127.0.0.1:7243/ingest/6397d191-f6f2-43f4-b4da-44a3482bedec',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'module-loader.js:116',message:'Результат condition',data:{moduleId:module.id,conditionResult:conditionResult},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'A'})}).catch(()=>{});
-                            // #endregion
+                            
                             if (!conditionResult) {
-                                // #region agent log
-                                fetch('http://127.0.0.1:7243/ingest/6397d191-f6f2-43f4-b4da-44a3482bedec',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'module-loader.js:120',message:'Модуль пропущен из-за condition=false',data:{moduleId:module.id},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'A'})}).catch(()=>{});
-                                // #endregion
+                                
                                 continue;
                             }
                         } catch (error) {
                             // При ошибке проверки условия загружаем модуль по умолчанию
-                            // #region agent log
-                            fetch('http://127.0.0.1:7243/ingest/6397d191-f6f2-43f4-b4da-44a3482bedec',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'module-loader.js:125',message:'Ошибка в condition, модуль будет загружен',data:{moduleId:module.id,error:error.message},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'B'})}).catch(()=>{});
-                            // #endregion
+                            
                         }
                     }
                     modules.push(module);
@@ -317,33 +303,23 @@
 
         // Загружаем модули последовательно и проверяем условия ПОСЛЕ загрузки зависимостей
         const failedModules = [];
-        // #region agent log
-        fetch('http://127.0.0.1:7243/ingest/6397d191-f6f2-43f4-b4da-44a3482bedec',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'module-loader.js:314',message:'Начало загрузки всех модулей',data:{totalModules:sortedModules.length,moduleIds:sortedModules.map(m=>m.id)},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'D'})}).catch(()=>{});
-        // #endregion
+        
         for (let i = 0; i < sortedModules.length; i++) {
             const module = sortedModules[i];
 
             // Проверяем условие загрузки ПОСЛЕ того, как зависимости уже загружены
             if (module.condition && typeof module.condition === 'function') {
                 try {
-                    // #region agent log
-                    fetch('http://127.0.0.1:7243/ingest/6397d191-f6f2-43f4-b4da-44a3482bedec',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'module-loader.js:328',message:'Проверка condition ПОСЛЕ загрузки зависимостей',data:{moduleId:module.id,hasAppConfig:!!window.appConfig,appConfigType:typeof window.appConfig},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'F'})}).catch(()=>{});
-                    // #endregion
+                    
                     const conditionResult = module.condition();
-                    // #region agent log
-                    fetch('http://127.0.0.1:7243/ingest/6397d191-f6f2-43f4-b4da-44a3482bedec',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'module-loader.js:330',message:'Результат condition ПОСЛЕ загрузки зависимостей',data:{moduleId:module.id,conditionResult:conditionResult},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'F'})}).catch(()=>{});
-                    // #endregion
+                    
                     if (!conditionResult) {
-                        // #region agent log
-                        fetch('http://127.0.0.1:7243/ingest/6397d191-f6f2-43f4-b4da-44a3482bedec',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'module-loader.js:333',message:'Модуль пропущен из-за condition=false (после загрузки зависимостей)',data:{moduleId:module.id},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'F'})}).catch(()=>{});
-                        // #endregion
+                        
                         continue; // Пропускаем модуль, но не загружаем его
                     }
                 } catch (error) {
                     // При ошибке проверки условия загружаем модуль по умолчанию
-                    // #region agent log
-                    fetch('http://127.0.0.1:7243/ingest/6397d191-f6f2-43f4-b4da-44a3482bedec',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'module-loader.js:338',message:'Ошибка в condition, модуль будет загружен',data:{moduleId:module.id,error:error.message},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'B'})}).catch(()=>{});
-                    // #endregion
+                    
                 }
             }
 
@@ -351,9 +327,7 @@
                 await loadModule(module);
             } catch (error) {
                 failedModules.push({ module, error });
-                // #region agent log
-                fetch('http://127.0.0.1:7243/ingest/6397d191-f6f2-43f4-b4da-44a3482bedec',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'module-loader.js:322',message:'Модуль не загружен',data:{moduleId:module.id,error:error.message},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'E'})}).catch(()=>{});
-                // #endregion
+                
 
                 // Для критичных модулей (app, vue, templates) прерываем загрузку
                 // Для критичных модулей (app, vue, шаблоны) прерываем загрузку
@@ -365,9 +339,7 @@
                 // Для некритичных модулей продолжаем загрузку
             }
         }
-        // #region agent log
-        fetch('http://127.0.0.1:7243/ingest/6397d191-f6f2-43f4-b4da-44a3482bedec',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'module-loader.js:333',message:'Все модули загружены',data:{totalModules:sortedModules.length,failedModules:failedModules.length,hasAuthButton:!!window.authButton,hasPortfoliosManager:!!window.portfoliosManager},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'C'})}).catch(()=>{});
-        // #endregion
+        
 
         // Вызываем инициализацию приложения, если она определена
         // Ждём готовности DOM, если он ещё не загружен

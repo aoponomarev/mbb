@@ -131,9 +131,7 @@
                 throw new Error('Не удалось получить URL для авторизации');
             }
 
-            // #region agent log
-            fetch('http://127.0.0.1:7243/ingest/6397d191-f6f2-43f4-b4da-44a3482bedec',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'auth-client.js:133',message:'Before window.open',data:{authUrl,clientUrl,protocol:window.location.protocol},timestamp:Date.now(),sessionId:'debug-session',hypothesisId:'popup-window'})}).catch(()=>{});
-            // #endregion
+            
 
             // Открываем OAuth в новой вкладке вместо редиректа
             // Это сохраняет состояние исходной страницы
@@ -143,15 +141,11 @@
                 'width=600,height=700,left=100,top=100'
             );
 
-            // #region agent log
-            fetch('http://127.0.0.1:7243/ingest/6397d191-f6f2-43f4-b4da-44a3482bedec',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'auth-client.js:143',message:'After window.open',data:{authWindowCreated:!!authWindow,authWindowClosed:authWindow?.closed},timestamp:Date.now(),sessionId:'debug-session',hypothesisId:'popup-window'})}).catch(()=>{});
-            // #endregion
+            
 
             if (!authWindow) {
                 // Если popup заблокирован браузером, показываем предупреждение
-                // #region agent log
-                fetch('http://127.0.0.1:7243/ingest/6397d191-f6f2-43f4-b4da-44a3482bedec',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'auth-client.js:150',message:'Popup blocked',data:{authUrl},timestamp:Date.now(),sessionId:'debug-session',hypothesisId:'popup-window'})}).catch(()=>{});
-                // #endregion
+                
 
                 const userConfirmed = confirm(
                     'Для авторизации нужно открыть новую вкладку.\n\n' +
@@ -160,9 +154,7 @@
 
                 if (userConfirmed) {
                     // Fallback: если popup заблокирован, используем редирект
-                    // #region agent log
-                    fetch('http://127.0.0.1:7243/ingest/6397d191-f6f2-43f4-b4da-44a3482bedec',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'auth-client.js:162',message:'Fallback to redirect',data:{authUrl},timestamp:Date.now(),sessionId:'debug-session',hypothesisId:'popup-window'})}).catch(()=>{});
-                    // #endregion
+                    
                     window.location.href = authUrl;
                 }
                 return;
@@ -175,9 +167,7 @@
                 if (authWindow.closed) {
                     clearInterval(checkClosed);
                     console.log('OAuth вкладка закрыта');
-                    // #region agent log
-                    fetch('http://127.0.0.1:7243/ingest/6397d191-f6f2-43f4-b4da-44a3482bedec',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'auth-client.js:176',message:'OAuth window closed',data:{},timestamp:Date.now(),sessionId:'debug-session',hypothesisId:'popup-window'})}).catch(()=>{});
-                    // #endregion
+                    
                     // Можно попробовать проверить статус авторизации
                     // или показать уведомление пользователю
                 }
