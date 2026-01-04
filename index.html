@@ -259,9 +259,6 @@
     <div id="app" class="flex-grow-1 d-flex flex-column">
         <!-- Header приложения (фиксирован к верху) -->
         <app-header>
-            <template #auth-button>
-                <auth-button v-if="isAuthEnabled" @login-success="handleAuthLogin" @logout-success="handleAuthLogout"></auth-button>
-            </template>
             <template #menu-items>
                 <li><dropdown-menu-item title="Пункт меню 1" @click="handleClick"></dropdown-menu-item></li>
                 <li><dropdown-menu-item title="Пункт меню 2" @click="handleClick"></dropdown-menu-item></li>

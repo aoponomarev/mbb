@@ -53,19 +53,19 @@
         }
 
         // Проверка feature flags для условной загрузки компонентов
-        
+
         const authEnabled = window.appConfig && window.appConfig.isFeatureEnabled('auth');
         const portfoliosEnabled = window.appConfig && window.appConfig.isFeatureEnabled('portfolios') && window.appConfig.isFeatureEnabled('cloudSync');
-        
+
 
         if (authEnabled && !window.authButton) {
             console.warn('app-ui-root: auth-button не загружен, хотя feature flag auth включен');
-            
+
         }
 
         if (portfoliosEnabled && !window.portfoliosManager) {
             console.warn('app-ui-root: portfolios-manager не загружен, хотя feature flags portfolios и cloudSync включены');
-            
+
         }
 
         const { createApp } = Vue;
@@ -247,15 +247,11 @@
                     },
                     immediate: false
                 },
-                
-                    },
-                    immediate: false // Убираем immediate, чтобы избежать мелькания при инициализации
-                },
                 // #endregion
                 // Watcher для отслеживания успешной авторизации через изменение testStep4Result
                 'testStep4Result.isAuthenticated': {
                     handler(newVal, oldVal) {
-                        
+
 
                         // Если пользователь успешно авторизован, но testStep5Result еще не обновлен через handleAuthLogin
                         if (newVal === true && oldVal === false && this.testStep4Result && this.testStep4Result.userData) {
@@ -267,7 +263,7 @@
                                     success: true,
                                     message: `✓ Авторизация успешна! Пользователь ${userName} (${userEmail}) авторизован.`
                                 };
-                                
+
                             }
                         }
                     },
@@ -325,7 +321,7 @@
                  * @param {Object} tokenData - Данные токена и пользователя
                  */
                 handleAuthLogin(tokenData) {
-                    
+
                     console.log('app-ui-root: пользователь успешно авторизован', tokenData);
 
                     // Обновляем testStep5Result для отображения успешной авторизации на тестовой карточке
@@ -336,7 +332,7 @@
                             success: true,
                             message: `✓ Авторизация успешна! Пользователь ${userName} (${userEmail}) авторизован. Токен сохранен.`
                         };
-                        
+
 
                         // Автоматически обновляем testStep4Result, чтобы отобразить информацию о пользователе
                         this.$nextTick(async () => {
@@ -374,12 +370,12 @@
                  * Тестирование Yandex API: отправка запроса (из поля ввода или случайный)
                  */
                 async testYandexAPI(useRandom = false) {
-                    
+
 
                     if (!window.aiProviderManager) {
-                        
+
                         this.yandexTestError = 'AI Provider Manager не загружен';
-                        
+
                         return;
                     }
 
@@ -406,9 +402,9 @@
 
                     this.yandexTestQuery = query;
                     this.yandexTestResponse = '';
-                    
+
                     this.yandexTestError = ''; // Используем пустую строку вместо null
-                    
+
                     this.yandexTestLoading = true;
 
                     try {
@@ -427,20 +423,20 @@
                         );
 
                         this.yandexTestResponse = response;
-                        
+
                     } catch (error) {
                         console.error('testYandexAPI: ошибка запроса:', error);
-                        
+
                         const errorMessage = error.message || 'Неизвестная ошибка';
                         // Используем Vue.nextTick для гарантии обновления DOM
                         this.$nextTick(() => {
                             this.yandexTestError = errorMessage;
-                            
+
                         });
                         this.yandexTestResponse = '';
                     } finally {
                         this.yandexTestLoading = false;
-                        
+
                     }
                 },
                 customFilterFunction(items, query) {
@@ -604,7 +600,7 @@
                  * Шаг 1: Проверка загрузки модулей
                  */
                 testStep1_CheckModules() {
-                    
+
                     const checks = [];
                     if (window.authClient) checks.push('✓ auth-client загружен');
                     else checks.push('✗ auth-client НЕ загружен');
@@ -626,7 +622,7 @@
                  * Шаг 2: Проверка feature flags
                  */
                 testStep2_CheckFeatureFlags() {
-                    
+
                     if (!window.appConfig) {
                         this.testStep2Result = {
                             success: false,
@@ -654,7 +650,7 @@
                  * Шаг 3: Проверка компонента auth-button
                  */
                 testStep3_CheckAuthButton() {
-                    
+
                     if (!window.authButton) {
                         this.testStep3Result = {
                             success: false,
@@ -682,7 +678,7 @@
                  * Шаг 4: Проверка состояния авторизации
                  */
                 async testStep4_CheckAuthStatus() {
-                    
+
                     if (!window.authClient) {
                         this.testStep4Result = {
                             success: false,
@@ -692,11 +688,11 @@
                     }
                     try {
                         const isAuthenticated = await window.authClient.isAuthenticated();
-                        
+
                         let userData = null;
                         if (isAuthenticated) {
                             userData = await window.authClient.getCurrentUser();
-                            
+
                         }
                         this.testStep4Result = {
                             success: true,
@@ -718,7 +714,7 @@
                  * Шаг 5: Инициация входа через Google
                  */
                 testStep5_InitiateLogin() {
-                    
+
                     if (!window.authClient) {
                         this.testStep5Result = {
                             success: false,
@@ -744,7 +740,7 @@
                  * Шаг 6: Проверка компонента portfolios-manager
                  */
                 testStep6_CheckPortfoliosManager() {
-                    
+
                     if (!window.portfoliosManager) {
                         this.testStep6Result = {
                             success: false,
@@ -879,15 +875,8 @@
 
     // Инициализация Vue приложения после загрузки всех модулей
     // Модульная система вызывает эту функцию после успешной загрузки всех модулей
-    if (document.readyState === 'loading') {
-        document.addEventListener('DOMContentLoaded', function() {
-            // Ждём завершения загрузки модулей
-            // Модульная система вызовет initVueApp через window.appInit
-            window.appInit = initVueApp;
-        });
-    } else {
-        // Если DOM уже загружен, устанавливаем функцию инициализации
-        window.appInit = initVueApp;
-    }
+    // Устанавливаем функцию инициализации сразу при загрузке модуля
+    // Модульный загрузчик сам проверяет состояние DOM перед вызовом
+    window.appInit = initVueApp;
 })();
 
