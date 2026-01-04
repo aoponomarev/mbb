@@ -19,30 +19,92 @@
  * }
  */
 
-import { jsonResponse, handleOptions } from './utils/cors.js';
+import { jsonResponse, handleOptions, getCorsHeaders } from './utils/cors.js';
 import { requireAuth, createToken } from './utils/auth.js';
 import { createUser, getUserByGoogleId, getUser } from './utils/d1-helpers.js';
 
 /**
  * Обработка OAuth callback от Google
- * Обмен authorization code на JWT токен и сохранение пользователя в D1
+ * Поддерживает GET (редирект от Google) и POST (вызов от клиента)
  * @param {Request} request - HTTP запрос
  * @param {Object} env - Переменные окружения (DB, GOOGLE_CLIENT_SECRET, JWT_SECRET)
- * @returns {Promise<Response>} JSON ответ с токеном и данными пользователя
+ * @returns {Promise<Response>} JSON ответ с токеном или HTML с редиректом
  */
 async function handleCallback(request, env) {
-  if (request.method !== 'POST') {
-    return jsonResponse(
-      { error: 'Method Not Allowed' },
-      { status: 405 }
-    );
-  }
-
   try {
-    const body = await request.json();
-    const { code, redirect_uri } = body;
+    // #region agent log
+    fetch('http://127.0.0.1:7243/ingest/6397d191-f6f2-43f4-b4da-44a3482bedec',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'auth.js:35',message:'handleCallback entry',data:{method:request.method,url:request.url},timestamp:Date.now(),sessionId:'debug-session',hypothesisId:'A,B,C,D,E'})}).catch(()=>{});
+    // #endregion
+    // Проверка наличия secrets
+    if (!env.GOOGLE_CLIENT_SECRET) {
+      console.error('auth.handleCallback: GOOGLE_CLIENT_SECRET не установлен');
+      throw new Error('Google Client Secret не настроен. Используйте: wrangler secret put GOOGLE_CLIENT_SECRET');
+    }
+
+    if (!env.JWT_SECRET) {
+      console.error('auth.handleCallback: JWT_SECRET не установлен');
+      throw new Error('JWT Secret не настроен. Используйте: wrangler secret put JWT_SECRET');
+    }
+
+    let code, redirect_uri;
+    let clientUrl = 'http://localhost:8787'; // По умолчанию для локальной разработки
+
+    // Поддержка GET (редирект от Google) и POST (вызов от клиента)
+    if (request.method === 'GET') {
+      const url = new URL(request.url);
+      code = url.searchParams.get('code');
+      const stateParam = url.searchParams.get('state');
+
+      // Извлекаем client_url из state, если он передан
+      if (stateParam) {
+        try {
+          const stateObj = JSON.parse(stateParam);
+          if (stateObj && stateObj.client_url) {
+            // Используем переданный URL напрямую (может быть file:// или http://)
+            clientUrl = stateObj.client_url;
+            console.log('auth.handleCallback: извлечен client_url из state:', clientUrl);
+          }
+        } catch (e) {
+          // state не JSON, используем дефолтный URL
+          console.log('auth.handleCallback: ошибка парсинга state, используется дефолтный URL');
+        }
+      }
+
+      // #region agent log
+      fetch('http://127.0.0.1:7243/ingest/6397d191-f6f2-43f4-b4da-44a3482bedec',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'auth.js:68',message:'GET params extracted',data:{hasCode:!!code,redirect_uri:'https://mbb-api.ponomarev-ux.workers.dev/auth/callback',clientUrl},timestamp:Date.now(),sessionId:'debug-session',hypothesisId:'E'})}).catch(()=>{});
+      // #endregion
+      // Используем тот же redirect_uri, который был использован для инициации OAuth
+      // Это должен быть production URL, так как Google редиректит на production Worker
+      redirect_uri = 'https://mbb-api.ponomarev-ux.workers.dev/auth/callback';
+
+      // Для GET возвращаем HTML страницу, которая обработает токен
+      if (!code) {
+        return new Response(
+          '<!DOCTYPE html><html><head><title>OAuth Error</title></head><body><h1>Authorization code not found</h1></body></html>',
+          { status: 400, headers: { 'Content-Type': 'text/html' } }
+        );
+      }
+    } else if (request.method === 'POST') {
+      const body = await request.json();
+      code = body.code;
+      redirect_uri = body.redirect_uri;
+      if (body.client_url) {
+        clientUrl = body.client_url;
+      }
+    } else {
+      return jsonResponse(
+        { error: 'Method Not Allowed' },
+        { status: 405 }
+      );
+    }
 
     if (!code) {
+      if (request.method === 'GET') {
+        return new Response(
+          '<!DOCTYPE html><html><head><title>OAuth Error</title></head><body><h1>Authorization code not found</h1></body></html>',
+          { status: 400, headers: { 'Content-Type': 'text/html' } }
+        );
+      }
       return jsonResponse(
         { error: 'Authorization code is required' },
         { status: 400 }
@@ -50,9 +112,18 @@ async function handleCallback(request, env) {
     }
 
     // Обмен code на access token от Google
+    // #region agent log
+    fetch('http://127.0.0.1:7243/ingest/6397d191-f6f2-43f4-b4da-44a3482bedec',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'auth.js:93',message:'Before exchangeCodeWithGoogle',data:{hasCode:!!code,hasClientSecret:!!env.GOOGLE_CLIENT_SECRET,redirect_uri},timestamp:Date.now(),sessionId:'debug-session',hypothesisId:'A'})}).catch(()=>{});
+    // #endregion
     const googleTokenResponse = await exchangeCodeWithGoogle(code, redirect_uri, env.GOOGLE_CLIENT_SECRET);
+    // #region agent log
+    fetch('http://127.0.0.1:7243/ingest/6397d191-f6f2-43f4-b4da-44a3482bedec',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'auth.js:97',message:'After exchangeCodeWithGoogle',data:{hasAccessToken:!!googleTokenResponse.access_token,responseKeys:Object.keys(googleTokenResponse)},timestamp:Date.now(),sessionId:'debug-session',hypothesisId:'A'})}).catch(()=>{});
+    // #endregion
 
     if (!googleTokenResponse.access_token) {
+      // #region agent log
+      fetch('http://127.0.0.1:7243/ingest/6397d191-f6f2-43f4-b4da-44a3482bedec',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'auth.js:102',message:'No access token from Google',data:{googleTokenResponse},timestamp:Date.now(),sessionId:'debug-session',hypothesisId:'A'})}).catch(()=>{});
+      // #endregion
       return jsonResponse(
         { error: 'Failed to exchange code for token' },
         { status: 401 }
@@ -60,9 +131,26 @@ async function handleCallback(request, env) {
     }
 
     // Получение данных пользователя от Google
+    console.log('auth.handleCallback: получение данных пользователя от Google');
+    // #region agent log
+    fetch('http://127.0.0.1:7243/ingest/6397d191-f6f2-43f4-b4da-44a3482bedec',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'auth.js:115',message:'Before getUserInfoFromGoogle',data:{hasAccessToken:!!googleTokenResponse.access_token},timestamp:Date.now(),sessionId:'debug-session',hypothesisId:'C'})}).catch(()=>{});
+    // #endregion
     const userInfo = await getUserInfoFromGoogle(googleTokenResponse.access_token);
+    // #region agent log
+    fetch('http://127.0.0.1:7243/ingest/6397d191-f6f2-43f4-b4da-44a3482bedec',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'auth.js:119',message:'After getUserInfoFromGoogle',data:{hasUserInfo:!!userInfo,userInfoKeys:userInfo?Object.keys(userInfo):[]},timestamp:Date.now(),sessionId:'debug-session',hypothesisId:'C'})}).catch(()=>{});
+    // #endregion
+    console.log('auth.handleCallback: получен userInfo', {
+      hasUserInfo: !!userInfo,
+      hasId: !!userInfo?.id,
+      hasSub: !!userInfo?.sub,
+      keys: userInfo ? Object.keys(userInfo) : []
+    });
 
-    if (!userInfo || !userInfo.id) {
+    // Google API использует 'sub' вместо 'id' для идентификатора пользователя
+    const googleUserId = userInfo?.sub || userInfo?.id;
+
+    if (!userInfo || !googleUserId) {
+      console.error('auth.handleCallback: userInfo невалиден', { userInfo });
       return jsonResponse(
         { error: 'Failed to get user info from Google' },
         { status: 401 }
@@ -70,15 +158,38 @@ async function handleCallback(request, env) {
     }
 
     // Сохранение или обновление пользователя в D1
-    let user = await getUserByGoogleId(env.DB, userInfo.id);
+    console.log('auth.handleCallback: поиск пользователя в D1', { googleUserId });
+    // #region agent log
+    fetch('http://127.0.0.1:7243/ingest/6397d191-f6f2-43f4-b4da-44a3482bedec',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'auth.js:137',message:'Before getUserByGoogleId',data:{googleUserId,hasDB:!!env.DB},timestamp:Date.now(),sessionId:'debug-session',hypothesisId:'D'})}).catch(()=>{});
+    // #endregion
+    let user = await getUserByGoogleId(env.DB, googleUserId);
+    // #region agent log
+    fetch('http://127.0.0.1:7243/ingest/6397d191-f6f2-43f4-b4da-44a3482bedec',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'auth.js:141',message:'After getUserByGoogleId',data:{hasUser:!!user,userId:user?.id},timestamp:Date.now(),sessionId:'debug-session',hypothesisId:'D'})}).catch(()=>{});
+    // #endregion
 
     if (!user) {
+      console.log('auth.handleCallback: создание нового пользователя в D1', {
+        google_id: googleUserId,
+        email: userInfo.email
+      });
+      // #region agent log
+      fetch('http://127.0.0.1:7243/ingest/6397d191-f6f2-43f4-b4da-44a3482bedec',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'auth.js:151',message:'Before createUser',data:{googleUserId,email:userInfo.email},timestamp:Date.now(),sessionId:'debug-session',hypothesisId:'D'})}).catch(()=>{});
+      // #endregion
       user = await createUser(env.DB, {
-        google_id: userInfo.id,
+        google_id: googleUserId,
         email: userInfo.email,
         name: userInfo.name || null,
         picture: userInfo.picture || null,
       });
+      // #region agent log
+      fetch('http://127.0.0.1:7243/ingest/6397d191-f6f2-43f4-b4da-44a3482bedec',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'auth.js:159',message:'After createUser',data:{hasUser:!!user,userId:user?.id},timestamp:Date.now(),sessionId:'debug-session',hypothesisId:'D'})}).catch(()=>{});
+      // #endregion
+      console.log('auth.handleCallback: пользователь создан', {
+        userId: user?.id,
+        success: !!user
+      });
+    } else {
+      console.log('auth.handleCallback: пользователь найден в D1', { userId: user.id });
     }
 
     if (!user) {
@@ -89,6 +200,14 @@ async function handleCallback(request, env) {
     }
 
     // Создание JWT токена
+    console.log('auth.handleCallback: создание JWT токена', {
+      userId: user.id,
+      email: user.email,
+      hasJWTSecret: !!env.JWT_SECRET
+    });
+    // #region agent log
+    fetch('http://127.0.0.1:7243/ingest/6397d191-f6f2-43f4-b4da-44a3482bedec',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'auth.js:177',message:'Before createToken',data:{userId:user.id,hasJWTSecret:!!env.JWT_SECRET},timestamp:Date.now(),sessionId:'debug-session',hypothesisId:'B'})}).catch(()=>{});
+    // #endregion
     const jwtToken = await createToken(
       {
         user_id: user.id,
@@ -98,9 +217,16 @@ async function handleCallback(request, env) {
       env.JWT_SECRET,
       3600 // 1 час
     );
+    // #region agent log
+    fetch('http://127.0.0.1:7243/ingest/6397d191-f6f2-43f4-b4da-44a3482bedec',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'auth.js:189',message:'After createToken',data:{hasToken:!!jwtToken,tokenLength:jwtToken?.length},timestamp:Date.now(),sessionId:'debug-session',hypothesisId:'B'})}).catch(()=>{});
+    // #endregion
+    console.log('auth.handleCallback: JWT токен создан', {
+      hasToken: !!jwtToken,
+      tokenLength: jwtToken?.length
+    });
 
     // Возврат токена и данных пользователя
-    return jsonResponse({
+    const tokenData = {
       access_token: jwtToken,
       token_type: 'Bearer',
       expires_in: 3600,
@@ -110,9 +236,203 @@ async function handleCallback(request, env) {
         name: user.name,
         picture: user.picture,
       },
-    });
+    };
+
+    // Для GET запроса (редирект от Google) возвращаем HTML страницу с JavaScript
+    // которая сохранит токен и редиректит на клиентское приложение
+    if (request.method === 'GET') {
+      // clientUrl уже извлечен из state параметра выше
+
+      // HTML страница, которая сохранит токен в localStorage и редиректит на клиент
+      const html = `<!DOCTYPE html>
+<html>
+<head>
+    <title>Авторизация успешна</title>
+    <meta charset="UTF-8">
+</head>
+<body>
+    <h1>Авторизация успешна! Перенаправление...</h1>
+    <script>
+        try {
+            // Сохраняем токен в localStorage через postMessage (если это popup) или напрямую
+            const tokenData = ${JSON.stringify(tokenData)};
+
+            // Сохраняем токен в localStorage (работает независимо от origin)
+            try {
+                localStorage.setItem('auth-token', JSON.stringify(tokenData));
+                localStorage.setItem('auth-user', JSON.stringify(tokenData.user));
+                console.log('Token saved to localStorage');
+            } catch (e) {
+                console.error('Error saving token to localStorage:', e);
+            }
+
+            const targetUrl = '${clientUrl}';
+            const isFileProtocol = targetUrl.startsWith('file://');
+            const hasOpener = window.opener && !window.opener.closed;
+
+            console.log('OAuth callback:', {
+                targetUrl: targetUrl,
+                isFileProtocol: isFileProtocol,
+                hasOpener: hasOpener
+            });
+
+            // Пытаемся отправить postMessage обратно в исходное окно (если OAuth открыт через window.open)
+            if (hasOpener) {
+                try {
+                    // Отправляем сообщение обратно в исходное окно
+                    window.opener.postMessage({
+                        type: 'oauth-callback',
+                        success: true,
+                        token: tokenData
+                    }, '*'); // Используем '*' для поддержки file://
+
+                    console.log('postMessage отправлен в исходное окно');
+
+                    // Для http:// закрываем окно автоматически
+                    if (!isFileProtocol) {
+                        setTimeout(() => {
+                            window.close();
+                        }, 500);
+                    }
+
+                    // Для file:// показываем сообщение, что можно закрыть
+                    if (isFileProtocol) {
+                        document.body.innerHTML = \`
+                            <div style="font-family: Arial, sans-serif; max-width: 650px; margin: 50px auto; padding: 30px; text-align: center; background: #f9f9f9; border-radius: 8px; box-shadow: 0 2px 10px rgba(0,0,0,0.1);">
+                                <div style="font-size: 48px; color: #4CAF50; margin-bottom: 20px;">✓</div>
+                                <h1 style="color: #4CAF50; margin: 0 0 10px 0;">Авторизация успешна!</h1>
+                                <p style="font-size: 16px; color: #666; margin: 10px 0;">Токен сохранен и отправлен в приложение.</p>
+
+                                <div style="background: #4CAF50; color: white; padding: 20px; border-radius: 4px; margin: 30px 0;">
+                                    <p style="font-size: 16px; margin: 0;">
+                                        <strong>✓ Токен отправлен в приложение</strong>
+                                    </p>
+                                    <p style="font-size: 14px; margin: 10px 0 0 0; opacity: 0.9;">
+                                        Можете закрыть эту вкладку. Приложение обновится автоматически.
+                                    </p>
+                                </div>
+
+                                <div style="margin-top: 30px; padding-top: 20px; border-top: 1px solid #ddd;">
+                                    <p style="font-size: 12px; color: #999; margin: 5px 0;">
+                                        Если приложение не обновилось автоматически, обновите страницу вручную (F5)
+                                    </p>
+                                </div>
+                            </div>
+                        \`;
+                    }
+                } catch (e) {
+                    console.error('Ошибка отправки postMessage:', e);
+                    // Fallback к обычной инструкции
+                    hasOpener = false;
+                }
+            }
+
+            // Если нет opener (обычный редирект), используем старую логику
+            if (!hasOpener) {
+                // Для file:// протокола браузер блокирует редирект с https:// на file://
+                // Поэтому показываем инструкцию для ручного возврата
+                if (isFileProtocol) {
+                    document.body.innerHTML = \`
+                        <div style="font-family: Arial, sans-serif; max-width: 650px; margin: 50px auto; padding: 30px; text-align: center; background: #f9f9f9; border-radius: 8px; box-shadow: 0 2px 10px rgba(0,0,0,0.1);">
+                            <div style="font-size: 48px; color: #4CAF50; margin-bottom: 20px;">✓</div>
+                            <h1 style="color: #4CAF50; margin: 0 0 10px 0;">Авторизация успешна!</h1>
+                            <p style="font-size: 16px; color: #666; margin: 10px 0;">Токен сохранен в localStorage.</p>
+
+                            <div style="background: #e3f2fd; border: 1px solid #2196F3; border-radius: 4px; padding: 20px; margin: 30px 0; text-align: left;">
+                                <div style="font-size: 18px; color: #1976D2; margin-bottom: 15px; text-align: center;">
+                                    <strong>📋 Что делать дальше:</strong>
+                                </div>
+                                <ol style="font-size: 15px; color: #1976D2; margin: 10px 0 0 20px; line-height: 1.8;">
+                                    <li style="margin: 8px 0;"><strong>Закройте</strong> это окно или вкладку</li>
+                                    <li style="margin: 8px 0;"><strong>Вернитесь</strong> к вкладке с приложением</li>
+                                    <li style="margin: 8px 0;"><strong>Обновите</strong> страницу (нажмите F5)</li>
+                                    <li style="margin: 8px 0;">Вы будете <strong>авторизованы автоматически</strong> ✓</li>
+                                </ol>
+                            </div>
+
+                            <div style="background: #fff3cd; border: 1px solid #ffc107; border-radius: 4px; padding: 15px; margin: 20px 0;">
+                                <p style="font-size: 13px; color: #856404; margin: 0;">
+                                    <strong>⚠️ Примечание:</strong> Браузер не позволяет автоматически вернуться к локальному файлу с веб-страницы по соображениям безопасности.
+                                </p>
+                            </div>
+
+                            <div style="margin-top: 30px; padding-top: 20px; border-top: 1px solid #ddd;">
+                                <p style="font-size: 13px; color: #666; margin: 5px 0;">
+                                    <strong>💡 Совет для разработки:</strong>
+                                </p>
+                                <p style="font-size: 12px; color: #999; margin: 5px 0;">
+                                    Используйте локальный сервер для полноценной работы OAuth:
+                                </p>
+                                <code style="background: #f5f5f5; padding: 8px 12px; border-radius: 4px; display: inline-block; margin: 10px 0; font-size: 12px; color: #333;">
+                                    python -m http.server 8787
+                                </code>
+                                <p style="font-size: 11px; color: #aaa; margin: 5px 0;">
+                                    или установите расширение "Live Server" в VS Code
+                                </p>
+                            </div>
+                        </div>
+                    \`;
+                } else {
+                    // Для http:// протокола выполняем обычный редирект
+                    console.log('Redirecting to:', targetUrl);
+                    window.location.href = targetUrl;
+                }
+            }
+        } catch (error) {
+            console.error('Error saving token:', error);
+            document.body.innerHTML = '<h1>Ошибка при сохранении токена. Закройте это окно и попробуйте снова.</h1>';
+        }
+    </script>
+</body>
+</html>`;
+
+      // Создаем заголовки с CORS
+      const headers = new Headers();
+      headers.set('Content-Type', 'text/html; charset=UTF-8');
+      const corsHeaders = getCorsHeaders();
+      Object.entries(corsHeaders).forEach(([key, value]) => {
+        headers.set(key, value);
+      });
+
+      return new Response(html, {
+        status: 200,
+        headers: headers,
+      });
+    }
+
+    // Для POST запроса возвращаем JSON
+    return jsonResponse(tokenData);
   } catch (error) {
     console.error('auth.handleCallback error:', error);
+    console.error('auth.handleCallback error stack:', error.stack);
+    console.error('auth.handleCallback env check:', {
+      hasGOOGLE_CLIENT_SECRET: !!env.GOOGLE_CLIENT_SECRET,
+      hasJWT_SECRET: !!env.JWT_SECRET,
+      hasDB: !!env.DB
+    });
+
+    // Для GET возвращаем HTML с ошибкой
+    if (request.method === 'GET') {
+      const errorMessage = error.message || 'Неизвестная ошибка';
+      const html = `<!DOCTYPE html>
+<html>
+<head>
+    <title>Ошибка авторизации</title>
+    <meta charset="UTF-8">
+</head>
+<body>
+    <h1>Ошибка авторизации</h1>
+    <p>${errorMessage}</p>
+    <p>Закройте это окно и попробуйте снова.</p>
+    <p><small>Если ошибка повторяется, проверьте логи Worker через: wrangler tail</small></p>
+</body>
+</html>`;
+      return new Response(html, {
+        status: 500,
+        headers: { 'Content-Type': 'text/html; charset=UTF-8' },
+      });
+    }
+
     return jsonResponse(
       { error: 'Internal Server Error', message: error.message },
       { status: 500 }
@@ -131,6 +451,12 @@ async function exchangeCodeWithGoogle(code, redirectUri, clientSecret) {
   const GOOGLE_CLIENT_ID = '926359695878-hr94rhkq1s30c3nqgkcbfcpr0537kt7i.apps.googleusercontent.com';
   const GOOGLE_TOKEN_URL = 'https://oauth2.googleapis.com/token';
 
+  console.log('exchangeCodeWithGoogle: отправка запроса', {
+    client_id: GOOGLE_CLIENT_ID,
+    redirect_uri: redirectUri,
+    has_client_secret: !!clientSecret
+  });
+
   const response = await fetch(GOOGLE_TOKEN_URL, {
     method: 'POST',
     headers: {
@@ -147,10 +473,18 @@ async function exchangeCodeWithGoogle(code, redirectUri, clientSecret) {
 
   if (!response.ok) {
     const errorData = await response.json().catch(() => ({ error: 'Unknown error' }));
+    console.error('exchangeCodeWithGoogle: ошибка от Google', {
+      status: response.status,
+      error: errorData
+    });
     throw new Error(errorData.error_description || errorData.error || 'Failed to exchange code');
   }
 
-  return await response.json();
+  const tokenData = await response.json();
+  console.log('exchangeCodeWithGoogle: успешно получен токен', {
+    has_access_token: !!tokenData.access_token
+  });
+  return tokenData;
 }
 
 /**
@@ -161,6 +495,11 @@ async function exchangeCodeWithGoogle(code, redirectUri, clientSecret) {
 async function getUserInfoFromGoogle(accessToken) {
   const GOOGLE_USERINFO_URL = 'https://www.googleapis.com/oauth2/v2/userinfo';
 
+  console.log('getUserInfoFromGoogle: запрос данных пользователя', {
+    url: GOOGLE_USERINFO_URL,
+    hasAccessToken: !!accessToken
+  });
+
   const response = await fetch(GOOGLE_USERINFO_URL, {
     headers: {
       Authorization: `Bearer ${accessToken}`,
@@ -168,10 +507,21 @@ async function getUserInfoFromGoogle(accessToken) {
   });
 
   if (!response.ok) {
-    throw new Error('Failed to get user info from Google');
+    const errorData = await response.json().catch(() => ({ error: 'Unknown error' }));
+    console.error('getUserInfoFromGoogle: ошибка от Google', {
+      status: response.status,
+      error: errorData
+    });
+    throw new Error(`Failed to get user info from Google: ${errorData.error || response.statusText}`);
   }
 
-  return await response.json();
+  const userInfo = await response.json();
+  console.log('getUserInfoFromGoogle: успешно получены данные', {
+    hasSub: !!userInfo.sub,
+    hasId: !!userInfo.id,
+    email: userInfo.email
+  });
+  return userInfo;
 }
 
 /**

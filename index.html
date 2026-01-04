@@ -286,11 +286,162 @@
                             Тестирование этапов интеграции Google OAuth + Cloudflare R2 + D1.
                             Здесь будут тестироваться компоненты авторизации, работы с портфелями и датасетами.
                         </p>
-                        <div class="alert alert-info mb-3">
-                            <small>
-                                <strong>Статус:</strong> Интеграция в разработке. Компоненты будут добавляться по мере реализации этапов плана.
-                            </small>
+
+                        <!-- Шаг 1: Проверка загрузки модулей -->
+                        <div class="mb-3 p-3 border rounded bg-light">
+                            <h5 class="mb-2">Шаг 1: Проверка загрузки модулей</h5>
+                            <p class="text-muted small mb-2">Проверяем, что все модули загружены и доступны.</p>
+                            <div class="d-flex gap-2 mb-2">
+                                <cmp-button
+                                    label="Проверить модули"
+                                    variant="outline-primary"
+                                    size="sm"
+                                    @click="testStep1_CheckModules">
+                                </cmp-button>
+                            </div>
+                            <div v-if="testStep1Result" class="mt-2">
+                                <div v-if="testStep1Result.success" class="alert alert-success alert-sm mb-0">
+                                    <small>{{ testStep1Result.message }}</small>
+                                </div>
+                                <div v-else class="alert alert-danger alert-sm mb-0">
+                                    <small>{{ testStep1Result.message }}</small>
+                                </div>
+                            </div>
                         </div>
+
+                        <!-- Шаг 2: Проверка feature flags -->
+                        <div class="mb-3 p-3 border rounded bg-light">
+                            <h5 class="mb-2">Шаг 2: Проверка feature flags</h5>
+                            <p class="text-muted small mb-2">Проверяем, что feature flags включены.</p>
+                            <div class="d-flex gap-2 mb-2">
+                                <cmp-button
+                                    label="Проверить feature flags"
+                                    variant="outline-primary"
+                                    size="sm"
+                                    @click="testStep2_CheckFeatureFlags">
+                                </cmp-button>
+                            </div>
+                            <div v-if="testStep2Result" class="mt-2">
+                                <div v-if="testStep2Result.success" class="alert alert-success alert-sm mb-0">
+                                    <small>{{ testStep2Result.message }}</small>
+                                </div>
+                                <div v-else class="alert alert-danger alert-sm mb-0">
+                                    <small>{{ testStep2Result.message }}</small>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Шаг 3: Проверка компонента auth-button -->
+                        <div class="mb-3 p-3 border rounded bg-light">
+                            <h5 class="mb-2">Шаг 3: Проверка компонента auth-button</h5>
+                            <p class="text-muted small mb-2">Проверяем, что компонент auth-button загружен и доступен.</p>
+                            <div class="d-flex gap-2 mb-2">
+                                <cmp-button
+                                    label="Проверить auth-button"
+                                    variant="outline-primary"
+                                    size="sm"
+                                    @click="testStep3_CheckAuthButton">
+                                </cmp-button>
+                            </div>
+                            <div v-if="testStep3Result" class="mt-2">
+                                <div v-if="testStep3Result.success" class="alert alert-success alert-sm mb-0">
+                                    <small>{{ testStep3Result.message }}</small>
+                                </div>
+                                <div v-else class="alert alert-danger alert-sm mb-0">
+                                    <small>{{ testStep3Result.message }}</small>
+                                </div>
+                            </div>
+                            <div v-if="testStep3Result && testStep3Result.hasAuthButton" class="mt-2">
+                                <small class="text-muted">
+                                    <strong>Где смотреть:</strong> Компонент auth-button должен отображаться в правом верхнем углу header (справа от меню, перед кнопкой настроек).
+                                    <br>Если авторизован — dropdown с профилем (аватар, имя, email, кнопка "Выйти").
+                                    <br>Если не авторизован — кнопка "Войти через Google".
+                                </small>
+                            </div>
+                        </div>
+
+                        <!-- Шаг 4: Проверка состояния авторизации -->
+                        <div class="mb-3 p-3 border rounded bg-light">
+                            <h5 class="mb-2">Шаг 4: Проверка состояния авторизации</h5>
+                            <p class="text-muted small mb-2">Проверяем текущее состояние авторизации и данные пользователя.</p>
+                            <div class="d-flex gap-2 mb-2">
+                                <cmp-button
+                                    label="Проверить авторизацию"
+                                    variant="outline-primary"
+                                    size="sm"
+                                    @click="testStep4_CheckAuthStatus">
+                                </cmp-button>
+                            </div>
+                            <div v-if="testStep4Result" class="mt-2">
+                                <div v-if="testStep4Result.success" class="alert alert-success alert-sm mb-0">
+                                    <small>{{ testStep4Result.message }}</small>
+                                </div>
+                                <div v-else class="alert alert-danger alert-sm mb-0">
+                                    <small>{{ testStep4Result.message }}</small>
+                                </div>
+                            </div>
+                            <div v-if="testStep4Result && testStep4Result.userData" class="mt-2 p-2 bg-white border rounded">
+                                <small>
+                                    <strong>Данные пользователя:</strong><br>
+                                    <span v-if="testStep4Result.userData.email">Email: {{ testStep4Result.userData.email }}<br></span>
+                                    <span v-if="testStep4Result.userData.name">Имя: {{ testStep4Result.userData.name }}<br></span>
+                                    <span v-if="testStep4Result.userData.picture">Avatar: {{ testStep4Result.userData.picture }}<br></span>
+                                </small>
+                            </div>
+                        </div>
+
+                        <!-- Шаг 5: Тестирование OAuth flow (инициация входа) -->
+                        <div class="mb-3 p-3 border rounded bg-light">
+                            <h5 class="mb-2">Шаг 5: Инициация входа через Google</h5>
+                            <p class="text-muted small mb-2">Нажимаем кнопку "Войти через Google" для начала OAuth flow.</p>
+                            <div class="alert alert-warning alert-sm mb-2">
+                                <small>
+                                    <strong>Внимание:</strong> После нажатия произойдет редирект на страницу Google OAuth.
+                                    Вы будете перенаправлены обратно после авторизации.
+                                </small>
+                            </div>
+                            <div class="d-flex gap-2 mb-2">
+                                <cmp-button
+                                    label="Войти через Google"
+                                    icon="fab fa-google"
+                                    variant="primary"
+                                    size="sm"
+                                    :disabled="testStep4Result && testStep4Result.isAuthenticated"
+                                    @click="testStep5_InitiateLogin">
+                                </cmp-button>
+                            </div>
+                            <div v-if="testStep5Result" class="mt-2">
+                                <div v-if="testStep5Result.success" class="alert alert-success alert-sm mb-0">
+                                    <small>{{ testStep5Result.message }}</small>
+                                </div>
+                                <div v-else class="alert alert-danger alert-sm mb-0">
+                                    <small>{{ testStep5Result.message }}</small>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Шаг 6: Компонент управления портфелями -->
+                        <div class="mb-3 p-3 border rounded bg-light">
+                            <h5 class="mb-2">Шаг 6: Компонент управления портфелями</h5>
+                            <p class="text-muted small mb-2">Проверяем загрузку и доступность компонента portfolios-manager.</p>
+                            <div class="d-flex gap-2 mb-2">
+                                <cmp-button
+                                    label="Проверить portfolios-manager"
+                                    variant="outline-primary"
+                                    size="sm"
+                                    @click="testStep6_CheckPortfoliosManager">
+                                </cmp-button>
+                            </div>
+                            <div v-if="testStep6Result" class="mt-2">
+                                <div v-if="testStep6Result.success" class="alert alert-success alert-sm mb-0">
+                                    <small>{{ testStep6Result.message }}</small>
+                                </div>
+                                <div v-else class="alert alert-danger alert-sm mb-0">
+                                    <small>{{ testStep6Result.message }}</small>
+                                </div>
+                            </div>
+                        </div>
+
                         <!-- Компонент управления портфелями (условно) -->
                         <portfolios-manager
                             v-if="isPortfoliosEnabled"

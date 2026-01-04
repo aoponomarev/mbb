@@ -551,10 +551,18 @@
                 condition: () => window.appConfig && window.appConfig.isFeatureEnabled('auth')
             },
             {
+                id: 'portfolio-modal-body',
+                src: 'app/components/portfolio-modal-body.js',
+                type: 'local',
+                deps: ['vue', 'button'],
+                category: 'components',
+                condition: () => window.appConfig && window.appConfig.isFeatureEnabled('portfolios') && window.appConfig.isFeatureEnabled('cloudSync')
+            },
+            {
                 id: 'portfolios-manager',
                 src: 'app/components/portfolios-manager.js',
                 type: 'local',
-                deps: ['vue', 'button', 'modal', 'modal-buttons', 'portfolios-client'],
+                deps: ['vue', 'button', 'modal', 'portfolio-modal-body', 'portfolios-client'],
                 category: 'components',
                 condition: () => window.appConfig && window.appConfig.isFeatureEnabled('portfolios') && window.appConfig.isFeatureEnabled('cloudSync')
             }

@@ -126,81 +126,25 @@
                 :title="modalTitle"
                 ref="portfolioModal"
             >
+                <template #header>
+                    <h5 class="modal-title">{{ modalTitle }}</h5>
+                    <button type="button" class="btn-close" aria-label="Закрыть" data-bs-dismiss="modal"></button>
+                </template>
                 <template #body>
-                    <form @submit.prevent="savePortfolio">
-                        <div class="mb-3">
-                            <label for="portfolio-name" class="form-label">Название портфеля *</label>
-                            <input
-                                type="text"
-                                class="form-control"
-                                id="portfolio-name"
-                                v-model="formData.name"
-                                required
-                                placeholder="Введите название портфеля"
-                            />
-                        </div>
-                        <div class="mb-3">
-                            <label for="portfolio-description" class="form-label">Описание</label>
-                            <textarea
-                                class="form-control"
-                                id="portfolio-description"
-                                v-model="formData.description"
-                                rows="3"
-                                placeholder="Введите описание портфеля (необязательно)"
-                            ></textarea>
-                        </div>
-                        <div class="mb-3">
-                            <label class="form-label">Активы портфеля</label>
-                            <div v-if="formData.assets && formData.assets.length > 0" class="mb-2">
-                                <div
-                                    v-for="(asset, index) in formData.assets"
-                                    :key="index"
-                                    class="d-flex align-items-center gap-2 mb-2"
-                                >
-                                    <input
-                                        type="text"
-                                        class="form-control form-control-sm"
-                                        v-model="asset.coinId"
-                                        placeholder="ID монеты"
-                                    />
-                                    <input
-                                        type="number"
-                                        class="form-control form-control-sm"
-                                        v-model.number="asset.weight"
-                                        placeholder="Вес (0-1)"
-                                        min="0"
-                                        max="1"
-                                        step="0.01"
-                                    />
-                                    <cmp-button
-                                        label=""
-                                        icon="fas fa-times"
-                                        variant="outline-danger"
-                                        size="sm"
-                                        @click="removeAsset(index)"
-                                        button-id="'remove-asset-' + index"
-                                    />
-                                </div>
-                            </div>
-                            <cmp-button
-                                label="Добавить актив"
-                                icon="fas fa-plus"
-                                variant="outline-primary"
-                                size="sm"
-                                @click="addAsset"
-                                button-id="add-asset-button"
-                            />
-                        </div>
-                    </form>
+                    <portfolio-modal-body
+                        v-model:name="formData.name"
+                        v-model:description="formData.description"
+                        v-model:assets="formData.assets"
+                        :initial-name="initialFormData.name"
+                        :initial-description="initialFormData.description"
+                        :initial-assets="initialFormData.assets"
+                        :is-editing="isEditing"
+                        :on-save="handleSave"
+                        :on-cancel="handleCancel"
+                    />
                 </template>
                 <template #footer>
-                    <cmp-modal-buttons
-                        :cancel-label="'Отмена'"
-                        :save-label="isEditing ? 'Сохранить' : 'Создать'"
-                        :save-disabled="!isFormValid"
-                        @cancel="cancelEdit"
-                        @save="savePortfolio"
-                    />
+                    <cmp-modal-buttons location="footer" />
                 </template>
             </cmp-modal>
         </div>

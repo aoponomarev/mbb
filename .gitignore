@@ -8,3 +8,6 @@ do-overs/
 # Папка .cursor с debug логами
 .cursor/
 # drafts/ - НЕ игнорируется, чтобы Git отслеживал файлы для коммитов
+
+# Кэш статистики проекта
+docs/.stats-cache.json

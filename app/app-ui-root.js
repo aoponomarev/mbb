@@ -53,15 +53,27 @@
         }
 
         // Проверка feature flags для условной загрузки компонентов
+        // #region agent log
+        fetch('http://127.0.0.1:7243/ingest/6397d191-f6f2-43f4-b4da-44a3482bedec',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'app-ui-root.js:56',message:'Проверка feature flags в app-ui-root',data:{hasAppConfig:!!window.appConfig,hasAuthButton:!!window.authButton,hasPortfoliosManager:!!window.portfoliosManager},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'C'})}).catch(()=>{});
+        // #endregion
         const authEnabled = window.appConfig && window.appConfig.isFeatureEnabled('auth');
         const portfoliosEnabled = window.appConfig && window.appConfig.isFeatureEnabled('portfolios') && window.appConfig.isFeatureEnabled('cloudSync');
+        // #region agent log
+        fetch('http://127.0.0.1:7243/ingest/6397d191-f6f2-43f4-b4da-44a3482bedec',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'app-ui-root.js:59',message:'Результаты проверки feature flags',data:{authEnabled:authEnabled,portfoliosEnabled:portfoliosEnabled},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'C'})}).catch(()=>{});
+        // #endregion
 
         if (authEnabled && !window.authButton) {
             console.warn('app-ui-root: auth-button не загружен, хотя feature flag auth включен');
+            // #region agent log
+            fetch('http://127.0.0.1:7243/ingest/6397d191-f6f2-43f4-b4da-44a3482bedec',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'app-ui-root.js:62',message:'auth-button отсутствует',data:{authEnabled:authEnabled,hasAuthButton:!!window.authButton},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'C'})}).catch(()=>{});
+            // #endregion
         }
 
         if (portfoliosEnabled && !window.portfoliosManager) {
             console.warn('app-ui-root: portfolios-manager не загружен, хотя feature flags portfolios и cloudSync включены');
+            // #region agent log
+            fetch('http://127.0.0.1:7243/ingest/6397d191-f6f2-43f4-b4da-44a3482bedec',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'app-ui-root.js:67',message:'portfolios-manager отсутствует',data:{portfoliosEnabled:portfoliosEnabled,hasPortfoliosManager:!!window.portfoliosManager},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'C'})}).catch(()=>{});
+            // #endregion
         }
 
         const { createApp } = Vue;
@@ -81,6 +93,7 @@
                 'ai-api-settings': window.aiApiSettings,
                 // Условная регистрация компонентов авторизации и портфелей
                 ...(window.authButton ? { 'auth-button': window.authButton } : {}),
+                ...(window.portfolioModalBody ? { 'portfolio-modal-body': window.portfolioModalBody } : {}),
                 ...(window.portfoliosManager ? { 'portfolios-manager': window.portfoliosManager } : {}),
                 'app-header': window.appHeader,
                 'app-footer': window.appFooter
@@ -213,7 +226,14 @@
                     yandexTestInputQuery: '',
                     yandexTestResponse: '',
                     yandexTestLoading: false,
-                    yandexTestError: '' // Используем пустую строку вместо null для лучшей реактивности Vue
+                    yandexTestError: '', // Используем пустую строку вместо null для лучшей реактивности Vue
+                    // Тестирование Google-Cloudflare интеграции
+                    testStep1Result: null,
+                    testStep2Result: null,
+                    testStep3Result: null,
+                    testStep4Result: null,
+                    testStep5Result: null,
+                    testStep6Result: null
                 };
             },
             watch: {
@@ -243,8 +263,33 @@
                         // #endregion
                     },
                     immediate: false // Убираем immediate, чтобы избежать мелькания при инициализации
-                }
+                },
                 // #endregion
+                // Watcher для отслеживания успешной авторизации через изменение testStep4Result
+                'testStep4Result.isAuthenticated': {
+                    handler(newVal, oldVal) {
+                        // #region agent log
+                        fetch('http://127.0.0.1:7243/ingest/6397d191-f6f2-43f4-b4da-44a3482bedec',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'app-ui-root.js:watch-isAuthenticated',message:'isAuthenticated changed',data:{newVal,oldVal,hasUserData:!!this.testStep4Result?.userData},timestamp:Date.now(),sessionId:'debug-session',hypothesisId:'login-success'})}).catch(()=>{});
+                        // #endregion
+
+                        // Если пользователь успешно авторизован, но testStep5Result еще не обновлен через handleAuthLogin
+                        if (newVal === true && oldVal === false && this.testStep4Result && this.testStep4Result.userData) {
+                            // Обновляем testStep5Result для отображения успешной авторизации
+                            if (!this.testStep5Result || !this.testStep5Result.success) {
+                                const userEmail = this.testStep4Result.userData.email || 'неизвестен';
+                                const userName = this.testStep4Result.userData.name || userEmail;
+                                this.testStep5Result = {
+                                    success: true,
+                                    message: `✓ Авторизация успешна! Пользователь ${userName} (${userEmail}) авторизован.`
+                                };
+                                // #region agent log
+                                fetch('http://127.0.0.1:7243/ingest/6397d191-f6f2-43f4-b4da-44a3482bedec',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'app-ui-root.js:watch-isAuthenticated',message:'testStep5Result updated via watcher',data:{userEmail,userName},timestamp:Date.now(),sessionId:'debug-session',hypothesisId:'login-success'})}).catch(()=>{});
+                                // #endregion
+                            }
+                        }
+                    },
+                    immediate: false
+                }
             },
             methods: {
                 /**
@@ -297,7 +342,29 @@
                  * @param {Object} tokenData - Данные токена и пользователя
                  */
                 handleAuthLogin(tokenData) {
+                    // #region agent log
+                    fetch('http://127.0.0.1:7243/ingest/6397d191-f6f2-43f4-b4da-44a3482bedec',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'app-ui-root.js:handleAuthLogin',message:'Login success event received',data:{hasTokenData:!!tokenData,hasAccessToken:!!tokenData?.access_token},timestamp:Date.now(),sessionId:'debug-session',hypothesisId:'login-success'})}).catch(()=>{});
+                    // #endregion
                     console.log('app-ui-root: пользователь успешно авторизован', tokenData);
+
+                    // Обновляем testStep5Result для отображения успешной авторизации на тестовой карточке
+                    if (tokenData && tokenData.access_token) {
+                        const userEmail = tokenData.user?.email || 'неизвестен';
+                        const userName = tokenData.user?.name || userEmail;
+                        this.testStep5Result = {
+                            success: true,
+                            message: `✓ Авторизация успешна! Пользователь ${userName} (${userEmail}) авторизован. Токен сохранен.`
+                        };
+                        // #region agent log
+                        fetch('http://127.0.0.1:7243/ingest/6397d191-f6f2-43f4-b4da-44a3482bedec',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'app-ui-root.js:handleAuthLogin',message:'testStep5Result updated',data:{userEmail,userName},timestamp:Date.now(),sessionId:'debug-session',hypothesisId:'login-success'})}).catch(()=>{});
+                        // #endregion
+
+                        // Автоматически обновляем testStep4Result, чтобы отобразить информацию о пользователе
+                        this.$nextTick(async () => {
+                            await this.testStep4_CheckAuthStatus();
+                        });
+                    }
+
                     // Можно добавить дополнительную логику при входе
                     // Например, загрузку портфелей пользователя
                 },
@@ -570,6 +637,194 @@
                 handlePortfolioDeleted(portfolioId) {
                     console.log('app-ui-root: портфель удалён', portfolioId);
                     // Можно добавить дополнительную логику при удалении портфеля
+                },
+
+                /**
+                 * Шаг 1: Проверка загрузки модулей
+                 */
+                testStep1_CheckModules() {
+                    // #region agent log
+                    fetch('http://127.0.0.1:7243/ingest/6397d191-f6f2-43f4-b4da-44a3482bedec',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'app-ui-root.js:testStep1',message:'Проверка загрузки модулей',data:{hasAuthClient:!!window.authClient,hasPortfoliosClient:!!window.portfoliosClient,hasAuthButton:!!window.authButton,hasPortfoliosManager:!!window.portfoliosManager},timestamp:Date.now(),sessionId:'debug-session',runId:'test-step1'})}).catch(()=>{});
+                    // #endregion
+                    const checks = [];
+                    if (window.authClient) checks.push('✓ auth-client загружен');
+                    else checks.push('✗ auth-client НЕ загружен');
+                    if (window.portfoliosClient) checks.push('✓ portfolios-client загружен');
+                    else checks.push('✗ portfolios-client НЕ загружен');
+                    if (window.authButton) checks.push('✓ auth-button загружен');
+                    else checks.push('✗ auth-button НЕ загружен');
+                    if (window.portfoliosManager) checks.push('✓ portfolios-manager загружен');
+                    else checks.push('✗ portfolios-manager НЕ загружен');
+
+                    const allLoaded = window.authClient && window.portfoliosClient && window.authButton && window.portfoliosManager;
+                    this.testStep1Result = {
+                        success: allLoaded,
+                        message: checks.join(' | ')
+                    };
+                },
+
+                /**
+                 * Шаг 2: Проверка feature flags
+                 */
+                testStep2_CheckFeatureFlags() {
+                    // #region agent log
+                    fetch('http://127.0.0.1:7243/ingest/6397d191-f6f2-43f4-b4da-44a3482bedec',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'app-ui-root.js:testStep2',message:'Проверка feature flags',data:{hasAppConfig:!!window.appConfig,authEnabled:window.appConfig?window.appConfig.isFeatureEnabled('auth'):false,cloudSyncEnabled:window.appConfig?window.appConfig.isFeatureEnabled('cloudSync'):false,portfoliosEnabled:window.appConfig?window.appConfig.isFeatureEnabled('portfolios'):false},timestamp:Date.now(),sessionId:'debug-session',runId:'test-step2'})}).catch(()=>{});
+                    // #endregion
+                    if (!window.appConfig) {
+                        this.testStep2Result = {
+                            success: false,
+                            message: '✗ appConfig не загружен'
+                        };
+                        return;
+                    }
+                    const authEnabled = window.appConfig.isFeatureEnabled('auth');
+                    const cloudSyncEnabled = window.appConfig.isFeatureEnabled('cloudSync');
+                    const portfoliosEnabled = window.appConfig.isFeatureEnabled('portfolios');
+
+                    const checks = [];
+                    checks.push(authEnabled ? '✓ auth: включен' : '✗ auth: выключен');
+                    checks.push(cloudSyncEnabled ? '✓ cloudSync: включен' : '✗ cloudSync: выключен');
+                    checks.push(portfoliosEnabled ? '✓ portfolios: включен' : '✗ portfolios: выключен');
+
+                    const allEnabled = authEnabled && cloudSyncEnabled && portfoliosEnabled;
+                    this.testStep2Result = {
+                        success: allEnabled,
+                        message: checks.join(' | ')
+                    };
+                },
+
+                /**
+                 * Шаг 3: Проверка компонента auth-button
+                 */
+                testStep3_CheckAuthButton() {
+                    // #region agent log
+                    fetch('http://127.0.0.1:7243/ingest/6397d191-f6f2-43f4-b4da-44a3482bedec',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'app-ui-root.js:testStep3',message:'Проверка auth-button',data:{hasAuthButton:!!window.authButton,hasAuthClient:!!window.authClient},timestamp:Date.now(),sessionId:'debug-session',runId:'test-step3'})}).catch(()=>{});
+                    // #endregion
+                    if (!window.authButton) {
+                        this.testStep3Result = {
+                            success: false,
+                            hasAuthButton: false,
+                            message: '✗ auth-button не загружен. Проверьте консоль на наличие ошибок загрузки модулей.'
+                        };
+                        return;
+                    }
+                    if (!window.authClient) {
+                        this.testStep3Result = {
+                            success: false,
+                            hasAuthButton: true,
+                            message: '⚠ auth-button загружен, но auth-client отсутствует'
+                        };
+                        return;
+                    }
+                    this.testStep3Result = {
+                        success: true,
+                        hasAuthButton: true,
+                        message: '✓ auth-button загружен и доступен. Компонент должен отображаться в header справа.'
+                    };
+                },
+
+                /**
+                 * Шаг 4: Проверка состояния авторизации
+                 */
+                async testStep4_CheckAuthStatus() {
+                    // #region agent log
+                    fetch('http://127.0.0.1:7243/ingest/6397d191-f6f2-43f4-b4da-44a3482bedec',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'app-ui-root.js:testStep4',message:'Начало проверки авторизации',data:{hasAuthClient:!!window.authClient},timestamp:Date.now(),sessionId:'debug-session',runId:'test-step4'})}).catch(()=>{});
+                    // #endregion
+                    if (!window.authClient) {
+                        this.testStep4Result = {
+                            success: false,
+                            message: '✗ auth-client не загружен'
+                        };
+                        return;
+                    }
+                    try {
+                        const isAuthenticated = await window.authClient.isAuthenticated();
+                        // #region agent log
+                        fetch('http://127.0.0.1:7243/ingest/6397d191-f6f2-43f4-b4da-44a3482bedec',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'app-ui-root.js:testStep4',message:'Результат isAuthenticated',data:{isAuthenticated:isAuthenticated},timestamp:Date.now(),sessionId:'debug-session',runId:'test-step4'})}).catch(()=>{});
+                        // #endregion
+                        let userData = null;
+                        if (isAuthenticated) {
+                            userData = await window.authClient.getCurrentUser();
+                            // #region agent log
+                            fetch('http://127.0.0.1:7243/ingest/6397d191-f6f2-43f4-b4da-44a3482bedec',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'app-ui-root.js:testStep4',message:'Результат getCurrentUser',data:{hasUser:userData!==null,hasEmail:userData&&userData.email?true:false},timestamp:Date.now(),sessionId:'debug-session',runId:'test-step4'})}).catch(()=>{});
+                            // #endregion
+                        }
+                        this.testStep4Result = {
+                            success: true,
+                            isAuthenticated: isAuthenticated,
+                            userData: userData,
+                            message: isAuthenticated
+                                ? `✓ Авторизован${userData ? ` как ${userData.email || userData.name || 'пользователь'}` : ' (но user === null)'}`
+                                : '○ Не авторизован'
+                        };
+                    } catch (error) {
+                        this.testStep4Result = {
+                            success: false,
+                            message: `✗ Ошибка проверки авторизации: ${error.message}`
+                        };
+                    }
+                },
+
+                /**
+                 * Шаг 5: Инициация входа через Google
+                 */
+                testStep5_InitiateLogin() {
+                    // #region agent log
+                    fetch('http://127.0.0.1:7243/ingest/6397d191-f6f2-43f4-b4da-44a3482bedec',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'app-ui-root.js:testStep5',message:'Инициация входа через Google',data:{hasAuthClient:!!window.authClient},timestamp:Date.now(),sessionId:'debug-session',runId:'test-step5'})}).catch(()=>{});
+                    // #endregion
+                    if (!window.authClient) {
+                        this.testStep5Result = {
+                            success: false,
+                            message: '✗ auth-client не загружен'
+                        };
+                        return;
+                    }
+                    try {
+                        window.authClient.initiateGoogleAuth();
+                        this.testStep5Result = {
+                            success: true,
+                            message: '✓ Редирект на Google OAuth инициирован. Вы будете перенаправлены на страницу авторизации Google.'
+                        };
+                    } catch (error) {
+                        this.testStep5Result = {
+                            success: false,
+                            message: `✗ Ошибка инициации входа: ${error.message}`
+                        };
+                    }
+                },
+
+                /**
+                 * Шаг 6: Проверка компонента portfolios-manager
+                 */
+                testStep6_CheckPortfoliosManager() {
+                    // #region agent log
+                    fetch('http://127.0.0.1:7243/ingest/6397d191-f6f2-43f4-b4da-44a3482bedec',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'app-ui-root.js:testStep6',message:'Проверка portfolios-manager',data:{hasPortfoliosManager:!!window.portfoliosManager,hasPortfoliosClient:!!window.portfoliosClient,isPortfoliosEnabled:this.isPortfoliosEnabled},timestamp:Date.now(),sessionId:'debug-session',runId:'test-step6'})}).catch(()=>{});
+                    // #endregion
+                    if (!window.portfoliosManager) {
+                        this.testStep6Result = {
+                            success: false,
+                            message: '✗ portfolios-manager не загружен. Проверьте консоль на наличие ошибок загрузки модулей.'
+                        };
+                        return;
+                    }
+                    if (!window.portfoliosClient) {
+                        this.testStep6Result = {
+                            success: false,
+                            message: '⚠ portfolios-manager загружен, но portfolios-client отсутствует'
+                        };
+                        return;
+                    }
+                    if (!this.isPortfoliosEnabled) {
+                        this.testStep6Result = {
+                            success: false,
+                            message: '⚠ portfolios-manager загружен, но feature flags не включены или пользователь не авторизован'
+                        };
+                        return;
+                    }
+                    this.testStep6Result = {
+                        success: true,
+                        message: '✓ portfolios-manager загружен и доступен. Компонент должен отображаться ниже.'
+                    };
                 }
             },
 

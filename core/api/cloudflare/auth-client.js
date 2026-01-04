@@ -103,8 +103,26 @@
     function initiateGoogleAuth(env = null) {
         try {
             // Генерация state для защиты от CSRF
-            const state = generateState();
-            saveState(state);
+            const stateBase = generateState();
+
+            // Добавляем URL клиентского приложения в state для правильного редиректа
+            // Для file:// сохраняем полный путь с href, для http:// используем origin
+            let clientUrl;
+            if (window.location.protocol === 'file:') {
+                // Для file:// сохраняем полный путь к файлу
+                clientUrl = window.location.href;
+                console.log('auth-client: обнаружен file:// протокол, сохраняем полный путь:', clientUrl);
+            } else {
+                // Для http:// используем origin
+                clientUrl = window.location.origin;
+            }
+
+            const state = JSON.stringify({
+                csrf: stateBase,
+                client_url: clientUrl
+            });
+
+            saveState(stateBase);
 
             // Получение URL для авторизации из конфигурации
             const authUrl = window.authConfig.getAuthUrl(state, env);
@@ -113,8 +131,57 @@
                 throw new Error('Не удалось получить URL для авторизации');
             }
 
-            // Редирект на Google OAuth
-            window.location.href = authUrl;
+            // #region agent log
+            fetch('http://127.0.0.1:7243/ingest/6397d191-f6f2-43f4-b4da-44a3482bedec',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'auth-client.js:133',message:'Before window.open',data:{authUrl,clientUrl,protocol:window.location.protocol},timestamp:Date.now(),sessionId:'debug-session',hypothesisId:'popup-window'})}).catch(()=>{});
+            // #endregion
+
+            // Открываем OAuth в новой вкладке вместо редиректа
+            // Это сохраняет состояние исходной страницы
+            const authWindow = window.open(
+                authUrl,
+                'google-oauth',
+                'width=600,height=700,left=100,top=100'
+            );
+
+            // #region agent log
+            fetch('http://127.0.0.1:7243/ingest/6397d191-f6f2-43f4-b4da-44a3482bedec',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'auth-client.js:143',message:'After window.open',data:{authWindowCreated:!!authWindow,authWindowClosed:authWindow?.closed},timestamp:Date.now(),sessionId:'debug-session',hypothesisId:'popup-window'})}).catch(()=>{});
+            // #endregion
+
+            if (!authWindow) {
+                // Если popup заблокирован браузером, показываем предупреждение
+                // #region agent log
+                fetch('http://127.0.0.1:7243/ingest/6397d191-f6f2-43f4-b4da-44a3482bedec',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'auth-client.js:150',message:'Popup blocked',data:{authUrl},timestamp:Date.now(),sessionId:'debug-session',hypothesisId:'popup-window'})}).catch(()=>{});
+                // #endregion
+
+                const userConfirmed = confirm(
+                    'Для авторизации нужно открыть новую вкладку.\n\n' +
+                    'Разрешите всплывающие окна для этого сайта или нажмите OK для открытия в текущей вкладке.'
+                );
+
+                if (userConfirmed) {
+                    // Fallback: если popup заблокирован, используем редирект
+                    // #region agent log
+                    fetch('http://127.0.0.1:7243/ingest/6397d191-f6f2-43f4-b4da-44a3482bedec',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'auth-client.js:162',message:'Fallback to redirect',data:{authUrl},timestamp:Date.now(),sessionId:'debug-session',hypothesisId:'popup-window'})}).catch(()=>{});
+                    // #endregion
+                    window.location.href = authUrl;
+                }
+                return;
+            }
+
+            console.log('OAuth открыт в новой вкладке. Ожидание авторизации...');
+
+            // Опционально: мониторим закрытие окна (для отладки)
+            const checkClosed = setInterval(() => {
+                if (authWindow.closed) {
+                    clearInterval(checkClosed);
+                    console.log('OAuth вкладка закрыта');
+                    // #region agent log
+                    fetch('http://127.0.0.1:7243/ingest/6397d191-f6f2-43f4-b4da-44a3482bedec',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'auth-client.js:176',message:'OAuth window closed',data:{},timestamp:Date.now(),sessionId:'debug-session',hypothesisId:'popup-window'})}).catch(()=>{});
+                    // #endregion
+                    // Можно попробовать проверить статус авторизации
+                    // или показать уведомление пользователю
+                }
+            }, 1000);
         } catch (error) {
             console.error('auth-client.initiateGoogleAuth:', error);
             if (window.errorHandler) {
@@ -156,8 +223,20 @@
                 return null;
             }
 
+            // Парсинг state (может быть JSON объектом с client_url или просто строкой)
+            let stateObj = null;
+            let stateCsrf = state;
+            try {
+                stateObj = JSON.parse(state);
+                if (stateObj && stateObj.csrf) {
+                    stateCsrf = stateObj.csrf;
+                }
+            } catch (e) {
+                // state не JSON, используем как есть
+            }
+
             // Проверка state (защита от CSRF)
-            if (!state || !validateState(state)) {
+            if (!stateCsrf || !validateState(stateCsrf)) {
                 throw new Error('Невалидный state параметр. Возможна CSRF атака.');
             }
 
@@ -401,6 +480,7 @@
         initiateGoogleAuth,
         handleAuthCallback,
         exchangeCodeForToken,
+        saveToken,
         getAccessToken,
         isAuthenticated,
         getCurrentUser,

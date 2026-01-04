@@ -67,7 +67,7 @@
                 <template #menu-items>
                     <div class="px-3 py-2 border-bottom">
                         <div class="fw-bold">{{ userDisplayName }}</div>
-                        <div class="text-muted small">{{ user.email }}</div>
+                        <div class="text-muted small">{{ user && user.email ? user.email : '' }}</div>
                     </div>
                     <dropdown-menu-item
                         icon="fas fa-sign-out-alt"

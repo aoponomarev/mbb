@@ -32,7 +32,7 @@ window.portfoliosManager = {
     components: {
         'cmp-button': window.cmpButton,
         'cmp-modal': window.cmpModal,
-        'cmp-modal-buttons': window.cmpModalButtons,
+        'portfolio-modal-body': window.portfolioModalBody,
     },
 
     data() {
@@ -44,6 +44,11 @@ window.portfoliosManager = {
             isEditing: false,
             editingPortfolioId: null,
             formData: {
+                name: '',
+                description: '',
+                assets: [],
+            },
+            initialFormData: {
                 name: '',
                 description: '',
                 assets: [],
@@ -64,13 +69,6 @@ window.portfoliosManager = {
             return this.isEditing ? 'Редактировать портфель' : 'Создать портфель';
         },
 
-        /**
-         * Проверка валидности формы
-         * @returns {boolean}
-         */
-        isFormValid() {
-            return this.formData.name && this.formData.name.trim().length > 0;
-        },
     },
 
     async mounted() {
@@ -118,6 +116,11 @@ window.portfoliosManager = {
                 description: '',
                 assets: [],
             };
+            this.initialFormData = {
+                name: '',
+                description: '',
+                assets: [],
+            };
             this.error = null;
             this.successMessage = null;
 
@@ -133,10 +136,20 @@ window.portfoliosManager = {
         openEditModal(portfolio) {
             this.isEditing = true;
             this.editingPortfolioId = portfolio.id;
+            // Глубокое копирование assets для предотвращения мутаций оригинальных данных
+            const assetsCopy = portfolio.assets && Array.isArray(portfolio.assets)
+                ? portfolio.assets.map(asset => ({ ...asset }))
+                : [];
             this.formData = {
                 name: portfolio.name || '',
                 description: portfolio.description || '',
-                assets: portfolio.assets ? [...portfolio.assets] : [],
+                assets: assetsCopy,
+            };
+            // Сохраняем исходные данные для восстановления при отмене
+            this.initialFormData = {
+                name: portfolio.name || '',
+                description: portfolio.description || '',
+                assets: assetsCopy,
             };
             this.error = null;
             this.successMessage = null;
@@ -194,25 +207,24 @@ window.portfoliosManager = {
 
         /**
          * Сохранение портфеля (создание или обновление)
+         * Вызывается из portfolio-modal-body через onSave
+         * @param {string} name - Название портфеля
+         * @param {string} description - Описание портфеля
+         * @param {Array} assets - Активы портфеля
          */
-        async savePortfolio() {
+        async handleSave(name, description, assets) {
             try {
                 if (!window.portfoliosClient) {
                     throw new Error('portfoliosClient не загружен');
-                }
-
-                if (!this.isFormValid) {
-                    this.error = 'Название портфеля обязательно';
-                    return;
                 }
 
                 this.isLoading = true;
                 this.error = null;
 
                 const portfolioData = {
-                    name: this.formData.name.trim(),
-                    description: this.formData.description.trim() || null,
-                    assets: this.formData.assets.filter(asset => asset.coinId && asset.weight !== undefined),
+                    name: name,
+                    description: description || null,
+                    assets: assets.filter(asset => asset.coinId && asset.weight !== undefined),
                 };
 
                 let savedPortfolio;
@@ -229,55 +241,43 @@ window.portfoliosManager = {
                     this.$emit('portfolio-created', savedPortfolio);
                 }
 
-                // Закрываем модальное окно
-                if (this.$refs.portfolioModal) {
-                    this.$refs.portfolioModal.hide();
-                }
+                // Обновляем formData с сохраненными данными
+                this.formData = {
+                    name: savedPortfolio.name || '',
+                    description: savedPortfolio.description || '',
+                    assets: savedPortfolio.assets || [],
+                };
+                this.initialFormData = {
+                    name: savedPortfolio.name || '',
+                    description: savedPortfolio.description || '',
+                    assets: (savedPortfolio.assets || []).map(asset => ({ ...asset })),
+                };
 
                 // Перезагружаем список портфелей
                 await this.loadPortfolios();
             } catch (error) {
-                console.error('portfolios-manager.savePortfolio error:', error);
+                console.error('portfolios-manager.handleSave error:', error);
                 this.error = error.message || 'Ошибка при сохранении портфеля';
-            } finally {
                 this.isLoading = false;
             }
         },
 
         /**
          * Отмена редактирования
+         * Вызывается из portfolio-modal-body через onCancel
          */
-        cancelEdit() {
+        handleCancel() {
+            // Восстанавливаем исходные данные
             this.formData = {
-                name: '',
-                description: '',
-                assets: [],
+                name: this.initialFormData.name,
+                description: this.initialFormData.description,
+                assets: this.initialFormData.assets.map(asset => ({ ...asset })),
             };
-            this.isEditing = false;
-            this.editingPortfolioId = null;
-            this.error = null;
 
+            // Закрываем модальное окно
             if (this.$refs.portfolioModal) {
                 this.$refs.portfolioModal.hide();
             }
-        },
-
-        /**
-         * Добавление актива в форму
-         */
-        addAsset() {
-            this.formData.assets.push({
-                coinId: '',
-                weight: 0,
-            });
-        },
-
-        /**
-         * Удаление актива из формы
-         * @param {number} index - Индекс актива
-         */
-        removeAsset(index) {
-            this.formData.assets.splice(index, 1);
         },
 
         /**
